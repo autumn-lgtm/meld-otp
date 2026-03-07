@@ -252,7 +252,7 @@ function TeamSection({ team }: { team: TeamData }) {
         <div className="flex items-center gap-6 text-sm flex-shrink-0">
           {team.total.oa !== null && (
             <div className="text-center">
-              <p className="text-xs text-slate-400">OA%</p>
+              <p className="text-xs text-slate-400">OAP</p>
               <p className="font-bold" style={{ color: oaColor(team.total.oa) }}>{pct(team.total.oa, 1)}</p>
             </div>
           )}
@@ -289,7 +289,7 @@ function TeamSection({ team }: { team: TeamData }) {
               <thead>
                 <tr className="text-xs text-slate-400 uppercase tracking-wide border-b border-slate-100">
                   <th className="text-left px-6 py-2 font-semibold">Name</th>
-                  <th className="text-right px-3 py-2 font-semibold">OA%</th>
+                  <th className="text-right px-3 py-2 font-semibold">OAP</th>
                   <th className="text-right px-3 py-2 font-semibold">CAP%</th>
                   <th className="text-right px-3 py-2 font-semibold">Ratio</th>
                   <th className="text-right px-3 py-2 font-semibold">Salary</th>
