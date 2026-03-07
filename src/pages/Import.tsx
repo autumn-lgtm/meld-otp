@@ -59,10 +59,10 @@ export function Import({ storage, onSave }: Props) {
             <button
               key={key}
               onClick={() => { setImportType(key); setResult(null); }}
-              className={`p-4 rounded-xl border-2 text-left transition-all ${importType === key ? 'border-indigo-400 bg-indigo-50' : 'border-slate-100 hover:border-slate-200'}`}
+              className={`p-4 rounded-xl border-2 text-left transition-all ${importType === key ? 'border-[#1175CC] bg-[#eef5fc]' : 'border-slate-100 hover:border-slate-200'}`}
             >
-              <p className={`font-semibold text-sm ${importType === key ? 'text-indigo-700' : 'text-slate-700'}`}>{label}</p>
-              <p className={`text-xs mt-1 ${importType === key ? 'text-indigo-500' : 'text-slate-400'}`}>{desc}</p>
+              <p className={`font-semibold text-sm ${importType === key ? 'text-[#0d4a6b]' : 'text-slate-700'}`}>{label}</p>
+              <p className={`text-xs mt-1 ${importType === key ? 'text-[#1175CC]' : 'text-slate-400'}`}>{desc}</p>
             </button>
           ))}
         </div>
@@ -100,7 +100,7 @@ export function Import({ storage, onSave }: Props) {
 
       {/* Drop Zone */}
       <div
-        className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-10 text-center cursor-pointer hover:border-indigo-300 hover:bg-indigo-50/30 transition-all"
+        className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-10 text-center cursor-pointer hover:border-[#52a3e8] hover:bg-[#eef5fc]/30 transition-all"
         onClick={() => fileRef.current?.click()}
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => {

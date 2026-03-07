@@ -6,6 +6,7 @@ import { Dashboard } from './pages/Dashboard';
 import { Export } from './pages/Export';
 import { History } from './pages/History';
 import { Import } from './pages/Import';
+import { Intro } from './pages/Intro';
 import { Melders } from './pages/Melders';
 import { Settings } from './pages/Settings';
 import { Trends } from './pages/Trends';
@@ -15,11 +16,12 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div className="flex min-h-screen bg-slate-100">
+      <div className="flex min-h-screen" style={{ background: '#F1F1F1' }}>
         <Sidebar />
         <main className="flex-1 overflow-y-auto">
           <Routes>
-            <Route path="/" element={<Dashboard storage={storage} />} />
+            <Route path="/" element={<Intro />} />
+            <Route path="/dashboard" element={<Dashboard storage={storage} />} />
             <Route path="/calculator" element={<Calculator storage={storage} onSave={update} />} />
             <Route path="/melders" element={<Melders storage={storage} onSave={update} />} />
             <Route path="/history" element={<History storage={storage} onSave={update} />} />

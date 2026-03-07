@@ -150,7 +150,7 @@ export function Calculator({ storage, onSave }: Props) {
               <select
                 value={melderId}
                 onChange={(e) => { setMelderId(e.target.value); setSaved(false); }}
-                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1175CC]"
               >
                 <option value="">— select —</option>
                 {melders.map((m) => (
@@ -165,7 +165,7 @@ export function Calculator({ storage, onSave }: Props) {
                 <select
                   value={month}
                   onChange={(e) => setMonth(Number(e.target.value))}
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1175CC]"
                 >
                   {MONTHS.map((m, i) => (
                     <option key={m} value={i + 1}>{m}</option>
@@ -177,7 +177,7 @@ export function Calculator({ storage, onSave }: Props) {
                 <select
                   value={year}
                   onChange={(e) => setYear(Number(e.target.value))}
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1175CC]"
                 >
                   {years.map((y) => <option key={y} value={y}>{y}</option>)}
                 </select>
@@ -203,7 +203,7 @@ export function Calculator({ storage, onSave }: Props) {
                         type="number"
                         value={metricInputs[metric.id]?.actual ?? ''}
                         onChange={(e) => setMetricInputs((prev) => ({ ...prev, [metric.id]: { ...prev[metric.id], actual: e.target.value } }))}
-                        className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                        className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1175CC]"
                         placeholder="0"
                       />
                     </div>
@@ -213,7 +213,7 @@ export function Calculator({ storage, onSave }: Props) {
                         type="number"
                         value={metricInputs[metric.id]?.target ?? ''}
                         onChange={(e) => setMetricInputs((prev) => ({ ...prev, [metric.id]: { ...prev[metric.id], target: e.target.value } }))}
-                        className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                        className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1175CC]"
                         placeholder="0"
                       />
                     </div>
@@ -236,7 +236,7 @@ export function Calculator({ storage, onSave }: Props) {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1175CC] resize-none"
               placeholder="Context, exceptions, next steps..."
             />
           </Section>
@@ -335,7 +335,7 @@ export function Calculator({ storage, onSave }: Props) {
                     saved
                       ? 'bg-green-500 text-white'
                       : hasEnoughData
-                      ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                      ? 'bg-[#1175CC] text-white hover:bg-[#0d62b0]'
                       : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                   }`}
                 >
@@ -384,7 +384,7 @@ function NumField({ label, value, onChange, placeholder }: { label: string; valu
         type="number"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1175CC]"
         placeholder={placeholder}
       />
     </label>

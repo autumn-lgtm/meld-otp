@@ -23,7 +23,7 @@ const headerGradient: Record<HealthColor, string> = {
   red:    'from-red-500 to-red-600',
   yellow: 'from-yellow-500 to-amber-500',
   green:  'from-green-500 to-emerald-600',
-  blue:   'from-blue-500 to-indigo-600',
+  blue:   'from-blue-500 to-[#0d62b0]',
 };
 
 export function MetricCard({ title, question, value, valueLabel, health, formula, children, className = '' }: Props) {

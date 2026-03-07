@@ -75,7 +75,7 @@ export function Dashboard({ storage }: Props) {
         actions={
           <Link
             to="/calculator"
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-[#1175CC] text-white text-sm font-medium rounded-xl hover:bg-[#0d62b0] transition-colors"
           >
             <Calculator className="w-4 h-4" />
             New Report
@@ -86,7 +86,7 @@ export function Dashboard({ storage }: Props) {
       {/* Team Summary */}
       {teamSummary && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <StatCard label="Melders" value={String(melders.length)} sub={`${latestReports.size} with reports`} color="from-indigo-500 to-purple-600" />
+          <StatCard label="Melders" value={String(melders.length)} sub={`${latestReports.size} with reports`} color="from-[#1175CC] to-[#0d4a6b]" />
           <StatCard label="Avg OAP" value={fmtPct(teamSummary.avgOAP)} sub="Team outcome attainment" color={teamSummary.oapHealth === 'green' ? 'from-green-500 to-emerald-600' : teamSummary.oapHealth === 'yellow' ? 'from-yellow-500 to-amber-500' : 'from-red-500 to-red-600'} />
           <StatCard label="Avg CAP" value={fmtPct(teamSummary.avgCAP)} sub="Comp attainment" color={teamSummary.capHealth === 'green' ? 'from-green-500 to-emerald-600' : teamSummary.capHealth === 'yellow' ? 'from-yellow-500 to-amber-500' : 'from-red-500 to-red-600'} />
           <StatCard label="Avg Ratio" value={fmtPct(teamSummary.avgRatio)} sub="Market competitiveness" color={teamSummary.ratioHealth === 'green' || teamSummary.ratioHealth === 'blue' ? 'from-green-500 to-emerald-600' : teamSummary.ratioHealth === 'yellow' ? 'from-yellow-500 to-amber-500' : 'from-red-500 to-red-600'} />
@@ -180,7 +180,7 @@ function MelderCard({ melder, report, roleName }: { melder: Melder; report?: Mon
           <div className="pt-2 flex gap-2">
             <Link
               to={`/history/${melder.id}`}
-              className="flex-1 text-center text-xs font-medium text-indigo-600 bg-indigo-50 px-3 py-2 rounded-xl hover:bg-indigo-100 transition-colors"
+              className="flex-1 text-center text-xs font-medium text-[#1175CC] bg-[#eef5fc] px-3 py-2 rounded-xl hover:bg-[#dceefa] transition-colors"
             >
               View History
             </Link>
@@ -197,7 +197,7 @@ function MelderCard({ melder, report, roleName }: { melder: Melder; report?: Mon
           <p className="text-slate-400 text-sm mb-3">No reports yet</p>
           <Link
             to={`/calculator?melder=${melder.id}`}
-            className="text-xs font-medium text-indigo-600 bg-indigo-50 px-4 py-2 rounded-xl hover:bg-indigo-100 transition-colors"
+            className="text-xs font-medium text-[#1175CC] bg-[#eef5fc] px-4 py-2 rounded-xl hover:bg-[#dceefa] transition-colors"
           >
             Create First Report
           </Link>
@@ -225,8 +225,8 @@ function MetricRow({ label, value, health, question }: { label: string; value: n
 function EmptyState() {
   return (
     <div className="text-center py-20">
-      <div className="w-16 h-16 rounded-2xl bg-indigo-100 flex items-center justify-center mx-auto mb-4">
-        <Users className="w-8 h-8 text-indigo-500" />
+      <div className="w-16 h-16 rounded-2xl bg-[#dceefa] flex items-center justify-center mx-auto mb-4">
+        <Users className="w-8 h-8 text-[#1175CC]" />
       </div>
       <h2 className="text-xl font-bold text-slate-700 mb-2">No Melders yet</h2>
       <p className="text-slate-400 text-sm mb-6 max-w-sm mx-auto">
@@ -235,7 +235,7 @@ function EmptyState() {
       <div className="flex justify-center gap-3">
         <Link
           to="/melders"
-          className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors"
+          className="flex items-center gap-2 px-5 py-2.5 bg-[#1175CC] text-white text-sm font-medium rounded-xl hover:bg-[#0d62b0] transition-colors"
         >
           <Users className="w-4 h-4" />
           Add Melder

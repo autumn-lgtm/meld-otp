@@ -90,7 +90,7 @@ export function Melders({ storage, onSave }: Props) {
         actions={
           <button
             onClick={openCreate}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-[#1175CC] text-white text-sm font-medium rounded-xl hover:bg-[#0d62b0] transition-colors"
           >
             <Plus className="w-4 h-4" />
             Add Melder
@@ -173,7 +173,7 @@ export function Melders({ storage, onSave }: Props) {
               </button>
               <button
                 onClick={handleSubmit}
-                className="px-5 py-2 text-sm font-medium text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-colors"
+                className="px-5 py-2 text-sm font-medium text-white bg-[#1175CC] rounded-xl hover:bg-[#0d62b0] transition-colors"
               >
                 {editing ? 'Save Changes' : 'Add Melder'}
               </button>
@@ -215,7 +215,7 @@ export function Melders({ storage, onSave }: Props) {
           <p className="text-slate-400 text-sm mb-4">No Melders added yet.</p>
           <button
             onClick={openCreate}
-            className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors"
+            className="px-5 py-2.5 bg-[#1175CC] text-white text-sm font-medium rounded-xl hover:bg-[#0d62b0] transition-colors"
           >
             Add your first Melder
           </button>
@@ -243,7 +243,7 @@ export function Melders({ storage, onSave }: Props) {
                       {m.email && <p className="text-xs text-slate-400">{m.email}</p>}
                     </td>
                     <td className="px-5 py-4">
-                      <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg">{m.roleId}</span>
+                      <span className="text-xs font-bold text-[#1175CC] bg-[#eef5fc] px-2 py-1 rounded-lg">{m.roleId}</span>
                       {role && <p className="text-xs text-slate-400 mt-0.5">{role.fullName}</p>}
                     </td>
                     <td className="px-5 py-4 text-slate-700">
@@ -257,7 +257,7 @@ export function Melders({ storage, onSave }: Props) {
                       <div className="flex items-center gap-2 justify-end">
                         <button
                           onClick={() => openEdit(m)}
-                          className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                          className="p-1.5 text-slate-400 hover:text-[#1175CC] hover:bg-[#eef5fc] rounded-lg transition-colors"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
@@ -291,5 +291,5 @@ function Field({ label, error, children }: { label: string; error?: string; chil
 }
 
 function inputCls(hasError: boolean) {
-  return `w-full rounded-xl border ${hasError ? 'border-red-300' : 'border-slate-200'} px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white`;
+  return `w-full rounded-xl border ${hasError ? 'border-red-300' : 'border-slate-200'} px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1175CC] bg-white`;
 }

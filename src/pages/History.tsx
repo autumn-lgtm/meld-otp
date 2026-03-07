@@ -54,7 +54,7 @@ export function History({ storage, onSave }: Props) {
           <select
             value={selectedMelder}
             onChange={(e) => setSelectedMelder(e.target.value)}
-            className="rounded-xl border border-slate-200 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="rounded-xl border border-slate-200 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1175CC]"
           >
             <option value="">All Melders</option>
             {melders.map((m) => (
