@@ -8,6 +8,7 @@ export interface MetricDefinition {
   abbreviation: string;
   weight: number; // 0–1, must sum to 1 across metrics for a role
   description: string;
+  defaultTarget?: number; // pre-filled quota for this role
 }
 
 export interface Role {

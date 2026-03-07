@@ -54,11 +54,16 @@ export function Calculator({ storage, onSave }: Props) {
     }
   }, [melder?.id]);
 
-  // Reset metric inputs when role changes
+  // Reset metric inputs when role changes, pre-filling targets from role defaults
   useEffect(() => {
     if (role) {
       const initial: Record<string, { actual: string; target: string }> = {};
-      role.metrics.forEach((m) => { initial[m.id] = { actual: '', target: '' }; });
+      role.metrics.forEach((m) => {
+        initial[m.id] = {
+          actual: '',
+          target: m.defaultTarget != null ? String(m.defaultTarget) : '',
+        };
+      });
       setMetricInputs(initial);
     }
   }, [role?.id]);
@@ -398,7 +403,7 @@ function PrintableReport({ report }: { report: ReturnType<typeof buildReport> })
     <div style={{ fontFamily: 'system-ui, sans-serif', color: '#1e293b' }}>
       {/* Header */}
       <div style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', borderRadius: 16, padding: '32px', marginBottom: 24, color: 'white' }}>
-        <p style={{ opacity: 0.7, fontSize: 12, marginBottom: 4 }}>OUTCOME-TO-PAY REPORT · PropertyMeld</p>
+        <p style={{ opacity: 0.7, fontSize: 12, marginBottom: 4 }}>OUTCOME-TO-PAY REPORT · Property Meld</p>
         <h1 style={{ fontSize: 28, fontWeight: 900, margin: 0 }}>{report.melderName}</h1>
         <p style={{ opacity: 0.8, marginTop: 4 }}>{report.roleId} · {MONTHS[report.month - 1]} {report.year}</p>
       </div>

@@ -18,12 +18,12 @@ export function Sidebar() {
       {/* Logo */}
       <div className="px-5 py-6 border-b border-white/10">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
-            <span className="text-white font-black text-sm">OTP</span>
+          <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
+            <span className="text-indigo-700 font-black text-xs tracking-tight">PM</span>
           </div>
           <div>
-            <p className="text-white font-bold text-sm leading-tight">Outcome-to-Pay</p>
-            <p className="text-white/50 text-xs">Meld · Comp System</p>
+            <p className="text-white font-bold text-sm leading-tight">Property Meld</p>
+            <p className="text-white/50 text-xs">Outcome-to-Pay</p>
           </div>
         </div>
       </div>
@@ -51,7 +51,7 @@ export function Sidebar() {
 
       {/* Footer */}
       <div className="px-5 py-4 border-t border-white/10">
-        <p className="text-white/30 text-xs">PropertyMeld · Internal</p>
+        <p className="text-white/30 text-xs">Property Meld · Internal</p>
       </div>
     </aside>
   );
