@@ -1,16 +1,17 @@
-import { BarChart2, Calculator, Clock, Download, Home, BookOpen, Settings, Upload, Users } from 'lucide-react';
+import { BarChart2, Calculator, Clock, Download, Home, BookOpen, CalendarDays, Settings, Upload, Users } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
 const nav = [
-  { to: '/',            icon: BookOpen,   label: 'Overview' },
-  { to: '/dashboard',   icon: Home,       label: 'Dashboard' },
-  { to: '/calculator',  icon: Calculator, label: 'Calculator' },
-  { to: '/melders',     icon: Users,      label: 'Melders' },
-  { to: '/history',     icon: Clock,      label: 'History' },
-  { to: '/trends',      icon: BarChart2,  label: 'Trends' },
-  { to: '/import',      icon: Upload,     label: 'Import' },
-  { to: '/export',      icon: Download,   label: 'Export' },
-  { to: '/settings',    icon: Settings,   label: 'Settings' },
+  { to: '/',            icon: BookOpen,     label: 'Overview' },
+  { to: '/dashboard',   icon: Home,         label: 'Dashboard' },
+  { to: '/calculator',  icon: Calculator,   label: 'Calculator' },
+  { to: '/melders',     icon: Users,        label: 'Melders' },
+  { to: '/history',     icon: Clock,        label: 'History' },
+  { to: '/trends',      icon: BarChart2,    label: 'Trends' },
+  { to: '/review-2025', icon: CalendarDays, label: '2025 Review' },
+  { to: '/import',      icon: Upload,       label: 'Import' },
+  { to: '/export',      icon: Download,     label: 'Export' },
+  { to: '/settings',    icon: Settings,     label: 'Settings' },
 ];
 
 // Property Meld house + wrench icon in brand SVG

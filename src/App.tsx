@@ -8,6 +8,7 @@ import { History } from './pages/History';
 import { Import } from './pages/Import';
 import { Intro } from './pages/Intro';
 import { Melders } from './pages/Melders';
+import { Review2025 } from './pages/Review2025';
 import { Settings } from './pages/Settings';
 import { Trends } from './pages/Trends';
 
@@ -27,6 +28,7 @@ export default function App() {
             <Route path="/history" element={<History storage={storage} onSave={update} />} />
             <Route path="/history/:melderId" element={<History storage={storage} onSave={update} />} />
             <Route path="/trends" element={<Trends storage={storage} />} />
+            <Route path="/review-2025" element={<Review2025 />} />
             <Route path="/import" element={<Import storage={storage} onSave={update} />} />
             <Route path="/export" element={<Export storage={storage} />} />
             <Route path="/settings" element={<Settings storage={storage} onSave={update} />} />

@@ -52,6 +52,111 @@ export interface CSVImportResult {
   errors: string[];
 }
 
+export interface SalaryImportResult {
+  meldersCreated: number;
+  meldersUpdated: number;
+  errors: string[];
+  warnings: string[];
+}
+
+// Salary Report CSV columns (flexible matching):
+// Name, Role, Current Salary, Market Salary Target, Total Cash Actual (Meld Comp Plan),
+// Total Cash Target (Market)
+// "Role" must match a role ID in the system (e.g. BDR, BSE, CSM).
+// If Role is omitted, the importer matches by name to an existing Melder.
+
+function parsePct(v: string | undefined): number | null {
+  if (!v || v.trim() === '—' || v.trim() === '') return null;
+  const n = parseFloat(v.replace('%', '').trim());
+  return isNaN(n) ? null : n;
+}
+
+function parseDollar(v: string | undefined): number | null {
+  if (!v || v.trim() === '—' || v.trim() === '') return null;
+  const n = parseFloat(v.replace(/[$,]/g, '').trim());
+  return isNaN(n) ? null : n;
+}
+
+// suppress unused warning — parsePct may be used by callers
+void parsePct;
+
+export function importSalaryReportCSV(
+  file: File,
+  storage: AppStorage,
+  onComplete: (result: SalaryImportResult, newStorage: AppStorage) => void
+): void {
+  Papa.parse(file, {
+    header: true,
+    skipEmptyLines: true,
+    complete: (results) => {
+      const errors: string[] = [];
+      const warnings: string[] = [];
+      let meldersCreated = 0;
+      let meldersUpdated = 0;
+      let currentStorage = { ...storage };
+
+      (results.data as Record<string, string>[]).forEach((row, idx) => {
+        const lineNum = idx + 2;
+        const name = (row['Name'] ?? row['name'] ?? '').trim();
+        if (!name) { errors.push(`Row ${lineNum}: Missing Name — skipped`); return; }
+
+        const roleId = (row['Role'] ?? row['role'] ?? '').trim().toUpperCase() || null;
+
+        const currentSalary = parseDollar(row['Current Salary'] ?? row['current_salary']);
+        const marketSalary  = parseDollar(row['Market Salary Target'] ?? row['Market Salary'] ?? row['market_salary']);
+        const totalCashPlan = parseDollar(row['Total Cash Actual (Meld Comp Plan)'] ?? row['Total Cash Actual'] ?? row['total_cash_actual']);
+        const totalCashMkt  = parseDollar(row['Total Cash Target (Market)'] ?? row['Total Cash Target'] ?? row['total_cash_target']);
+
+        // Prefer total-cash values over base salary
+        const effectiveMarketRate = totalCashMkt  ?? marketSalary  ?? 0;
+        const effectiveTargetComp = totalCashPlan ?? currentSalary ?? 0;
+
+        let existingMelder = currentStorage.melders.find((m) => {
+          const nameMatch = m.name.toLowerCase() === name.toLowerCase();
+          return roleId ? nameMatch && m.roleId === roleId : nameMatch;
+        });
+
+        if (!existingMelder && !roleId) {
+          warnings.push(`Row ${lineNum}: "${name}" — no Role column and no existing Melder found by name. Skipped.`);
+          return;
+        }
+
+        if (!existingMelder && roleId) {
+          if (!currentStorage.roles.some((r) => r.id === roleId)) {
+            errors.push(`Row ${lineNum}: "${name}" — unknown role "${roleId}". Skipped.`);
+            return;
+          }
+          const newMelder: Melder = {
+            id: generateId(),
+            name,
+            roleId,
+            marketRate: effectiveMarketRate,
+            targetCompensation: effectiveTargetComp,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          currentStorage = saveMelder(currentStorage, newMelder);
+          meldersCreated++;
+        } else if (existingMelder) {
+          const updated: Melder = {
+            ...existingMelder,
+            marketRate: effectiveMarketRate || existingMelder.marketRate,
+            targetCompensation: effectiveTargetComp || existingMelder.targetCompensation,
+            updatedAt: new Date().toISOString(),
+          };
+          currentStorage = saveMelder(currentStorage, updated);
+          meldersUpdated++;
+        }
+      });
+
+      onComplete({ meldersCreated, meldersUpdated, errors, warnings }, currentStorage);
+    },
+    error: (err) => {
+      onComplete({ meldersCreated: 0, meldersUpdated: 0, errors: [err.message], warnings: [] }, storage);
+    },
+  });
+}
+
 export function importMeldersFromCSV(
   file: File,
   storage: AppStorage,
