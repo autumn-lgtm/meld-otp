@@ -9,6 +9,7 @@ export interface MetricDefinition {
   weight: number; // 0–1, must sum to 1 across metrics for a role
   description: string;
   defaultTarget?: number; // pre-filled quota for this role
+  inverse?: boolean;       // true = lower actual is better (e.g. response time); uses target/actual
 }
 
 export interface Role {

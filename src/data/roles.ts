@@ -211,6 +211,57 @@ export const DEFAULT_ROLES: Role[] = [
     ],
   },
 
+  // ── Customer Support Track ───────────────────────────────────────────────────
+  {
+    id: 'CSS',
+    name: 'CSS',
+    fullName: 'Customer Support Specialist',
+    cadence: 'monthly',
+    metrics: [
+      {
+        id: 'CSS-CSAT',
+        name: 'Customer Satisfaction Score (CSAT)',
+        abbreviation: 'CSAT',
+        weight: 0.5,
+        description: 'Customer satisfaction score as a percentage',
+        defaultTarget: 97.99,
+      },
+      {
+        id: 'CSS-CRT',
+        name: 'Chat Response Time',
+        abbreviation: 'Chat RT',
+        weight: 0.5,
+        description: 'Average chat response time in minutes — lower is better (attainment = Target ÷ Actual)',
+        defaultTarget: 0.4,
+        inverse: true,
+      },
+    ],
+  },
+  {
+    id: 'MMES',
+    name: 'MMES',
+    fullName: 'Mid Market Customer Enablement Specialist',
+    cadence: 'monthly',
+    metrics: [
+      {
+        id: 'MMES-GRR',
+        name: 'Mid Market Gross Revenue Retention',
+        abbreviation: 'MM GRR',
+        weight: 0.5,
+        description: 'Gross revenue retained from Mid Market customers (excluding expansion)',
+        defaultTarget: 94,
+      },
+      {
+        id: 'MMES-CSAT',
+        name: 'Customer Satisfaction Score (CSAT)',
+        abbreviation: 'CSAT',
+        weight: 0.5,
+        description: 'Customer satisfaction score as a percentage',
+        defaultTarget: 97.99,
+      },
+    ],
+  },
+
   // ── Onboarding Track ────────────────────────────────────────────────────────
   {
     id: 'COM',

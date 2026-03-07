@@ -196,6 +196,11 @@ export function Calculator({ storage, onSave }: Props) {
                     <span className="text-xs text-slate-400">{(metric.weight * 100).toFixed(0)}% weight</span>
                   </div>
                   <p className="text-xs text-slate-400 mb-2">{metric.name}</p>
+                  {metric.inverse && (
+                    <p className="text-xs mb-2 px-2 py-1 rounded-lg font-medium" style={{ background: '#fff7ed', color: '#c2410c' }}>
+                      Lower is better — attainment = Target ÷ Actual
+                    </p>
+                  )}
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="text-xs text-slate-500">Actual</label>

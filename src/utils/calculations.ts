@@ -32,6 +32,7 @@ export function getRatioHealth(ratio: number): HealthColor {
 
 // ─── OAP Calculation ───────────────────────────────────────────────────────────
 // Formula: OAP = sum( (actual/target) * weight ) * 100
+// For inverse metrics (lower is better, e.g. response time): attainment = target/actual
 
 export function calculateOAP(
   metrics: MetricDefinition[],
@@ -39,7 +40,13 @@ export function calculateOAP(
 ): OAPResult {
   const metricResults: MetricResult[] = metrics.map((metric) => {
     const input = inputs[metric.id] ?? { actual: 0, target: 0 };
-    const attainmentPct = input.target > 0 ? (input.actual / input.target) * 100 : 0;
+    let attainmentPct: number;
+    if (metric.inverse) {
+      // Lower actual = better; attainment = target / actual (capped at 150%)
+      attainmentPct = input.actual > 0 ? Math.min((input.target / input.actual) * 100, 150) : 0;
+    } else {
+      attainmentPct = input.target > 0 ? (input.actual / input.target) * 100 : 0;
+    }
     const weightedContribution = attainmentPct * metric.weight;
     return {
       metricId: metric.id,
