@@ -1,6 +1,31 @@
+import confetti from 'canvas-confetti';
 import { CheckCircle, Download, Plus } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+
+// ─── Audio feedback ────────────────────────────────────────────────────────────
+function playChime(type: 'success' | 'celebration') {
+  try {
+    const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    const notes = type === 'celebration' ? [523.25, 659.25, 783.99, 1046.5] : [659.25, 783.99];
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const t = ctx.currentTime + i * (type === 'celebration' ? 0.13 : 0.1);
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(type === 'celebration' ? 0.25 : 0.15, t + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
+      osc.start(t);
+      osc.stop(t + 0.6);
+    });
+  } catch {
+    // AudioContext not available — silent fail
+  }
+}
 import { AlertBanner } from '../components/shared/AlertBanner';
 import { MetricCard } from '../components/shared/MetricCard';
 import { Header } from '../components/layout/Header';
@@ -42,6 +67,7 @@ export function Calculator({ storage, onSave }: Props) {
   const [saved, setSaved] = useState(false);
   const [exporting, setExporting] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
+  const confettiFiredKey = useRef<string>('');
 
   const melder: Melder | undefined = melders.find((m) => m.id === melderId);
   const role = roles.find((r) => r.id === melder?.roleId);
@@ -97,6 +123,37 @@ export function Calculator({ storage, onSave }: Props) {
   );
 
   const hasEnoughData = melder && role && oapResult && parseFloat(actualComp) > 0 && parseFloat(targetComp) > 0;
+
+  // Sweet spot: all three metrics healthy
+  const isSweetSpot =
+    !!oapResult &&
+    oapResult.health === 'green' &&
+    capResult.health === 'green' &&
+    (ratioResult.health === 'green' || ratioResult.health === 'blue');
+
+  // Celebration — fires once per unique "all green" state
+  useEffect(() => {
+    if (!isSweetSpot || !hasEnoughData) return;
+    const key = `${melderId}-${month}-${year}-${oapResult?.oap.toFixed(1)}-${capResult.cap.toFixed(1)}-${ratioResult.ratio.toFixed(1)}`;
+    if (confettiFiredKey.current === key) return;
+    confettiFiredKey.current = key;
+    playChime('celebration');
+    const end = Date.now() + 2200;
+    const fire = () => {
+      confetti({ particleCount: 6, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#1175CC', '#B0E3FF', '#FFB41B', '#022935', '#ffffff'] });
+      confetti({ particleCount: 6, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#1175CC', '#B0E3FF', '#FFB41B', '#022935', '#ffffff'] });
+      if (Date.now() < end) requestAnimationFrame(fire);
+    };
+    fire();
+  }, [isSweetSpot, hasEnoughData, melderId, month, year, oapResult?.oap, capResult.cap, ratioResult.ratio]);
+
+  // Success chime when valid OAP result first appears
+  const prevOapValid = useRef(false);
+  useEffect(() => {
+    const nowValid = !!oapResult && oapResult.oap > 0;
+    if (nowValid && !prevOapValid.current && !isSweetSpot) playChime('success');
+    prevOapValid.current = nowValid;
+  }, [oapResult?.oap, isSweetSpot]);
 
   const reportData = useMemo(() => {
     if (!hasEnoughData || !role || !melder || !oapResult) return null;
@@ -189,10 +246,19 @@ export function Calculator({ storage, onSave }: Props) {
           {role && (
             <Section title="Outcome Attainment (OAP)">
               <p className="text-xs text-slate-400 mb-3">Enter actual vs. target for each metric.</p>
-              {role.metrics.map((metric) => (
+              {role.metrics.map((metric) => {
+                const actualVal = parseFloat(metricInputs[metric.id]?.actual ?? '');
+                const targetVal = parseFloat(metricInputs[metric.id]?.target ?? '');
+                const metricValid = !isNaN(actualVal) && actualVal > 0 && !isNaN(targetVal) && targetVal > 0;
+                return (
                 <div key={metric.id} className="mb-4">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-semibold text-slate-600">{metric.abbreviation}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-semibold text-slate-600">{metric.abbreviation}</span>
+                      {metricValid && (
+                        <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                      )}
+                    </div>
                     <span className="text-xs text-slate-400">{(metric.weight * 100).toFixed(0)}% weight</span>
                   </div>
                   <p className="text-xs text-slate-400 mb-2">{metric.name}</p>
@@ -224,7 +290,8 @@ export function Calculator({ storage, onSave }: Props) {
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </Section>
           )}
 
@@ -257,6 +324,20 @@ export function Calculator({ storage, onSave }: Props) {
 
           {melder && role && oapResult && (
             <>
+              {/* Sweet Spot banner */}
+              {isSweetSpot && (
+                <div
+                  className="rounded-2xl px-5 py-4 flex items-center gap-3 text-white font-semibold text-sm shadow-md"
+                  style={{ background: 'linear-gradient(135deg, #022935 0%, #1175CC 100%)' }}
+                >
+                  <span className="text-2xl">🎉</span>
+                  <div>
+                    <p style={{ fontFamily: 'Poppins, sans-serif' }}>Sweet Spot — All Metrics Aligned</p>
+                    <p className="font-normal text-xs mt-0.5 opacity-75">OAP, CAP, and Compensation Ratio are all healthy. This Melder is performing well and paid fairly at market.</p>
+                  </div>
+                </div>
+              )}
+
               {/* Three metric cards */}
               <MetricCard
                 title="Outcome Attainment (OAP)"

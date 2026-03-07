@@ -112,7 +112,7 @@ export function Intro() {
             {[
               {
                 icon: <TrendingUp className="w-5 h-5" />,
-                label: 'OA%',
+                label: 'OAP',
                 title: 'Outcome Attainment',
                 desc: 'Did the Melder hit their performance targets? Measured as a weighted average of role-specific metrics.',
                 color: MELD_BLUE,
@@ -158,7 +158,7 @@ export function Intro() {
           </p>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-              <p className="text-xs font-bold uppercase tracking-wide mb-3" style={{ color: MELD_BLUE }}>OA% &amp; CAP% — Threshold: 90%</p>
+              <p className="text-xs font-bold uppercase tracking-wide mb-3" style={{ color: MELD_BLUE }}>OAP &amp; CAP% — Threshold: 90%</p>
               <ThresholdRow color="red" label="Red" range="0 – 89%" meaning="Below expectations" />
               <ThresholdRow color="yellow" label="Yellow" range="90 – 99%" meaning="Approaching target" />
               <ThresholdRow color="green" label="Green" range="100%+" meaning="At or above target" />

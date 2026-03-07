@@ -484,7 +484,7 @@ export function Review2025() {
           <h2 className="text-sm font-bold uppercase tracking-wide mb-1" style={{ color: MELD_DARK, fontFamily: 'Poppins, sans-serif' }}>
             Excluded Teams
           </h2>
-          <p className="text-xs text-slate-400 mb-3">Tracked but no OTP metrics assigned — OA% = 0 by design.</p>
+          <p className="text-xs text-slate-400 mb-3">Tracked but no OTP metrics assigned — OAP = 0 by design.</p>
           <div className="space-y-3">
             {EXCLUDED_TEAMS.map((team) => (
               <ExcludedSection key={team.name} team={team} />

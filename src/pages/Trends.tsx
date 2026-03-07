@@ -23,7 +23,7 @@ export function Trends({ storage }: Props) {
     .sort((a, b) => a.year - b.year || a.month - b.month);
 
   const metrics: { key: Metric; label: string; color: string }[] = [
-    { key: 'oap', label: 'OAP', color: '#6366f1' },
+    { key: 'oap', label: 'OAP', color: '#1175CC' },
     { key: 'cap', label: 'CAP', color: '#10b981' },
     { key: 'ratio', label: 'Ratio', color: '#f59e0b' },
   ];
