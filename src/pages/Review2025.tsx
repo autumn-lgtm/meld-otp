@@ -97,7 +97,6 @@ const TEAMS: TeamData[] = [
   {
     id: 'marketing',
     name: 'Marketing',
-    highlight: 'watch',
     total: { oa: 97.5, cap: 87.0, ratio: 96.6, salary: 426400, market: 541000 },
     melders: [
       { name: 'Elizabeth Greenway', oa: 90.3,  cap: 82.4,  ratio: 72.5,  salary: 100000, market: 133000, q: [90.3, 99, 83, 69] },
@@ -438,7 +437,7 @@ export function Review2025() {
             {[
               { label: 'Company OAP (EOY)',  value: '~99%',  sub: 'Up from 72.6% in Q1', color: '#f59e0b' },
               { label: 'OAP Growth',         value: '+26 pts', sub: 'Q1 → Q4 improvement',  color: MELD_ACCENT },
-              { label: 'BD Turnaround',      value: '+47 pts', sub: 'Biggest swing of 2025', color: MELD_ACCENT },
+              { label: 'BD Turnaround',      value: '+47 pts', sub: 'Biggest swing of 2025', color: '#22c55e' },
               { label: 'Support Annual OAP', value: '100%+',  sub: 'Model team all year',   color: '#22c55e' },
             ].map((s) => (
               <div key={s.label} className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(4px)' }}>

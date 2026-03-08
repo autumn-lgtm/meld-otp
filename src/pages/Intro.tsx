@@ -149,7 +149,6 @@ export function Intro() {
               <ThresholdRow color="red" label="Red" range="0 – 89%" meaning="Below target compensation" />
               <ThresholdRow color="yellow" label="Yellow" range="90 – 99%" meaning="Approaching target" />
               <ThresholdRow color="green" label="Green" range="100%+" meaning="At or above target comp" />
-              <ThresholdRow color="blue" label="Blue" range="110%+" meaning="Exceeded comp plan" />
             </div>
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
               <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: '#0d4a6b' }}>Comp Ratio — Threshold: 80%</p>
@@ -157,8 +156,6 @@ export function Intro() {
               <ThresholdRow color="red" label="Red" range="0 – 79%" meaning="Significant market gap" />
               <ThresholdRow color="yellow" label="Yellow" range="80 – 94%" meaning="Below market (may be intentional)" />
               <ThresholdRow color="green" label="Green" range="95%+" meaning="Competitive or above market" />
-              <ThresholdRow color="blue" label="Blue" range="105%+" meaning="Intentionally above market" />
-              <p className="text-xs text-slate-400 mt-3">BD and BSE are intentionally positioned below market — known, accepted design choice.</p>
             </div>
           </div>
         </Section>
@@ -189,7 +186,7 @@ export function Intro() {
               { label: 'Below Expectations', range: '< 90%', color: '#ef4444', bg: '#fef2f2', note: 'Requires active coaching plan' },
               { label: 'Moderate', range: '90 – 99%', color: '#f59e0b', bg: '#fffbeb', note: 'Approaching target — monitor' },
               { label: 'High Performance', range: '100 – 110%', color: '#22c55e', bg: '#f0fdf4', note: 'At or above target — healthy' },
-              { label: 'Exceptional', range: '> 110%', color: MELD_BLUE, bg: `${MELD_BLUE}10`, note: 'Recognition flag — no additional comp trigger' },
+              { label: 'Exceptional', range: '> 110%', color: MELD_BLUE, bg: `${MELD_BLUE}10`, note: 'Recognition flag' },
             ].map((band) => (
               <div key={band.label} className="rounded-2xl p-6 text-center border" style={{ background: band.bg, borderColor: band.color + '30' }}>
                 <p className="text-2xl font-black mb-1.5" style={{ color: band.color, fontFamily: 'Poppins, sans-serif' }}>{band.range}</p>
@@ -198,7 +195,6 @@ export function Intro() {
               </div>
             ))}
           </div>
-          <p className="text-sm text-slate-400 mt-4">Note: Exceptional (110%+) flags the Melder for recognition. It does not change comp or review cadence — this is a deliberate design choice.</p>
         </Section>
 
         {/* 2025 Context */}
