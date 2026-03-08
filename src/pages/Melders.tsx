@@ -1,8 +1,8 @@
 import { Edit2, Plus, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 import { Header } from '../components/layout/Header';
-import type { AppStorage, Melder } from '../types';
-import { deleteMelder, generateId, saveMelder } from '../utils/storage';
+import type { AppStorage, Melder, Role } from '../types';
+import { deleteMelder, generateId, saveMelder, saveRole } from '../utils/storage';
 
 interface Props {
   storage: AppStorage;
@@ -18,6 +18,141 @@ const emptyForm = {
 };
 
 type FormState = typeof emptyForm;
+
+// ── Department / leader helpers ───────────────────────────────────────────────
+
+const ROLE_DEPT: Record<string, string> = {
+  BDA: 'Business Development', BDR: 'Business Development', 'SR-BDR': 'Business Development', 'BD-MGR': 'Business Development',
+  'ASSOC-BSE': 'Business Solutions', BSE: 'Business Solutions', 'SR-BSE': 'Business Solutions', 'BS-DIR': 'Business Solutions',
+  CSM: 'Customer Success', 'MM-CSM': 'Customer Success', 'CS-MGR': 'Customer Success',
+  CSS: 'Customer Support & Enablement', MMES: 'Customer Support & Enablement', 'CSS-MGR': 'Customer Support & Enablement',
+  COM: 'Customer Onboarding',
+  'MKT-IC2': 'Marketing', 'MKT-IC3': 'Marketing', 'MKT-L4': 'Marketing',
+  'ENG-IC1': 'Engineering', 'ENG-IC2': 'Engineering', 'ENG-IC3': 'Engineering',
+  'ENG-IC4': 'Engineering', 'ENG-IC5': 'Engineering', 'ENG-MGR': 'Engineering',
+  'DATA-IC5': 'Engineering', 'DATA-MGR': 'Engineering',
+  'PROD-IC2': 'Product', 'PROD-IC3': 'Product', 'PROD-IC4': 'Product',
+  'PEOPLE-OPS-IC': 'People Ops', 'PEOPLE-OPS-MGR': 'People Ops',
+};
+
+const DEPT_ORDER = [
+  'Business Development',
+  'Business Solutions',
+  'Customer Success',
+  'Customer Support & Enablement',
+  'Customer Onboarding',
+  'Marketing',
+  'Engineering',
+  'Product',
+  'People Ops',
+  'Other',
+];
+
+const DEPT_COLORS: Record<string, string> = {
+  'Business Development': '#f59e0b',
+  'Business Solutions': '#8b5cf6',
+  'Customer Success': '#22c55e',
+  'Customer Support & Enablement': '#06b6d4',
+  'Customer Onboarding': '#1175CC',
+  'Marketing': '#94a3b8',
+  'Engineering': '#f97316',
+  'Product': '#ec4899',
+  'People Ops': '#14b8a6',
+  'Other': '#64748b',
+};
+
+function roleDept(roleId: string): string {
+  return ROLE_DEPT[roleId] ?? 'Other';
+}
+
+function isLeaderRole(roleId: string): boolean {
+  return /MGR|DIR|L4|LEAD/.test(roleId);
+}
+
+// ── Inline "add new role" inside the Role dropdown ───────────────────────────
+
+const NEW_ROLE_SENTINEL = '__new__';
+
+interface RoleSelectProps {
+  roles: Role[];
+  value: string;
+  hasError: boolean;
+  onChange: (roleId: string) => void;
+  onRoleCreated: (role: Role) => void;
+}
+
+function RoleSelect({ roles, value, hasError, onChange, onRoleCreated }: RoleSelectProps) {
+  const [newTitle, setNewTitle] = useState('');
+  const showInput = value === NEW_ROLE_SENTINEL;
+
+  function handleSelectChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const v = e.target.value;
+    if (v === NEW_ROLE_SENTINEL) {
+      onChange(NEW_ROLE_SENTINEL);
+      setNewTitle('');
+    } else {
+      onChange(v);
+    }
+  }
+
+  function createRole() {
+    const title = newTitle.trim();
+    if (!title) return;
+    const slug = title.toUpperCase().replace(/\s+/g, '-').replace(/[^A-Z0-9-]/g, '').slice(0, 20);
+    const id = slug + '-' + generateId().slice(0, 4);
+    const role: Role = { id, name: title, fullName: title, cadence: 'monthly', metrics: [], isCustom: true };
+    onRoleCreated(role);
+    onChange(id);
+    setNewTitle('');
+  }
+
+  return (
+    <div className="space-y-2">
+      <select
+        value={showInput ? NEW_ROLE_SENTINEL : value}
+        onChange={handleSelectChange}
+        className={inputCls(hasError)}
+      >
+        <option value="">— select a role —</option>
+        {roles.map((r) => (
+          <option key={r.id} value={r.id}>{r.name} — {r.fullName}</option>
+        ))}
+        <option disabled>──────────────</option>
+        <option value={NEW_ROLE_SENTINEL}>+ Add new role title…</option>
+      </select>
+
+      {showInput && (
+        <div className="flex gap-2">
+          <input
+            autoFocus
+            value={newTitle}
+            onChange={e => setNewTitle(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && createRole()}
+            className="flex-1 rounded-xl border border-[#1175CC] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1175CC]"
+            placeholder="Role title, e.g. Senior AE"
+          />
+          <button
+            type="button"
+            onClick={createRole}
+            disabled={!newTitle.trim()}
+            className="px-3 py-2 text-sm font-medium text-white bg-[#1175CC] rounded-xl hover:bg-[#0d62b0] disabled:opacity-40 transition-colors"
+          >
+            Add
+          </button>
+          <button
+            type="button"
+            onClick={() => { onChange(''); setNewTitle(''); }}
+            className="px-3 py-2 text-sm text-slate-500 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Page ─────────────────────────────────────────────────────────────────────
 
 export function Melders({ storage, onSave }: Props) {
   const { melders, roles, reports } = storage;
@@ -50,7 +185,7 @@ export function Melders({ storage, onSave }: Props) {
   function validate(): boolean {
     const e: Partial<FormState> = {};
     if (!form.name.trim()) e.name = 'Name is required';
-    if (!form.roleId) e.roleId = 'Role is required';
+    if (!form.roleId || form.roleId === NEW_ROLE_SENTINEL) e.roleId = 'Role is required';
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -78,9 +213,35 @@ export function Melders({ storage, onSave }: Props) {
     setDeleteConfirm(null);
   }
 
+  function handleRoleCreated(role: Role) {
+    onSave((s) => saveRole(s, role));
+  }
+
   function reportCount(melderId: string) {
     return reports.filter((r) => r.melderId === melderId).length;
   }
+
+  // Group and sort melders: by dept, then leaders first within each dept
+  const grouped = new Map<string, Melder[]>();
+  for (const dept of DEPT_ORDER) grouped.set(dept, []);
+
+  for (const m of melders) {
+    const dept = roleDept(m.roleId);
+    if (!grouped.has(dept)) grouped.set(dept, []);
+    grouped.get(dept)!.push(m);
+  }
+
+  // Sort within each group: leaders first, then alphabetically by name
+  for (const [, group] of grouped) {
+    group.sort((a, b) => {
+      const aLeader = isLeaderRole(a.roleId) ? 0 : 1;
+      const bLeader = isLeaderRole(b.roleId) ? 0 : 1;
+      if (aLeader !== bLeader) return aLeader - bLeader;
+      return a.name.localeCompare(b.name);
+    });
+  }
+
+  const activeGroups = DEPT_ORDER.filter(d => (grouped.get(d)?.length ?? 0) > 0);
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -120,16 +281,13 @@ export function Melders({ storage, onSave }: Props) {
               </Field>
 
               <Field label="Role *" error={errors.roleId}>
-                <select
+                <RoleSelect
+                  roles={roles}
                   value={form.roleId}
-                  onChange={(e) => setForm({ ...form, roleId: e.target.value })}
-                  className={inputCls(!!errors.roleId)}
-                >
-                  <option value="">— select a role —</option>
-                  {roles.map((r) => (
-                    <option key={r.id} value={r.id}>{r.name} — {r.fullName}</option>
-                  ))}
-                </select>
+                  hasError={!!errors.roleId}
+                  onChange={(id) => setForm({ ...form, roleId: id })}
+                  onRoleCreated={handleRoleCreated}
+                />
               </Field>
 
               <Field label="Email (optional)">
@@ -143,7 +301,7 @@ export function Melders({ storage, onSave }: Props) {
               </Field>
 
               <div className="grid grid-cols-2 gap-4">
-                <Field label="Target Compensation ($/mo)">
+                <Field label="Target Comp ($/mo)">
                   <input
                     type="number"
                     value={form.targetCompensation}
@@ -209,7 +367,7 @@ export function Melders({ storage, onSave }: Props) {
         </div>
       )}
 
-      {/* Melder Table */}
+      {/* Melder Table — grouped by dept, leaders first */}
       {melders.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-2xl border border-slate-100">
           <p className="text-slate-400 text-sm mb-4">No Melders added yet.</p>
@@ -221,59 +379,90 @@ export function Melders({ storage, onSave }: Props) {
           </button>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-100">
-                <th className="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase tracking-wide">Name</th>
-                <th className="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase tracking-wide">Role</th>
-                <th className="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase tracking-wide">Target Comp</th>
-                <th className="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase tracking-wide">Market Rate</th>
-                <th className="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase tracking-wide">Reports</th>
-                <th className="px-5 py-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {melders.map((m) => {
-                const role = roles.find((r) => r.id === m.roleId);
-                return (
-                  <tr key={m.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
-                    <td className="px-5 py-4">
-                      <p className="font-semibold text-slate-900">{m.name}</p>
-                      {m.email && <p className="text-xs text-slate-400">{m.email}</p>}
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className="text-xs font-bold text-[#1175CC] bg-[#eef5fc] px-2 py-1 rounded-lg">{m.roleId}</span>
-                      {role && <p className="text-xs text-slate-400 mt-0.5">{role.fullName}</p>}
-                    </td>
-                    <td className="px-5 py-4 text-slate-700">
-                      {m.targetCompensation > 0 ? `$${m.targetCompensation.toLocaleString()}` : '—'}
-                    </td>
-                    <td className="px-5 py-4 text-slate-700">
-                      {m.marketRate > 0 ? `$${m.marketRate.toLocaleString()}` : '—'}
-                    </td>
-                    <td className="px-5 py-4 text-slate-500">{reportCount(m.id)}</td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-2 justify-end">
-                        <button
-                          onClick={() => openEdit(m)}
-                          className="p-1.5 text-slate-400 hover:text-[#1175CC] hover:bg-[#eef5fc] rounded-lg transition-colors"
+        <div className="space-y-6">
+          {activeGroups.map(dept => {
+            const group = grouped.get(dept)!;
+            const color = DEPT_COLORS[dept] ?? '#64748b';
+            return (
+              <div key={dept} className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
+                {/* Dept header */}
+                <div className="flex items-center gap-2.5 px-5 py-3 border-b border-slate-100 bg-slate-50">
+                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: color }} />
+                  <span className="text-xs font-bold uppercase tracking-widest text-slate-500">{dept}</span>
+                  <span className="ml-auto text-xs text-slate-400">{group.length}</span>
+                </div>
+
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-50">
+                      <th className="text-left px-5 py-2.5 text-xs font-semibold text-slate-400 uppercase tracking-wide">Name</th>
+                      <th className="text-left px-5 py-2.5 text-xs font-semibold text-slate-400 uppercase tracking-wide">Role</th>
+                      <th className="text-left px-5 py-2.5 text-xs font-semibold text-slate-400 uppercase tracking-wide">Target Comp</th>
+                      <th className="text-left px-5 py-2.5 text-xs font-semibold text-slate-400 uppercase tracking-wide">Market Rate</th>
+                      <th className="text-left px-5 py-2.5 text-xs font-semibold text-slate-400 uppercase tracking-wide">Reports</th>
+                      <th className="px-5 py-2.5" />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {group.map((m, idx) => {
+                      const role = roles.find((r) => r.id === m.roleId);
+                      const leader = isLeaderRole(m.roleId);
+                      return (
+                        <tr
+                          key={m.id}
+                          className={`border-b border-slate-50 hover:bg-slate-50/50 transition-colors ${idx < group.length - 1 ? '' : 'last:border-0'}`}
                         >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => setDeleteConfirm(m.id)}
-                          className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                          <td className="px-5 py-3.5">
+                            <div className="flex items-center gap-2">
+                              {leader && (
+                                <span
+                                  className="text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-md flex-shrink-0"
+                                  style={{ background: `${color}20`, color }}
+                                >
+                                  Leader
+                                </span>
+                              )}
+                              <div>
+                                <p className="font-semibold text-slate-900">{m.name}</p>
+                                {m.email && <p className="text-xs text-slate-400">{m.email}</p>}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-5 py-3.5">
+                            <span className="text-xs font-bold text-[#1175CC] bg-[#eef5fc] px-2 py-1 rounded-lg">{m.roleId}</span>
+                            {role && <p className="text-xs text-slate-400 mt-0.5">{role.fullName}</p>}
+                          </td>
+                          <td className="px-5 py-3.5 text-slate-700">
+                            {m.targetCompensation > 0 ? `$${m.targetCompensation.toLocaleString()}` : '—'}
+                          </td>
+                          <td className="px-5 py-3.5 text-slate-700">
+                            {m.marketRate > 0 ? `$${m.marketRate.toLocaleString()}` : '—'}
+                          </td>
+                          <td className="px-5 py-3.5 text-slate-500">{reportCount(m.id)}</td>
+                          <td className="px-5 py-3.5">
+                            <div className="flex items-center gap-2 justify-end">
+                              <button
+                                onClick={() => openEdit(m)}
+                                className="p-1.5 text-slate-400 hover:text-[#1175CC] hover:bg-[#eef5fc] rounded-lg transition-colors"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => setDeleteConfirm(m.id)}
+                                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

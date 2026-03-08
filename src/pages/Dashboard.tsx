@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowDownRight, ArrowUpRight, Calculator, Edit2, Eye, EyeOff, PieChart, Plus, Trash2, TrendingUp, Users, X } from 'lucide-react';
+import { AlertTriangle, ArrowDownRight, ArrowUpRight, Calculator, Edit2, Eye, EyeOff, PieChart, Plus, Search, Shield, Trash2, TrendingUp, Users, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { HealthBadge } from '../components/shared/HealthBadge';
@@ -45,6 +45,10 @@ function StatCard({ label, value, sub, color }: { label: string; value: string; 
 
 const healthRank: Record<HealthColor, number> = { red: 0, yellow: 1, green: 2, blue: 3 };
 
+function isTeamLead(level: string | null | undefined): boolean {
+  return !!level && /^(MGR|EX)/.test(level);
+}
+
 export function Dashboard({ storage, onSave }: Props) {
   const { melders, reports, roles, annualSnapshots } = storage;
   const [editingMelder, setEditingMelder] = useState<Melder | null>(null);
@@ -52,6 +56,7 @@ export function Dashboard({ storage, onSave }: Props) {
   const [editingSnapshot, setEditingSnapshot] = useState<AnnualSnapshot | null>(null);
   const [form, setForm] = useState<MelderForm>({ name: '', roleId: '', email: '', targetCompensation: '', marketRate: '' });
   const [showSalary, setShowSalary] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Map snapshot by lowercased name for fast lookup (last snapshot wins if duplicate names)
   const snapshotByName = useMemo(() => {
@@ -124,20 +129,54 @@ export function Dashboard({ storage, onSave }: Props) {
   }, [reports]);
 
   const roleMap = Object.fromEntries(roles.map((r) => [r.id, r.fullName]));
+  const searchLower = searchQuery.toLowerCase().trim();
+
+  // Map melder name → role title for SnapshotCard title display
+  const melderRoleByName = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const m of melders) {
+      const title = roleMap[m.roleId];
+      if (title) map.set(m.name.toLowerCase().trim(), title);
+    }
+    return map;
+  }, [melders, roleMap]);
 
   const snapshotGroups = useMemo(() => {
-    const filtered = annualSnapshots.filter((s) => s.name !== 'Aaron Seaholm');
+    const filtered = annualSnapshots.filter(
+      (s) => s.name !== 'Aaron Seaholm' &&
+        (!searchLower || s.name.toLowerCase().includes(searchLower) || s.team.toLowerCase().includes(searchLower))
+    );
     const groups = new Map<string, AnnualSnapshot[]>();
     for (const s of filtered) {
       if (!groups.has(s.team)) groups.set(s.team, []);
       groups.get(s.team)!.push(s);
     }
-    return Array.from(groups.entries());
+    // Sort each team's members: leaders first, then by OAP % descending (nulls last)
+    for (const [, snaps] of groups) {
+      snaps.sort((a, b) => {
+        const aLead = isTeamLead(a.level), bLead = isTeamLead(b.level);
+        if (aLead !== bLead) return aLead ? -1 : 1;
+        if (a.oaPct === null && b.oaPct === null) return 0;
+        if (a.oaPct === null) return 1;
+        if (b.oaPct === null) return -1;
+        return b.oaPct - a.oaPct;
+      });
+    }
+    // Sort teams alphabetically
+    return Array.from(groups.entries()).sort((a, b) => a[0].localeCompare(b[0]));
   }, [annualSnapshots]);
 
-  // Sort melders: by worst health first
+  // Sort melders: by department, leaders first within team, then worst OTP health
   const sortedMelders = useMemo(() => {
     return [...melders].sort((a, b) => {
+      const snapA = snapshotByName.get(a.name.toLowerCase().trim());
+      const snapB = snapshotByName.get(b.name.toLowerCase().trim());
+      const teamA = snapA?.team ?? 'zzz';
+      const teamB = snapB?.team ?? 'zzz';
+      const teamCmp = teamA.localeCompare(teamB);
+      if (teamCmp !== 0) return teamCmp;
+      const aLead = isTeamLead(snapA?.level), bLead = isTeamLead(snapB?.level);
+      if (aLead !== bLead) return aLead ? -1 : 1;
       const ra = latestReports.get(a.id);
       const rb = latestReports.get(b.id);
       if (!ra && !rb) return 0;
@@ -146,14 +185,18 @@ export function Dashboard({ storage, onSave }: Props) {
       const worstA = Math.min(healthRank[ra.oapResult.health], healthRank[ra.capResult.health], healthRank[ra.ratioResult.health]);
       const worstB = Math.min(healthRank[rb.oapResult.health], healthRank[rb.capResult.health], healthRank[rb.ratioResult.health]);
       return worstA - worstB;
-    });
-  }, [melders, latestReports]);
+    }).filter((m) =>
+      !searchLower ||
+      m.name.toLowerCase().includes(searchLower) ||
+      (roleMap[m.roleId] ?? '').toLowerCase().includes(searchLower)
+    );
+  }, [melders, latestReports, snapshotByName, searchLower, roleMap]);
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <Header
         title="OTP Dashboard"
-        subtitle="Overview of all Melders — sorted by compensation health"
+        subtitle="Overview of all Melders — sorted by OTP health"
         actions={
           <div className="flex gap-2">
             <Link
@@ -173,6 +216,26 @@ export function Dashboard({ storage, onSave }: Props) {
           </div>
         }
       />
+
+      {/* Search */}
+      <div className="relative mb-6">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search by name or title…"
+          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1175CC] shadow-sm"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
 
       {/* Team Summary */}
       {teamSummary && (
@@ -261,6 +324,7 @@ export function Dashboard({ storage, onSave }: Props) {
               .sort((a, b) => a.year - b.year || a.month - b.month)
               .slice(-6);
             const snapshot = snapshotByName.get(melder.name.toLowerCase().trim());
+            const isLead = isTeamLead(snapshot?.level);
             return (
               <MelderCard
                 key={melder.id}
@@ -269,6 +333,7 @@ export function Dashboard({ storage, onSave }: Props) {
                 roleName={roleMap[melder.roleId] ?? melder.roleId}
                 sparkReports={melderHistory}
                 snapshot={snapshot}
+                isLead={isLead}
                 onEdit={() => openEdit(melder)}
                 onDelete={() => setDeleteConfirm(melder.id)}
                 onEditSnapshot={() => snapshot && setEditingSnapshot(snapshot)}
@@ -303,7 +368,12 @@ export function Dashboard({ storage, onSave }: Props) {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {snaps.map((s) => (
-                  <SnapshotCard key={s.id} snapshot={s} showSalary={showSalary} />
+                  <SnapshotCard
+                    key={s.id}
+                    snapshot={s}
+                    showSalary={showSalary}
+                    roleName={melderRoleByName.get(s.name.toLowerCase().trim())}
+                  />
                 ))}
               </div>
             </div>
@@ -406,6 +476,7 @@ function MelderCard({
   roleName,
   sparkReports,
   snapshot,
+  isLead,
   onEdit,
   onDelete,
   onEditSnapshot,
@@ -415,6 +486,7 @@ function MelderCard({
   roleName: string;
   sparkReports: MonthlyReport[];
   snapshot?: AnnualSnapshot;
+  isLead: boolean;
   onEdit: () => void;
   onDelete: () => void;
   onEditSnapshot: () => void;
@@ -422,27 +494,30 @@ function MelderCard({
   const monthLabel = report ? `${MONTHS[report.month - 1]} ${report.year}` : null;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-shadow">
+    <div className={`bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow ${isLead ? 'border border-[#0d4a6b]' : 'border border-slate-100'}`}>
       {/* Card Header */}
-      <div className="px-5 py-4 border-b border-slate-100">
+      <div className={`px-5 py-4 border-b ${isLead ? 'border-white/10 bg-gradient-to-br from-[#1175CC] to-[#0a3a5c]' : 'border-slate-100'}`}>
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-slate-900 truncate">{melder.name}</h3>
-            <p className="text-slate-500 text-sm">{roleName}</p>
+            <div className="flex items-center gap-2">
+              {isLead && <Shield className="w-3.5 h-3.5 text-white/80 flex-shrink-0" />}
+              <h3 className={`font-bold truncate ${isLead ? 'text-white' : 'text-slate-900'}`}>{melder.name}</h3>
+            </div>
+            <p className={`text-sm ${isLead ? 'text-white/70' : 'text-slate-500'}`}>{roleName}</p>
           </div>
           <div className="flex items-center gap-1.5 ml-2 flex-shrink-0">
             {sparkReports.length >= 2 && (
               <MiniSparkline reports={sparkReports} melderId={melder.id} />
             )}
             {report && (
-              <span className="text-xs text-slate-400 bg-slate-50 px-2 py-1 rounded-lg">
+              <span className={`text-xs px-2 py-1 rounded-lg ${isLead ? 'text-white/60 bg-white/10' : 'text-slate-400 bg-slate-50'}`}>
                 {monthLabel}
               </span>
             )}
-            <button onClick={onEdit} className="p-1.5 text-slate-300 hover:text-[#1175CC] hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
+            <button onClick={onEdit} className={`p-1.5 rounded-lg transition-colors ${isLead ? 'text-white/40 hover:text-white hover:bg-white/10' : 'text-slate-300 hover:text-[#1175CC] hover:bg-blue-50'}`} title="Edit">
               <Edit2 className="w-3.5 h-3.5" />
             </button>
-            <button onClick={onDelete} className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+            <button onClick={onDelete} className={`p-1.5 rounded-lg transition-colors ${isLead ? 'text-white/40 hover:text-red-300 hover:bg-white/10' : 'text-slate-300 hover:text-red-500 hover:bg-red-50'}`} title="Delete">
               <Trash2 className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -614,10 +689,9 @@ function AnnualSnapshotPanel({ snapshot, onEdit }: { snapshot: AnnualSnapshot; o
           )}
         </div>
       )}
-      {snapshot.level && (
+      {snapshot.tenure && (
         <div className="mt-1 text-[10px] text-slate-400">
-          Level <strong className="text-slate-600">{snapshot.level}</strong>
-          {snapshot.tenure && <> · Tenure <strong className="text-slate-600">{snapshot.tenure}</strong></>}
+          Tenure <strong className="text-slate-600">{snapshot.tenure}</strong>
         </div>
       )}
     </div>
@@ -787,7 +861,7 @@ function getActivityStatus(s: AnnualSnapshot) {
   };
 }
 
-function SnapshotCard({ snapshot: s, showSalary }: { snapshot: AnnualSnapshot; showSalary: boolean }) {
+function SnapshotCard({ snapshot: s, showSalary, roleName }: { snapshot: AnnualSnapshot; showSalary: boolean; roleName?: string }) {
   const qtrs = [
     { label: 'Q1', val: s.q1Oa },
     { label: 'Q2', val: s.q2Oa },
@@ -798,16 +872,22 @@ function SnapshotCard({ snapshot: s, showSalary }: { snapshot: AnnualSnapshot; s
   const maxVal = Math.max(...qtrs.map((q) => q.val ?? 0), 130);
   const { noData, termed, started, startQ, termedAfterQ } = getActivityStatus(s);
 
+  const lead = isTeamLead(s.level);
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-shadow">
+    <div className={`bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow ${lead ? 'border border-[#0d4a6b]' : 'border border-slate-100'}`}>
       {/* Header */}
-      <div className="px-5 py-4 border-b border-slate-100">
+      <div className={`px-5 py-4 border-b ${lead ? 'border-white/10 bg-gradient-to-br from-[#1175CC] to-[#0a3a5c]' : 'border-slate-100'}`}>
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-slate-900 truncate">{s.name}</h3>
+            <div className="flex items-center gap-2">
+              {lead && <Shield className="w-3.5 h-3.5 text-white/80 flex-shrink-0" />}
+              <h3 className={`font-bold truncate ${lead ? 'text-white' : 'text-slate-900'}`}>{s.name}</h3>
+            </div>
             <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-              {s.level && <span className="text-xs text-slate-500">{s.level}</span>}
-              {s.tenure && <span className="text-xs text-slate-400">· {s.tenure}</span>}
+              {(roleName || s.level) && (
+                <span className={`text-xs ${lead ? 'text-white/70' : 'text-slate-500'}`}>{roleName ?? s.level}</span>
+              )}
+              {s.tenure && <span className={`text-xs ${lead ? 'text-white/50' : 'text-slate-400'}`}>· {s.tenure}</span>}
             </div>
           </div>
           <div className="flex flex-col items-end gap-1 flex-shrink-0">
@@ -817,7 +897,7 @@ function SnapshotCard({ snapshot: s, showSalary }: { snapshot: AnnualSnapshot; s
               </span>
             )}
             {started && (
-              <span className="text-[10px] font-bold uppercase tracking-wide bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full">
+              <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full ${lead ? 'bg-white/20 text-white' : 'bg-blue-50 text-blue-500'}`}>
                 Started Q{startQ}
               </span>
             )}

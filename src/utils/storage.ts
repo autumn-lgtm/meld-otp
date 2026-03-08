@@ -38,8 +38,26 @@ export function loadStorage(): AppStorage {
       };
     });
     const melders = parsed.melders.length === 0 ? DEFAULT_MELDERS : parsed.melders;
-    // Seed annual snapshots if not yet stored
-    const annualSnapshots: AnnualSnapshot[] = parsed.annualSnapshots ?? SEED_2025_ANNUAL;
+    // Seed is authoritative base; stored edits override matching IDs; user-added entries preserved.
+    // Always take oaPct from seed (it may be computed from quarters) — never let a stored null override it.
+    const storedMap = new Map((parsed.annualSnapshots ?? []).map((s) => [s.id, s]));
+    const seedIds = new Set(SEED_2025_ANNUAL.map((s) => s.id));
+    const userAdded = (parsed.annualSnapshots ?? []).filter((s) => !seedIds.has(s.id));
+    const annualSnapshots: AnnualSnapshot[] = [
+      ...SEED_2025_ANNUAL.map((s) => {
+        const stored = storedMap.get(s.id);
+        if (!stored) return s;
+        return {
+          ...stored,
+          oaPct: stored.oaPct ?? s.oaPct,
+          q1Oa: stored.q1Oa ?? s.q1Oa,
+          q2Oa: stored.q2Oa ?? s.q2Oa,
+          q3Oa: stored.q3Oa ?? s.q3Oa,
+          q4Oa: stored.q4Oa ?? s.q4Oa,
+        };
+      }),
+      ...userAdded,
+    ];
     return { ...parsed, melders, roles: [...missingDefaults, ...mergedRoles], annualSnapshots };
   } catch {
     return getDefaultStorage();

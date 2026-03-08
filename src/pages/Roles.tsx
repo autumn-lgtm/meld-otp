@@ -1,36 +1,60 @@
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, Edit2, Plus, X } from 'lucide-react';
+import { Check, Edit2, Plus, Trash2, X } from 'lucide-react';
 import type { AppStorage, MetricDefinition, Role } from '../types';
-import { saveRole } from '../utils/storage';
+import { deleteRole, generateId, saveRole } from '../utils/storage';
 
 const MELD_BLUE = '#1175CC';
 const MELD_DARK = '#022935';
 
-type DeptKey = 'bd' | 'bse' | 'cs' | 'css' | 'com' | 'mkt';
+// ── Department grouping ──────────────────────────────────────────────────────
 
-interface DeptConfig {
-  label: string;
-  color: string;
-  light: string;
-  border: string;
-  textColor: string;
-}
+const DEPT_ORDER = [
+  'Business Development',
+  'Business Solutions',
+  'Customer Success',
+  'Customer Support & Enablement',
+  'Customer Onboarding',
+  'Marketing',
+  'Engineering',
+  'Product',
+  'People Ops',
+  'Custom',
+];
 
-const DEPT: Record<DeptKey, DeptConfig> = {
-  bd:  { label: 'Business Development', color: '#f59e0b', light: '#fffbeb', border: '#fde68a', textColor: '#92400e' },
-  bse: { label: 'Business Solutions',   color: '#8b5cf6', light: '#f5f3ff', border: '#ddd6fe', textColor: '#4c1d95' },
-  cs:  { label: 'Customer Success',     color: '#22c55e', light: '#f0fdf4', border: '#bbf7d0', textColor: '#14532d' },
-  css: { label: 'Customer Support',     color: '#06b6d4', light: '#ecfeff', border: '#a5f3fc', textColor: '#164e63' },
-  com: { label: 'Customer Onboarding',  color: MELD_BLUE, light: '#eff6ff', border: '#bfdbfe', textColor: '#1e3a5f' },
-  mkt: { label: 'Marketing',            color: '#94a3b8', light: '#f8fafc', border: '#e2e8f0', textColor: '#334155' },
+const DEPT_COLORS: Record<string, { color: string; text: string; border: string }> = {
+  'Business Development':          { color: '#f59e0b', text: '#92400e', border: '#fde68a' },
+  'Business Solutions':            { color: '#8b5cf6', text: '#4c1d95', border: '#ddd6fe' },
+  'Customer Success':              { color: '#22c55e', text: '#14532d', border: '#bbf7d0' },
+  'Customer Support & Enablement': { color: '#06b6d4', text: '#164e63', border: '#a5f3fc' },
+  'Customer Onboarding':           { color: MELD_BLUE, text: '#1e3a5f', border: '#bfdbfe' },
+  'Marketing':                     { color: '#94a3b8', text: '#334155', border: '#e2e8f0' },
+  'Engineering':                   { color: '#f97316', text: '#7c2d12', border: '#fed7aa' },
+  'Product':                       { color: '#ec4899', text: '#831843', border: '#fbcfe8' },
+  'People Ops':                    { color: '#14b8a6', text: '#134e4a', border: '#99f6e4' },
+  'Custom':                        { color: '#64748b', text: '#1e293b', border: '#cbd5e1' },
 };
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+const ROLE_DEPT: Record<string, string> = {
+  BDA: 'Business Development', BDR: 'Business Development', 'SR-BDR': 'Business Development', 'BD-MGR': 'Business Development',
+  'ASSOC-BSE': 'Business Solutions', BSE: 'Business Solutions', 'SR-BSE': 'Business Solutions', 'BS-DIR': 'Business Solutions',
+  CSM: 'Customer Success', 'MM-CSM': 'Customer Success', 'CS-MGR': 'Customer Success',
+  CSS: 'Customer Support & Enablement', MMES: 'Customer Support & Enablement', 'CSS-MGR': 'Customer Support & Enablement',
+  COM: 'Customer Onboarding',
+  'MKT-IC2': 'Marketing', 'MKT-IC3': 'Marketing', 'MKT-L4': 'Marketing',
+  'ENG-IC1': 'Engineering', 'ENG-IC2': 'Engineering', 'ENG-IC3': 'Engineering',
+  'ENG-IC4': 'Engineering', 'ENG-IC5': 'Engineering', 'ENG-MGR': 'Engineering',
+  'DATA-IC5': 'Engineering', 'DATA-MGR': 'Engineering',
+  'PROD-IC2': 'Product', 'PROD-IC3': 'Product', 'PROD-IC4': 'Product',
+  'PEOPLE-OPS-IC': 'People Ops', 'PEOPLE-OPS-MGR': 'People Ops',
+};
 
-function newId() {
-  return `m-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+function getDept(role: Role): string {
+  if (role.isCustom) return 'Custom';
+  return ROLE_DEPT[role.id] ?? 'Custom';
 }
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
 function abbrev(name: string) {
   return name.split(/\s+/).map(w => w[0]?.toUpperCase() ?? '').join('').slice(0, 6) || 'M';
@@ -46,8 +70,8 @@ function parseNum(s: string): number {
 interface EditMetric {
   id: string;
   name: string;
-  weight: number; // 0–100
-  target: string; // display string
+  weight: number;
+  target: string;
   inverse: boolean;
 }
 
@@ -78,15 +102,11 @@ function fromEditMetrics(edits: EditMetric[], originals: MetricDefinition[]): Me
 }
 
 // ── Draggable weight bar ─────────────────────────────────────────────────────
-//
-// Renders a segmented bar where dividers between segments are draggable.
-// Pointer capture on the bar itself keeps events flowing during fast drags.
+
+const MIN_STEAL = 10;
 
 function WeightBar({
-  metrics,
-  color,
-  editable,
-  onWeightsChange,
+  metrics, color, editable, onWeightsChange,
 }: {
   metrics: EditMetric[];
   color: string;
@@ -96,9 +116,8 @@ function WeightBar({
   const barRef = useRef<HTMLDivElement>(null);
   const drag = useRef<{ idx: number; startX: number; startW: number[] } | null>(null);
   const SEG_OPACITIES = [1, 0.55, 0.3, 0.18];
-  const MIN_W = 5; // minimum 5% per metric
+  const MIN_W = 5;
 
-  // Cumulative positions for handle placement
   let cum = 0;
   const handles = metrics.slice(0, -1).map(m => { cum += m.weight; return cum; });
 
@@ -108,14 +127,11 @@ function WeightBar({
     const barW = barRef.current.offsetWidth;
     const delta = ((e.clientX - startX) / barW) * 100;
     const pool = startW[idx] + startW[idx + 1];
-    // Snap to 2.5% increments for clean numbers
-    const raw = startW[idx] + delta;
-    let a = Math.round(raw / 2.5) * 2.5;
+    let a = Math.round((startW[idx] + delta) / 2.5) * 2.5;
     a = Math.max(MIN_W, Math.min(pool - MIN_W, a));
-    const b = pool - a;
     const next = [...startW];
     next[idx] = a;
-    next[idx + 1] = b;
+    next[idx + 1] = pool - a;
     onWeightsChange(next);
   }
 
@@ -130,20 +146,14 @@ function WeightBar({
       onPointerMove={onMove}
       onPointerUp={() => { drag.current = null; }}
     >
-      {/* Segmented fill */}
       <div
         className="absolute left-0 right-0 rounded-full overflow-hidden flex bg-slate-100"
         style={{ top: editable ? (WRAP_H - BAR_H) / 2 : 0, height: BAR_H }}
       >
         {metrics.map((m, i) => (
-          <div
-            key={m.id}
-            style={{ width: `${m.weight}%`, background: color, opacity: SEG_OPACITIES[i] ?? 0.15 }}
-          />
+          <div key={m.id} style={{ width: `${m.weight}%`, background: color, opacity: SEG_OPACITIES[i] ?? 0.15 }} />
         ))}
       </div>
-
-      {/* Drag handles — only in edit mode */}
       {editable && handles.map((pos, i) => (
         <div
           key={i}
@@ -151,20 +161,13 @@ function WeightBar({
           style={{ left: `calc(${pos}% - 11px)`, width: 22, height: WRAP_H, cursor: 'col-resize' }}
           onPointerDown={(e) => {
             e.preventDefault();
-            // Capture on bar so events keep firing even outside the handle
             barRef.current?.setPointerCapture(e.pointerId);
             drag.current = { idx: i, startX: e.clientX, startW: metrics.map(m => m.weight) };
           }}
         >
           <div
             className="flex flex-col items-center justify-center gap-0.5 rounded-md"
-            style={{
-              width: 14,
-              height: 22,
-              background: 'white',
-              boxShadow: '0 1px 5px rgba(0,0,0,0.18)',
-              border: '1.5px solid #cbd5e1',
-            }}
+            style={{ width: 14, height: 22, background: 'white', boxShadow: '0 1px 5px rgba(0,0,0,0.18)', border: '1.5px solid #cbd5e1' }}
           >
             <div className="w-0.5 h-1.5 rounded-full bg-slate-400" />
             <div className="w-0.5 h-1.5 rounded-full bg-slate-400" />
@@ -183,24 +186,24 @@ const CARD_LIGHT    = '#eff6ff';
 
 function RoleCard({
   role,
-  dept,
   onSaveRole,
+  onDeleteRole,
 }: {
   role: Role;
-  dept: DeptKey;
   onSaveRole: (r: Role) => void;
+  onDeleteRole: (id: string) => void;
 }) {
-  // dept kept for section-level differentiation only; cards use unified Meld palette
-  void dept;
   const [editing, setEditing] = useState(false);
   const [em, setEm] = useState<EditMetric[]>([]);
+  const [editName, setEditName] = useState('');
   const SEG_OPACITIES = [1, 0.55, 0.3, 0.18];
 
   function enterEdit() {
+    setEditName(role.fullName || role.name);
     setEm(
       role.metrics.length > 0
         ? toEditMetrics(role)
-        : [{ id: newId(), name: 'New Metric', weight: 100, target: '', inverse: false }]
+        : [{ id: generateId(), name: 'New Metric', weight: 100, target: '', inverse: false }]
     );
     setEditing(true);
   }
@@ -208,7 +211,12 @@ function RoleCard({
   function cancel() { setEditing(false); setEm([]); }
 
   function save() {
-    onSaveRole({ ...role, metrics: fromEditMetrics(em, role.metrics) });
+    onSaveRole({
+      ...role,
+      fullName: editName.trim() || role.fullName,
+      name: editName.trim() || role.name,
+      metrics: fromEditMetrics(em, role.metrics),
+    });
     setEditing(false);
   }
 
@@ -226,7 +234,7 @@ function RoleCard({
     if (!donor || donor.weight <= MIN_STEAL + ADD) return;
     setEm(prev => [
       ...prev.map(m => m.id === donor.id ? { ...m, weight: m.weight - ADD } : m),
-      { id: newId(), name: 'New Metric', weight: ADD, target: '', inverse: false },
+      { id: generateId(), name: 'New Metric', weight: ADD, target: '', inverse: false },
     ]);
   }
 
@@ -241,19 +249,13 @@ function RoleCard({
   const totalW = em.reduce((s, m) => s + m.weight, 0);
   const weightOk = Math.abs(totalW - 100) < 0.6;
 
-  // ── Read mode ──
-
   if (!editing) {
     return (
       <div
         className="bg-white rounded-2xl overflow-hidden group"
         style={{ border: `1.5px solid ${CARD_BORDER}`, boxShadow: '0 2px 8px rgba(17,117,204,0.08)' }}
       >
-        {/* Gradient header */}
-        <div
-          className="flex items-center gap-3 px-5 py-4"
-          style={{ background: CARD_GRADIENT }}
-        >
+        <div className="flex items-center gap-3 px-5 py-4" style={{ background: CARD_GRADIENT }}>
           <p className="flex-1 font-bold text-sm leading-tight min-w-0 text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
             {role.fullName || role.name}
           </p>
@@ -261,10 +263,20 @@ function RoleCard({
             onClick={enterEdit}
             className="ml-1 p-1.5 rounded-lg opacity-25 group-hover:opacity-100 transition-all hover:scale-110 hover:bg-white/20"
             style={{ color: 'rgba(255,255,255,0.7)' }}
-            title="Edit metrics & weights"
+            title="Edit title, metrics & weights"
           >
             <Edit2 className="w-3.5 h-3.5" />
           </button>
+          {role.isCustom && (
+            <button
+              onClick={() => onDeleteRole(role.id)}
+              className="p-1.5 rounded-lg opacity-25 group-hover:opacity-100 transition-all hover:scale-110 hover:bg-white/20"
+              style={{ color: 'rgba(255,255,255,0.7)' }}
+              title="Delete custom role"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
 
         {role.metrics.length === 0 ? (
@@ -287,10 +299,7 @@ function RoleCard({
                   <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: MELD_BLUE, opacity: SEG_OPACITIES[i] ?? 0.15 }} />
                   <span className="flex-1 text-sm text-slate-700 leading-snug min-w-0">{m.name}</span>
                   <span className="text-xs font-mono text-slate-300 flex-shrink-0">{Math.round(m.weight * 100)}%</span>
-                  <span
-                    className="text-sm font-bold flex-shrink-0 tabular-nums"
-                    style={{ color: MELD_BLUE, minWidth: '5.5rem', textAlign: 'right' }}
-                  >
+                  <span className="text-sm font-bold flex-shrink-0 tabular-nums" style={{ color: MELD_BLUE, minWidth: '5.5rem', textAlign: 'right' }}>
                     {m.targetDisplay ?? (m.defaultTarget != null ? String(m.defaultTarget) : '—')}
                   </span>
                 </div>
@@ -302,28 +311,25 @@ function RoleCard({
     );
   }
 
-  // ── Edit mode ──
-
   return (
     <div
       className="bg-white rounded-2xl overflow-hidden"
       style={{ border: `2px solid ${MELD_BLUE}`, boxShadow: `0 0 0 4px ${MELD_BLUE}1a` }}
     >
-      {/* Gradient header */}
-      <div
-        className="flex items-center gap-3 px-5 py-3.5"
-        style={{ background: CARD_GRADIENT }}
-      >
-        <p className="flex-1 font-bold text-sm text-white min-w-0" style={{ fontFamily: 'Poppins, sans-serif' }}>
-          {role.fullName || role.name}
-        </p>
+      <div className="flex items-center gap-3 px-5 py-3.5" style={{ background: CARD_GRADIENT }}>
+        <input
+          value={editName}
+          onChange={e => setEditName(e.target.value)}
+          className="flex-1 font-bold text-sm text-white bg-white/10 rounded-lg px-3 py-1.5 min-w-0 focus:outline-none focus:ring-2 focus:ring-white/40 placeholder-white/40"
+          style={{ fontFamily: 'Poppins, sans-serif' }}
+          placeholder="Role title…"
+        />
         <span className="ml-1 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-white/20 text-white/80">
           editing
         </span>
       </div>
 
       <div className="px-5 pt-4 pb-2">
-        {/* Draggable weight bar */}
         {em.length > 0 && (
           <>
             <p className="text-[10px] font-semibold uppercase tracking-widest mb-2 text-slate-400">
@@ -338,15 +344,10 @@ function RoleCard({
           </>
         )}
 
-        {/* Metric rows */}
         <div className="mt-4 space-y-2">
           {em.map((m, i) => (
             <div key={m.id} className="flex items-center gap-2">
-              <div
-                className="w-2 h-2 rounded-full flex-shrink-0"
-                style={{ background: MELD_BLUE, opacity: SEG_OPACITIES[i] ?? 0.15 }}
-              />
-
+              <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: MELD_BLUE, opacity: SEG_OPACITIES[i] ?? 0.15 }} />
               <input
                 type="text"
                 value={m.name}
@@ -355,7 +356,6 @@ function RoleCard({
                 style={{ border: `1px solid ${CARD_BORDER}`, background: CARD_LIGHT }}
                 placeholder="Metric name"
               />
-
               <input
                 type="text"
                 value={m.target}
@@ -364,16 +364,13 @@ function RoleCard({
                 style={{ border: `1px solid ${CARD_BORDER}`, background: CARD_LIGHT, color: MELD_BLUE }}
                 placeholder="Target"
               />
-
               <span className="text-xs font-mono tabular-nums flex-shrink-0 w-12 text-right text-slate-500">
                 {m.weight.toFixed(1)}%
               </span>
-
               <button
                 onClick={() => removeMetric(m.id)}
                 disabled={em.length <= 1}
                 className="p-1 rounded hover:bg-red-50 flex-shrink-0 disabled:opacity-20"
-                title="Remove metric"
               >
                 <X className="w-3.5 h-3.5 text-slate-400 hover:text-red-400" />
               </button>
@@ -390,11 +387,7 @@ function RoleCard({
         </button>
       </div>
 
-      {/* Footer: Save / Cancel */}
-      <div
-        className="flex justify-end gap-2 px-5 py-3"
-        style={{ borderTop: `1px solid ${CARD_BORDER}`, background: CARD_LIGHT }}
-      >
+      <div className="flex justify-end gap-2 px-5 py-3" style={{ borderTop: `1px solid ${CARD_BORDER}`, background: CARD_LIGHT }}>
         <button
           onClick={cancel}
           className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-slate-500 hover:text-slate-700 hover:bg-white/60 transition-colors"
@@ -403,12 +396,9 @@ function RoleCard({
         </button>
         <button
           onClick={save}
-          disabled={!weightOk}
+          disabled={!weightOk || !editName.trim()}
           className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all"
-          style={{
-            background: weightOk ? MELD_BLUE : '#94a3b8',
-            cursor: weightOk ? 'pointer' : 'not-allowed',
-          }}
+          style={{ background: weightOk && editName.trim() ? MELD_BLUE : '#94a3b8', cursor: weightOk && editName.trim() ? 'pointer' : 'not-allowed' }}
         >
           <Check className="w-3.5 h-3.5" /> Save changes
         </button>
@@ -417,22 +407,69 @@ function RoleCard({
   );
 }
 
-const MIN_STEAL = 10;
+// ── New Role Modal ────────────────────────────────────────────────────────────
 
-// ── Dept section ─────────────────────────────────────────────────────────────
+function NewRoleModal({ onSave, onClose }: { onSave: (r: Role) => void; onClose: () => void }) {
+  const [title, setTitle] = useState('');
+  const [cadence, setCadence] = useState<'monthly' | 'quarterly'>('monthly');
 
-function DeptSection({ deptKey, children }: { deptKey: DeptKey; children: React.ReactNode }) {
-  const d = DEPT[deptKey];
+  function handleSave() {
+    if (!title.trim()) return;
+    const id = title.trim().toUpperCase().replace(/\s+/g, '-').replace(/[^A-Z0-9-]/g, '').slice(0, 20) + '-' + generateId().slice(0, 4);
+    onSave({
+      id,
+      name: title.trim(),
+      fullName: title.trim(),
+      cadence,
+      metrics: [],
+      isCustom: true,
+    });
+    onClose();
+  }
+
   return (
-    <div>
-      <div className="flex items-center gap-3 mb-5">
-        <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: d.color }} />
-        <span className="text-xs font-bold uppercase tracking-widest flex-shrink-0" style={{ color: d.textColor }}>
-          {d.label}
-        </span>
-        <div className="flex-1 h-px" style={{ background: d.border }} />
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+          <h2 className="font-bold text-slate-900">New Role</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X className="w-5 h-5" /></button>
+        </div>
+        <div className="px-6 py-5 space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Role Title</label>
+            <input
+              autoFocus
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSave()}
+              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1175CC]"
+              placeholder="e.g. Senior Account Executive"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Cadence</label>
+            <select
+              value={cadence}
+              onChange={e => setCadence(e.target.value as 'monthly' | 'quarterly')}
+              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1175CC]"
+            >
+              <option value="monthly">Monthly</option>
+              <option value="quarterly">Quarterly</option>
+            </select>
+          </div>
+          <p className="text-xs text-slate-400">You can add metrics after creating the role by clicking the pencil icon on its card.</p>
+        </div>
+        <div className="flex justify-end gap-3 px-6 py-4 border-t border-slate-100">
+          <button onClick={onClose} className="px-4 py-2 text-sm text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200">Cancel</button>
+          <button
+            onClick={handleSave}
+            disabled={!title.trim()}
+            className="px-5 py-2 text-sm font-medium text-white bg-[#1175CC] rounded-xl hover:bg-[#0d62b0] disabled:opacity-40"
+          >
+            Create Role
+          </button>
+        </div>
       </div>
-      <div className="grid md:grid-cols-2 gap-4">{children}</div>
     </div>
   );
 }
@@ -446,21 +483,23 @@ export function Roles({
   storage: AppStorage;
   onSave: (updater: (prev: AppStorage) => AppStorage) => void;
 }) {
+  const [showNewRole, setShowNewRole] = useState(false);
+
   function handleSaveRole(updated: Role) {
     onSave(prev => saveRole(prev, updated));
   }
 
-  function r(id: string): Role | undefined {
-    return storage.roles.find(role => role.id === id);
+  function handleDeleteRole(id: string) {
+    onSave(prev => deleteRole(prev, id));
   }
 
-  function cards(ids: string[], dept: DeptKey) {
-    return ids
-      .map(id => r(id))
-      .filter((role): role is Role => !!role)
-      .map(role => (
-        <RoleCard key={role.id} role={role} dept={dept} onSaveRole={handleSaveRole} />
-      ));
+  // Group roles by department
+  const groups = new Map<string, Role[]>();
+  for (const dept of DEPT_ORDER) groups.set(dept, []);
+  for (const role of storage.roles) {
+    const dept = getDept(role);
+    if (!groups.has(dept)) groups.set(dept, []);
+    groups.get(dept)!.push(role);
   }
 
   const totalMetrics = storage.roles.reduce((s, role) => s + role.metrics.length, 0);
@@ -477,18 +516,28 @@ export function Roles({
           <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#B0E3FF', fontFamily: 'Rubik, sans-serif' }}>
             Property Meld · OTP System
           </p>
-          <h1 className="text-3xl font-black text-white mb-1" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Roles &amp; Metrics
-          </h1>
-          <p className="text-sm mb-5" style={{ color: '#B0E3FF' }}>
-            Every OTP-covered role: what gets measured, how it's weighted, and what target defines success. Click the pencil icon on any card to edit weights and metrics.
-          </p>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-black text-white mb-1" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                Roles &amp; Metrics
+              </h1>
+              <p className="text-sm mb-5" style={{ color: '#B0E3FF' }}>
+                Every OTP-covered role: what gets measured, how it's weighted, and what target defines success.
+                Click the pencil icon on any card to edit the title, weights, and metrics.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowNewRole(true)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 flex-shrink-0 transition-colors"
+            >
+              <Plus className="w-4 h-4" /> New Role
+            </button>
+          </div>
 
-          {/* Stats */}
-          <div className="flex gap-8 mb-6">
+          <div className="flex gap-8">
             {[
               { stat: String(storage.roles.length), label: 'roles' },
-              { stat: '6', label: 'departments' },
+              { stat: String(Array.from(groups.values()).filter(g => g.length > 0).length), label: 'departments' },
               { stat: String(totalMetrics), label: 'metric configs' },
             ].map(s => (
               <div key={s.label} className="flex items-baseline gap-1.5">
@@ -497,24 +546,51 @@ export function Roles({
               </div>
             ))}
           </div>
-
         </div>
       </div>
 
       {/* Role sections */}
       <div className="max-w-6xl mx-auto px-8 py-10 space-y-12">
-        <DeptSection deptKey="bd">{cards(['BDA', 'BDR', 'SR-BDR'], 'bd')}</DeptSection>
-        <DeptSection deptKey="bse">{cards(['ASSOC-BSE', 'BSE', 'SR-BSE'], 'bse')}</DeptSection>
-        <DeptSection deptKey="cs">{cards(['CSM', 'MM-CSM'], 'cs')}</DeptSection>
-        <DeptSection deptKey="css">{cards(['CSS', 'MMES'], 'css')}</DeptSection>
-        <DeptSection deptKey="com">{cards(['COM'], 'com')}</DeptSection>
-        <DeptSection deptKey="mkt">{cards(['MKT-IC2', 'MKT-IC3', 'MKT-L4'], 'mkt')}</DeptSection>
+        {DEPT_ORDER.map(dept => {
+          const roles = groups.get(dept) ?? [];
+          if (roles.length === 0) return null;
+          const c = DEPT_COLORS[dept] ?? DEPT_COLORS['Custom'];
+          return (
+            <div key={dept}>
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: c.color }} />
+                <span className="text-xs font-bold uppercase tracking-widest flex-shrink-0" style={{ color: c.text }}>
+                  {dept}
+                </span>
+                <div className="flex-1 h-px" style={{ background: c.border }} />
+                <span className="text-xs font-medium" style={{ color: c.text }}>{roles.length}</span>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                {roles.map(role => (
+                  <RoleCard
+                    key={role.id}
+                    role={role}
+                    onSaveRole={handleSaveRole}
+                    onDeleteRole={handleDeleteRole}
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <div className="max-w-6xl mx-auto px-8 pb-10 flex items-center justify-center gap-2 text-xs text-slate-400">
         <span>Changes save to your local browser session ·</span>
         <Link to="/export" className="underline decoration-dotted hover:text-slate-600">Export backup</Link>
       </div>
+
+      {showNewRole && (
+        <NewRoleModal
+          onSave={handleSaveRole}
+          onClose={() => setShowNewRole(false)}
+        />
+      )}
     </div>
   );
 }

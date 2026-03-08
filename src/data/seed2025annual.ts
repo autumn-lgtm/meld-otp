@@ -21,6 +21,11 @@ function snap(
   q4: number | null,
 ): AnnualSnapshot {
   const id = `2025-${team}-${name}`.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  // Auto-compute oaPct from available quarters if not explicitly provided
+  const computedOaPct = oa_pct ?? (() => {
+    const vals = [q1, q2, q3, q4].filter((v): v is number => v !== null);
+    return vals.length > 0 ? vals.reduce((s, v) => s + v, 0) / vals.length : null;
+  })();
   return {
     id,
     year: 2025,
@@ -28,7 +33,7 @@ function snap(
     name,
     level,
     tenure,
-    oaPct: oa_pct,
+    oaPct: computedOaPct,
     capPct: cap_pct,
     compRatio: comp_ratio,
     currentSalary: current_salary,
@@ -49,7 +54,7 @@ export const SEED_2025_ANNUAL: AnnualSnapshot[] = [
   // ── Customer Onboarding ──────────────────────────────────────────────────────
   snap('Customer Onboarding', 'Aaron Seaholm',           'EX 9', '3y 8m', 101.0, 96.4,  133.0, 233000, 181000, 232000, 308000,  77000,  74208,  74208, 101.0, 101.0,  null,  null),
   snap('Customer Onboarding', 'Brianna Pesek',           'IC 3', '6y 4m',  76.0,100.0,  108.9,  68000,  83000,  99000, 107800, 107021, 107021,  74837,  76.0, 119.0, 113.0,  90.0),
-  snap('Customer Onboarding', 'Kristoffer Allen Hewlett','IC 4', '1y 8m',  99.0,100.0,  105.3,  83000,  96000, 118000, 124290, 131970, 131970,  93906,  99.0, 115.0, 104.0,  93.0),
+  snap('Customer Onboarding', 'Kristoffer Hewlett',      'IC 4', '1y 8m',  99.0,100.0,  105.3,  83000,  96000, 118000, 124290, 131970, 131970,  93906,  99.0, 115.0, 104.0,  93.0),
 
   // ── Customer Success ─────────────────────────────────────────────────────────
   snap('Customer Success', 'Aaron Seaholm',         'EX 9',  '3y 8m', 101.0,  96.4, 133.0, 233000, 181000, 232000, 308000,  77000,  74208,  74208, 101.0, 101.0,  null,  null),
@@ -59,7 +64,7 @@ export const SEED_2025_ANNUAL: AnnualSnapshot[] = [
   snap('Customer Success', 'Bryce Codr',            'IC 2',  '8m',    144.0,  87.9, 122.0,  66000,  61000,  86000, 104948, 104948,  92286,  92286, 144.0, 116.0,  44.0,  91.0),
   snap('Customer Success', 'Kalico Jordan',         'IC 3',  '5m',     58.0,  98.7, 110.6,  72000,  83000,  99000, 109500,  54750,  54065,  54065,  58.0, 108.0,  null,  null),
   snap('Customer Success', 'David Herr',            null,    null,      null,  66.9, 109.0,  70000,  83000,  99000, 107958,  62975,  42138,  42138,  null,  null,  97.0,  93.0),
-  snap('Customer Success', 'Ben Capelle',           null,    null,      null,  85.2, 109.0,  63000,  61000,  86000,  93714,  78095,  66541,  66541,  null,  null, 113.0,  68.0),
+  snap('Customer Success', 'Benjamin Capelle',       null,    null,      null,  85.2, 109.0,  63000,  61000,  86000,  93714,  78095,  66541,  66541,  null,  null, 113.0,  68.0),
   snap('Customer Success', 'Johnny Trokey',         null,    null,      null,  79.2, 109.0,  70000,  83000,  99000, 107958,  35986,  28488,  28488,  null,  null,  null, 116.0),
 
   // ── Business Development ─────────────────────────────────────────────────────
@@ -73,7 +78,7 @@ export const SEED_2025_ANNUAL: AnnualSnapshot[] = [
   snap('Business Development', 'Jace Holzer',         null,    null,   null,  97.0,  96.4,  60000,  63000, 107000, 103200,  77400,  75052,  75052,  null, 125.0, 137.0,  93.0),
   snap('Business Development', 'Seth Nichols',        null,    null,   null,  96.7,  86.6,  43900,  59000,  83000,  71900,  35950,  34753,  34753,  null,  null, 113.0, 158.0),
   snap('Business Development', 'Megan Golliher',      null,    null,   null, 111.7,  86.6,  43900,  59000,  83000,  71900,  17975,  20085,  20085,  null,  null, 120.0, 115.0),
-  snap('Business Development', 'Anthony',             null,    null,   null, 109.1,  86.6,  43900,  59000,  83000,  71900,  17975,  19604,  19604,  null,  null, 109.0,  90.0),
+  snap('Business Development', 'Anthony Drealan',      null,    null,   null, 109.1,  86.6,  43900,  59000,  83000,  71900,  17975,  19604,  19604,  null,  null, 109.0,  90.0),
 
   // ── Business Solutions ───────────────────────────────────────────────────────
   snap('Business Solutions', 'Andrew D McGlashan', 'EX 9',  '2y 8m', 100.0, 107.4,  77.2,  55000,  56000, 123000,  95000,  95000, 102036, 102036, 100.0,  90.0, 103.0, 136.0),

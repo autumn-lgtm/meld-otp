@@ -321,6 +321,141 @@ export const DEFAULT_ROLES: Role[] = [
     metrics: [],
   },
 
+  // ── Customer Support Manager ─────────────────────────────────────────────────
+  {
+    id: 'CSS-MGR',
+    name: 'CSS-MGR',
+    fullName: 'Customer Support Manager',
+    cadence: 'monthly',
+    metrics: [],
+  },
+
+  // ── Customer Success Leader ───────────────────────────────────────────────────
+  {
+    id: 'CS-MGR',
+    name: 'CS-MGR',
+    fullName: 'Customer Success Team Lead',
+    cadence: 'monthly',
+    metrics: [],
+  },
+
+  // ── Business Development Manager ─────────────────────────────────────────────
+  {
+    id: 'BD-MGR',
+    name: 'BD-MGR',
+    fullName: 'Business Development Manager',
+    cadence: 'monthly',
+    metrics: [],
+  },
+
+  // ── Business Solutions Director ───────────────────────────────────────────────
+  {
+    id: 'BS-DIR',
+    name: 'BS-DIR',
+    fullName: 'Business Solutions Director',
+    cadence: 'monthly',
+    metrics: [],
+  },
+
+  // ── People Ops ────────────────────────────────────────────────────────────────
+  {
+    id: 'PEOPLE-OPS-IC',
+    name: 'PEOPLE-OPS-IC',
+    fullName: 'People Operations Specialist',
+    cadence: 'monthly',
+    metrics: [],
+  },
+  {
+    id: 'PEOPLE-OPS-MGR',
+    name: 'PEOPLE-OPS-MGR',
+    fullName: 'People Operations Manager',
+    cadence: 'monthly',
+    metrics: [],
+  },
+
+  // ── Product ───────────────────────────────────────────────────────────────────
+  {
+    id: 'PROD-IC2',
+    name: 'PROD-IC2',
+    fullName: 'Product Manager',
+    cadence: 'monthly',
+    metrics: [],
+  },
+  {
+    id: 'PROD-IC3',
+    name: 'PROD-IC3',
+    fullName: 'Senior Product Manager',
+    cadence: 'monthly',
+    metrics: [],
+  },
+  {
+    id: 'PROD-IC4',
+    name: 'PROD-IC4',
+    fullName: 'Staff Product Manager',
+    cadence: 'monthly',
+    metrics: [],
+  },
+
+  // ── Engineering & Data ────────────────────────────────────────────────────────
+  {
+    id: 'DATA-IC5',
+    name: 'DATA-IC5',
+    fullName: 'Principal Data Engineer',
+    cadence: 'monthly',
+    metrics: [],
+  },
+  {
+    id: 'DATA-MGR',
+    name: 'DATA-MGR',
+    fullName: 'Engineering & Data Manager',
+    cadence: 'monthly',
+    metrics: [],
+  },
+
+  // ── Engineering ───────────────────────────────────────────────────────────────
+  {
+    id: 'ENG-IC1',
+    name: 'ENG-IC1',
+    fullName: 'Software Engineer',
+    cadence: 'monthly',
+    metrics: [],
+  },
+  {
+    id: 'ENG-IC2',
+    name: 'ENG-IC2',
+    fullName: 'Software Engineer II',
+    cadence: 'monthly',
+    metrics: [],
+  },
+  {
+    id: 'ENG-IC3',
+    name: 'ENG-IC3',
+    fullName: 'Senior Software Engineer',
+    cadence: 'monthly',
+    metrics: [],
+  },
+  {
+    id: 'ENG-IC4',
+    name: 'ENG-IC4',
+    fullName: 'Staff Software Engineer',
+    cadence: 'monthly',
+    metrics: [],
+  },
+  {
+    id: 'ENG-IC5',
+    name: 'ENG-IC5',
+    fullName: 'Principal Software Engineer',
+    cadence: 'monthly',
+    metrics: [],
+  },
+  {
+    id: 'ENG-MGR',
+    name: 'ENG-MGR',
+    fullName: 'Engineering Manager',
+    cadence: 'monthly',
+    metrics: [],
+  },
+
   // ── Onboarding Track ────────────────────────────────────────────────────────
   {
     id: 'COM',
