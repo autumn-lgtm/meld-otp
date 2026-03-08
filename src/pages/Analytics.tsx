@@ -13,6 +13,7 @@ import {
   getRatioHealth,
 } from '../utils/calculations';
 import type { TeamSummary } from '../utils/calculations';
+import { SEED_REPORTS_2025, SEED_MELDER_MAP } from '../data/seed2025';
 
 interface Props {
   storage: AppStorage;
@@ -53,12 +54,16 @@ export function Analytics({ storage }: Props) {
   const { melders, reports, roles } = storage;
   const [period, setPeriod] = useState<PeriodFilter>('all');
 
+  // Use 2025 seed data when no live reports exist yet
+  const isUsingSeed = reports.length === 0;
+  const activeReports = isUsingSeed ? SEED_REPORTS_2025 : reports;
+
   const filteredReports = useMemo(() => {
-    if (period === 'all') return reports;
+    if (period === 'all') return activeReports;
     const cutoff = new Date();
     cutoff.setMonth(cutoff.getMonth() - parseInt(period));
-    return reports.filter((r) => new Date(r.year, r.month - 1) >= cutoff);
-  }, [reports, period]);
+    return activeReports.filter((r) => new Date(r.year, r.month - 1) >= cutoff);
+  }, [activeReports, period]);
 
   // Latest report per melder within period
   const latestByMelder = useMemo(() => {
@@ -163,42 +168,20 @@ export function Analytics({ storage }: Props) {
   }, [monthlyTrends]);
 
   const melderMap = useMemo(
-    () => Object.fromEntries(melders.map((m) => [m.id, m])),
+    () => ({
+      ...SEED_MELDER_MAP,
+      ...Object.fromEntries(melders.map((m) => [m.id, m])),
+    }),
     [melders]
   );
-
-  // ── Empty state ──
-  if (melders.length === 0 || reports.length === 0) {
-    return (
-      <div className="p-6 max-w-7xl mx-auto">
-        <Header title="Analytics" subtitle="Team-wide performance and compensation insights" />
-        <div className="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border border-slate-100">
-          <div className="w-16 h-16 rounded-2xl bg-[#dceefa] flex items-center justify-center mb-4">
-            <PieChart className="w-8 h-8 text-[#1175CC]" />
-          </div>
-          <h2 className="text-lg font-bold text-slate-700 mb-2">No data yet</h2>
-          <p className="text-slate-400 text-sm mb-2 max-w-sm text-center">
-            Once you save reports for your team, this screen will show compensation quadrant analysis, health distribution, and cross-team patterns.
-          </p>
-          <p className="text-slate-300 text-xs mb-6 max-w-xs text-center">
-            Save 3+ reports to start seeing team-wide trends and outlier flags.
-          </p>
-          <Link
-            to="/calculator"
-            className="px-5 py-2.5 bg-[#1175CC] text-white text-sm font-medium rounded-xl hover:bg-[#0d62b0]"
-          >
-            Create First Report
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <Header
         title="Analytics"
-        subtitle={`${latestByMelder.length} Melders · ${filteredReports.length} report${filteredReports.length !== 1 ? 's' : ''}${period !== 'all' ? ` in last ${period} months` : ' all time'}`}
+        subtitle={isUsingSeed
+          ? `2025 Baseline · ${latestByMelder.length} Melders`
+          : `${latestByMelder.length} Melders · ${filteredReports.length} report${filteredReports.length !== 1 ? 's' : ''}${period !== 'all' ? ` in last ${period} months` : ' all time'}`}
         actions={
           <div className="flex bg-slate-100 rounded-xl p-1 gap-0.5">
             {(['3', '6', '12', 'all'] as PeriodFilter[]).map((p) => (
@@ -217,6 +200,21 @@ export function Analytics({ storage }: Props) {
           </div>
         }
       />
+
+      {/* Seed data banner */}
+      {isUsingSeed && (
+        <div className="flex items-start gap-3 px-4 py-3 rounded-xl text-sm" style={{ background: '#eff6ff', border: '1px solid #bfdbfe' }}>
+          <PieChart className="w-4 h-4 flex-shrink-0 mt-0.5 text-[#1175CC]" />
+          <div>
+            <span className="font-semibold" style={{ color: '#1e3a5f' }}>Showing 2025 Annual Review baseline</span>
+            <span className="text-slate-500"> — this data is pre-loaded from the 2025 performance review. </span>
+            <Link to="/calculator" className="font-semibold underline decoration-dotted" style={{ color: '#1175CC' }}>
+              Save your first report
+            </Link>
+            <span className="text-slate-500"> to start tracking live data.</span>
+          </div>
+        </div>
+      )}
 
       {/* 1 — Team Pulse */}
       {teamSummary && (
