@@ -1,4 +1,4 @@
-import { AlertTriangle, Calculator, TrendingUp, Users } from 'lucide-react';
+import { AlertTriangle, ArrowDownRight, ArrowUpRight, Calculator, PieChart, TrendingUp, Users } from 'lucide-react';
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { HealthBadge } from '../components/shared/HealthBadge';
@@ -50,6 +50,23 @@ export function Dashboard({ storage }: Props) {
       r.alerts.filter((a) => a.severity === 'critical').map((a) => ({ ...a, melderName: r.melderName, reportId: r.id, melderId: r.melderId }))
     );
   }, [latestReports]);
+
+  // Compute team OAP trend (latest month avg vs previous month avg)
+  const teamMomentum = useMemo(() => {
+    const byMonth = new Map<string, number[]>();
+    for (const r of reports) {
+      const key = `${r.year}-${String(r.month).padStart(2, '0')}`;
+      if (!byMonth.has(key)) byMonth.set(key, []);
+      byMonth.get(key)!.push(r.oapResult.oap);
+    }
+    const sorted = Array.from(byMonth.entries()).sort(([a], [b]) => a.localeCompare(b));
+    if (sorted.length < 2) return null;
+    const last = sorted[sorted.length - 1][1];
+    const prev = sorted[sorted.length - 2][1];
+    const avgLast = last.reduce((s, v) => s + v, 0) / last.length;
+    const avgPrev = prev.reduce((s, v) => s + v, 0) / prev.length;
+    return { delta: avgLast - avgPrev, avgLast };
+  }, [reports]);
 
   const roleMap = Object.fromEntries(roles.map((r) => [r.id, r.fullName]));
 
@@ -119,6 +136,45 @@ export function Dashboard({ storage }: Props) {
         </div>
       )}
 
+      {/* Momentum + Analytics shortcut */}
+      {(teamMomentum || reports.length > 0) && (
+        <div className="flex gap-3 mb-6 flex-wrap">
+          {teamMomentum && (
+            <div
+              className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium ${
+                teamMomentum.delta > 0.5
+                  ? 'bg-green-50 text-green-700 border border-green-200'
+                  : teamMomentum.delta < -0.5
+                  ? 'bg-red-50 text-red-700 border border-red-200'
+                  : 'bg-slate-50 text-slate-600 border border-slate-200'
+              }`}
+            >
+              {teamMomentum.delta > 0.5 ? (
+                <ArrowUpRight className="w-4 h-4" />
+              ) : teamMomentum.delta < -0.5 ? (
+                <ArrowDownRight className="w-4 h-4" />
+              ) : (
+                <TrendingUp className="w-4 h-4" />
+              )}
+              Team OAP{' '}
+              {teamMomentum.delta > 0.5
+                ? `+${teamMomentum.delta.toFixed(1)}pts`
+                : teamMomentum.delta < -0.5
+                ? `${teamMomentum.delta.toFixed(1)}pts`
+                : 'stable'}{' '}
+              month-over-month
+            </div>
+          )}
+          <Link
+            to="/analytics"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-[#eef5fc] text-[#1175CC] border border-[#b8d9f5] hover:bg-[#dceefa] transition-colors ml-auto"
+          >
+            <PieChart className="w-4 h-4" />
+            Team Analytics
+          </Link>
+        </div>
+      )}
+
       {/* Melder Grid */}
       {melders.length === 0 ? (
         <EmptyState />
@@ -126,12 +182,17 @@ export function Dashboard({ storage }: Props) {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {sortedMelders.map((melder) => {
             const report = latestReports.get(melder.id);
+            const melderHistory = reports
+              .filter((r) => r.melderId === melder.id)
+              .sort((a, b) => a.year - b.year || a.month - b.month)
+              .slice(-6);
             return (
               <MelderCard
                 key={melder.id}
                 melder={melder}
                 report={report}
                 roleName={roleMap[melder.roleId] ?? melder.roleId}
+                sparkReports={melderHistory}
               />
             );
           })}
@@ -141,7 +202,17 @@ export function Dashboard({ storage }: Props) {
   );
 }
 
-function MelderCard({ melder, report, roleName }: { melder: Melder; report?: MonthlyReport; roleName: string }) {
+function MelderCard({
+  melder,
+  report,
+  roleName,
+  sparkReports,
+}: {
+  melder: Melder;
+  report?: MonthlyReport;
+  roleName: string;
+  sparkReports: MonthlyReport[];
+}) {
   const monthLabel = report ? `${MONTHS[report.month - 1]} ${report.year}` : null;
 
   return (
@@ -153,9 +224,16 @@ function MelderCard({ melder, report, roleName }: { melder: Melder; report?: Mon
             <h3 className="font-bold text-slate-900">{melder.name}</h3>
             <p className="text-slate-500 text-sm">{roleName}</p>
           </div>
-          {report && (
-            <span className="text-xs text-slate-400 bg-slate-50 px-2 py-1 rounded-lg">{monthLabel}</span>
-          )}
+          <div className="flex items-center gap-2">
+            {sparkReports.length >= 2 && (
+              <MiniSparkline reports={sparkReports} melderId={melder.id} />
+            )}
+            {report && (
+              <span className="text-xs text-slate-400 bg-slate-50 px-2 py-1 rounded-lg">
+                {monthLabel}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -219,6 +297,69 @@ function MetricRow({ label, value, health, question }: { label: string; value: n
         <HealthBadge health={health} size="sm" />
       </div>
     </div>
+  );
+}
+
+// ── Mini OAP Sparkline ──────────────────────────────────────────────────────────
+function MiniSparkline({
+  reports,
+  melderId,
+}: {
+  reports: MonthlyReport[];
+  melderId: string;
+}) {
+  const vals = reports.map((r) => r.oapResult.oap);
+  const W = 68, H = 28, PAD = 2;
+  const minV = Math.min(...vals, 70);
+  const maxV = Math.max(...vals, 110);
+  const range = maxV - minV || 1;
+
+  const pts = vals.map((v, i) => {
+    const x = PAD + (vals.length > 1 ? (i / (vals.length - 1)) : 0.5) * (W - PAD * 2);
+    const y = PAD + (H - PAD * 2) - ((v - minV) / range) * (H - PAD * 2);
+    return [x, y] as [number, number];
+  });
+
+  const lastVal = vals[vals.length - 1];
+  const prevVal = vals[vals.length - 2] ?? lastVal;
+  const trending = lastVal > prevVal + 1 ? 'up' : lastVal < prevVal - 1 ? 'down' : 'flat';
+  const color = trending === 'up' ? '#10b981' : trending === 'down' ? '#ef4444' : '#94a3b8';
+
+  const linePath = pts.map(([x, y], i) => `${i === 0 ? 'M' : 'L'} ${x} ${y}`).join(' ');
+  const areaPath = [
+    ...pts.map(([x, y], i) => `${i === 0 ? 'M' : 'L'} ${x} ${y}`),
+    `L ${pts[pts.length - 1][0]} ${H - PAD}`,
+    `L ${pts[0][0]} ${H - PAD}`,
+    'Z',
+  ].join(' ');
+  const gradId = `sg-${melderId.replace(/[^a-zA-Z0-9]/g, '')}`;
+
+  return (
+    <svg width={W} height={H} aria-label={`OAP trend: ${lastVal.toFixed(1)}%`}>
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity={0.22} />
+          <stop offset="100%" stopColor={color} stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      <path d={areaPath} fill={`url(#${gradId})`} />
+      <path
+        d={linePath}
+        fill="none"
+        stroke={color}
+        strokeWidth={1.5}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+      <circle
+        cx={pts[pts.length - 1][0]}
+        cy={pts[pts.length - 1][1]}
+        r={2.5}
+        fill={color}
+        stroke="white"
+        strokeWidth={1}
+      />
+    </svg>
   );
 }
 

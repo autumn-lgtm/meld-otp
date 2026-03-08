@@ -1,13 +1,15 @@
-import { BarChart2, Calculator, Clock, Download, Home, BookOpen, CalendarDays, Settings, Upload, Users } from 'lucide-react';
+import { BarChart2, Calculator, Clock, Download, Home, BookOpen, CalendarDays, PieChart, Settings, Upload, Users, AlertTriangle, Layers } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
 const nav = [
   { to: '/',            icon: BookOpen,     label: 'Overview' },
+  { to: '/roles',       icon: Layers,       label: 'Roles & Metrics' },
   { to: '/dashboard',   icon: Home,         label: 'Dashboard' },
   { to: '/calculator',  icon: Calculator,   label: 'Calculator' },
   { to: '/melders',     icon: Users,        label: 'Melders' },
   { to: '/history',     icon: Clock,        label: 'History' },
   { to: '/trends',      icon: BarChart2,    label: 'Trends' },
+  { to: '/analytics',   icon: PieChart,     label: 'Analytics' },
   { to: '/review-2025', icon: CalendarDays, label: '2025 Review' },
   { to: '/import',      icon: Upload,       label: 'Import' },
   { to: '/export',      icon: Download,     label: 'Export' },
@@ -65,6 +67,19 @@ export function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      {/* Persistence warning */}
+      <NavLink
+        to="/export"
+        className="mx-3 mb-2 px-3 py-2.5 rounded-xl flex items-start gap-2 hover:bg-white/10 transition-all"
+        style={{ background: 'rgba(255,180,27,0.12)', border: '1px solid rgba(255,180,27,0.25)' }}
+      >
+        <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: '#FFB41B' }} />
+        <div>
+          <p className="text-xs font-semibold" style={{ color: '#FFB41B' }}>Data is browser-local</p>
+          <p className="text-xs mt-0.5" style={{ color: 'rgba(176,227,255,0.6)' }}>Export a backup to share or persist across devices.</p>
+        </div>
+      </NavLink>
 
       {/* Footer */}
       <div className="px-5 py-4 border-t border-white/10">
