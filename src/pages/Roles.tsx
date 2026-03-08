@@ -1,4 +1,4 @@
-import { Fragment, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Check, Edit2, Plus, X } from 'lucide-react';
 import type { AppStorage, MetricDefinition, Role } from '../types';
@@ -15,20 +15,16 @@ interface DeptConfig {
   light: string;
   border: string;
   textColor: string;
-  levels: string[];
 }
 
 const DEPT: Record<DeptKey, DeptConfig> = {
-  bd:  { label: 'Business Development', color: '#f59e0b', light: '#fffbeb', border: '#fde68a', textColor: '#92400e', levels: ['IC1', 'IC2', 'IC3'] },
-  bse: { label: 'Business Solutions',   color: '#8b5cf6', light: '#f5f3ff', border: '#ddd6fe', textColor: '#4c1d95', levels: ['IC1', 'IC2', 'IC3'] },
-  cs:  { label: 'Customer Success',     color: '#22c55e', light: '#f0fdf4', border: '#bbf7d0', textColor: '#14532d', levels: ['IC2', 'IC4'] },
-  css: { label: 'Customer Support',     color: '#06b6d4', light: '#ecfeff', border: '#a5f3fc', textColor: '#164e63', levels: ['IC2', 'IC4'] },
-  com: { label: 'Customer Onboarding',  color: MELD_BLUE, light: '#eff6ff', border: '#bfdbfe', textColor: '#1e3a5f', levels: ['IC2'] },
-  mkt: { label: 'Marketing',            color: '#94a3b8', light: '#f8fafc', border: '#e2e8f0', textColor: '#334155', levels: ['IC2', 'IC3', 'L4'] },
+  bd:  { label: 'Business Development', color: '#f59e0b', light: '#fffbeb', border: '#fde68a', textColor: '#92400e' },
+  bse: { label: 'Business Solutions',   color: '#8b5cf6', light: '#f5f3ff', border: '#ddd6fe', textColor: '#4c1d95' },
+  cs:  { label: 'Customer Success',     color: '#22c55e', light: '#f0fdf4', border: '#bbf7d0', textColor: '#14532d' },
+  css: { label: 'Customer Support',     color: '#06b6d4', light: '#ecfeff', border: '#a5f3fc', textColor: '#164e63' },
+  com: { label: 'Customer Onboarding',  color: MELD_BLUE, light: '#eff6ff', border: '#bfdbfe', textColor: '#1e3a5f' },
+  mkt: { label: 'Marketing',            color: '#94a3b8', light: '#f8fafc', border: '#e2e8f0', textColor: '#334155' },
 };
-
-const IC_LABELS: Record<string, string> = { IC1: 'Associate', IC2: 'Standard', IC3: 'Senior', IC4: 'Principal / MM' };
-const L_LABELS:  Record<string, string> = { L1: 'Team Lead', L2: 'Manager', L3: 'Head of', L4: 'Director' };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -79,17 +75,6 @@ function fromEditMetrics(edits: EditMetric[], originals: MetricDefinition[]): Me
       inverse: e.inverse,
     };
   });
-}
-
-// ── Level badge ──────────────────────────────────────────────────────────────
-
-function LevelBadge({ level }: { level?: string }) {
-  if (!level) return null;
-  return (
-    <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold flex-shrink-0" style={{ background: '#dbeafe', color: '#1d4ed8' }}>
-      {level}
-    </span>
-  );
 }
 
 // ── Draggable weight bar ─────────────────────────────────────────────────────
@@ -272,7 +257,6 @@ function RoleCard({
           <p className="flex-1 font-bold text-sm leading-tight min-w-0 text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
             {role.fullName || role.name}
           </p>
-          <LevelBadge level={role.level} />
           <button
             onClick={enterEdit}
             className="ml-1 p-1.5 rounded-lg opacity-25 group-hover:opacity-100 transition-all hover:scale-110 hover:bg-white/20"
@@ -333,7 +317,6 @@ function RoleCard({
         <p className="flex-1 font-bold text-sm text-white min-w-0" style={{ fontFamily: 'Poppins, sans-serif' }}>
           {role.fullName || role.name}
         </p>
-        <LevelBadge level={role.level} />
         <span className="ml-1 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-white/20 text-white/80">
           editing
         </span>
@@ -447,14 +430,6 @@ function DeptSection({ deptKey, children }: { deptKey: DeptKey; children: React.
         <span className="text-xs font-bold uppercase tracking-widest flex-shrink-0" style={{ color: d.textColor }}>
           {d.label}
         </span>
-        <div className="flex items-center gap-1 flex-shrink-0">
-          {d.levels.map((lv, i) => (
-            <Fragment key={lv}>
-              {i > 0 && <span className="text-xs text-slate-300 px-0.5">›</span>}
-              <LevelBadge level={lv} />
-            </Fragment>
-          ))}
-        </div>
         <div className="flex-1 h-px" style={{ background: d.border }} />
       </div>
       <div className="grid md:grid-cols-2 gap-4">{children}</div>
@@ -523,24 +498,6 @@ export function Roles({
             ))}
           </div>
 
-          {/* Level legend */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wide mr-1" style={{ color: 'rgba(176,227,255,0.5)' }}>IC</span>
-            {Object.entries(IC_LABELS).map(([lv, label]) => (
-              <div key={lv} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: 'rgba(255,255,255,0.1)' }}>
-                <span className="font-bold text-[10px] px-1.5 py-0.5 rounded" style={{ background: '#dbeafe', color: '#1d4ed8' }}>{lv}</span>
-                <span className="text-xs" style={{ color: '#B0E3FF' }}>{label}</span>
-              </div>
-            ))}
-            <div className="w-px h-5 mx-1 rounded-full" style={{ background: 'rgba(176,227,255,0.25)' }} />
-            <span className="text-[11px] font-semibold uppercase tracking-wide mr-1" style={{ color: 'rgba(176,227,255,0.5)' }}>Leadership</span>
-            {Object.entries(L_LABELS).map(([lv, label]) => (
-              <div key={lv} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: 'rgba(255,255,255,0.1)' }}>
-                <span className="font-bold text-[10px] px-1.5 py-0.5 rounded" style={{ background: '#dbeafe', color: '#1d4ed8' }}>{lv}</span>
-                <span className="text-xs" style={{ color: '#B0E3FF' }}>{label}</span>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 

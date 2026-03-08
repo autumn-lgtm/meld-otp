@@ -204,7 +204,7 @@ export function Intro() {
             {[
               { stat: '+20 pts', label: 'Company-wide OAP growth', sub: '~72.6% → ~93% over 2025', color: MELD_BLUE },
               { stat: '+47 pts', label: 'BD turnaround Q1 → Q4', sub: 'Story of the year', color: '#22c55e' },
-              { stat: '100%+', label: 'Customer Support annual', sub: 'Model team across Meld', color: MELD_ACCENT },
+              { stat: '100%+', label: 'Customer Support annual', sub: 'Model team across Meld', color: MELD_BLUE },
             ].map((s) => (
               <div key={s.label} className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm text-center">
                 <p className="text-4xl font-black mb-2" style={{ color: s.color, fontFamily: 'Poppins, sans-serif' }}>{s.stat}</p>
