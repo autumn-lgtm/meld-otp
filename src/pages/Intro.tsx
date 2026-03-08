@@ -79,31 +79,31 @@ export function Intro() {
 
         {/* What is OTP */}
         <Section>
-          <SectionTitle>What is the OTP System?</SectionTitle>
+          <SectionTitle>Three Numbers. One Chain.</SectionTitle>
           <p className="text-slate-500 text-base mb-6">
-            PropertyMeld built the Outcome-to-Pay (OTP) system internally — it's not derived from any market framework. It gives every Melder and their manager a shared, auditable view of three things at once:
+            PropertyMeld designed OTP from scratch — not borrowed from any external framework. The core insight: performance, pay, and market positioning aren't three separate conversations. They're a chain. OAP drives the pay conversation. CAP holds the company accountable to the plan. Ratio anchors it all to market reality. Misalign any link, and it shows up immediately.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
               {
                 icon: <TrendingUp className="w-6 h-6" />,
                 label: 'OAP%',
-                title: 'Outcome Attainment Percentage',
-                desc: 'Did the Melder hit their performance targets? Measured as a weighted average of role-specific metrics.',
+                title: 'Did they earn it?',
+                desc: 'A weighted average of role-specific outcomes — objective, transparent, no opinions. This is the Melder\'s number. It starts the conversation.',
                 color: MELD_BLUE,
               },
               {
                 icon: <Calculator className="w-6 h-6" />,
                 label: 'CAP%',
-                title: 'Compensation Attainment',
-                desc: 'Did the company pay what it planned to pay, relative to the internal comp plan? Measures system integrity.',
+                title: 'Did we pay it?',
+                desc: 'Did the company follow through on the comp plan? Below 100% means the Melder outperformed their pay — a signal that demands a response.',
                 color: '#0d4a6b',
               },
               {
                 icon: <BarChart2 className="w-6 h-6" />,
                 label: 'Ratio',
-                title: 'Compensation Ratio',
-                desc: 'How does actual pay compare to market rate? A strategic lever — intentional below-market positioning is visible here.',
+                title: 'Is it market-fair?',
+                desc: 'Actual pay vs. external market rate. Our strategic lever — some roles sit intentionally below market, and the Ratio makes that honest and visible.',
                 color: MELD_ACCENT,
               },
             ].map((card) => (
@@ -120,8 +120,8 @@ export function Intro() {
             ))}
           </div>
           <div className="mt-6 p-6 rounded-xl border-l-4 text-base" style={{ background: `${MELD_BLUE}0d`, borderColor: MELD_BLUE }}>
-            <strong style={{ color: MELD_DARK }}>Critical distinction:</strong>
-            <span className="text-slate-600"> Compensation Ratio is measured against <em>market</em>. CAP% is measured against the <em>internal plan</em>. Never conflate these.</span>
+            <strong style={{ color: MELD_DARK }}>Key distinction:</strong>
+            <span className="text-slate-600"> Ratio answers to the <em>market</em>. CAP answers to the <em>internal plan</em>. Both matter. Neither replaces the other.</span>
           </div>
         </Section>
 

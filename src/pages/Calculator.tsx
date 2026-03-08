@@ -76,37 +76,58 @@ export function Calculator({ storage, onSave }: Props) {
   const effectiveRoleId = melder?.roleId ?? overrideRoleId;
   const role = roles.find((r) => r.id === effectiveRoleId);
 
-  // Pre-fill from melder defaults, applying proration when they started in the selected month
+  // Pre-fill from saved report (if one exists for this melder+month+year), otherwise use defaults.
+  // Combines melder-defaults and role-reset logic so the report data wins over blank defaults.
   useEffect(() => {
-    if (melder) {
-      const factor = getProratedFactor(melder.startDate, month, year);
-      if (factor != null) {
-        // Start month — prorate to days worked out of monthly target (annual ÷ 12)
-        const proTarget = Math.round((melder.targetCompensation / 12) * factor);
-        const proMarket = Math.round((melder.marketRate / 12) * factor);
-        setTargetComp(proTarget > 0 ? String(proTarget) : '');
-        setMarketRate(proMarket > 0 ? String(proMarket) : '');
-      } else {
-        setTargetComp(melder.targetCompensation > 0 ? String(melder.targetCompensation) : '');
-        setMarketRate(melder.marketRate > 0 ? String(melder.marketRate) : '');
-      }
-      setOverrideRoleId('');
-    }
-  }, [melder?.id, month, year]);
+    const existingReport = melderId
+      ? storage.reports.find((r) => r.melderId === melderId && r.month === month && r.year === year)
+      : null;
 
-  // Reset metric inputs when role changes, pre-filling targets from role defaults
-  useEffect(() => {
-    if (role) {
-      const initial: Record<string, { actual: string; target: string }> = {};
-      role.metrics.forEach((m) => {
-        initial[m.id] = {
-          actual: '',
-          target: m.defaultTarget != null ? String(m.defaultTarget) : '',
-        };
-      });
-      setMetricInputs(initial);
+    if (existingReport) {
+      setActualComp(existingReport.actualCompensation > 0 ? String(existingReport.actualCompensation) : '');
+      setTargetComp(existingReport.targetCompensation > 0 ? String(existingReport.targetCompensation) : '');
+      setMarketRate(existingReport.marketRate > 0 ? String(existingReport.marketRate) : '');
+      setNotes(existingReport.notes ?? '');
+      if (role) {
+        const inputs: Record<string, { actual: string; target: string }> = {};
+        role.metrics.forEach((m) => {
+          const saved = existingReport.metricInputs[m.id];
+          inputs[m.id] = {
+            actual: saved?.actual != null && saved.actual > 0 ? String(saved.actual) : '',
+            target: saved?.target != null && saved.target > 0 ? String(saved.target) : (m.defaultTarget != null ? String(m.defaultTarget) : ''),
+          };
+        });
+        setMetricInputs(inputs);
+      }
+    } else {
+      // No saved report — fall back to melder/role defaults
+      setActualComp('');
+      if (melder) {
+        const factor = getProratedFactor(melder.startDate, month, year);
+        if (factor != null) {
+          const proTarget = Math.round((melder.targetCompensation / 12) * factor);
+          const proMarket = Math.round((melder.marketRate / 12) * factor);
+          setTargetComp(proTarget > 0 ? String(proTarget) : '');
+          setMarketRate(proMarket > 0 ? String(proMarket) : '');
+        } else {
+          setTargetComp(melder.targetCompensation > 0 ? String(melder.targetCompensation) : '');
+          setMarketRate(melder.marketRate > 0 ? String(melder.marketRate) : '');
+        }
+        setOverrideRoleId('');
+      }
+      if (role) {
+        const initial: Record<string, { actual: string; target: string }> = {};
+        role.metrics.forEach((m) => {
+          initial[m.id] = {
+            actual: '',
+            target: m.defaultTarget != null ? String(m.defaultTarget) : '',
+          };
+        });
+        setMetricInputs(initial);
+      }
     }
-  }, [role?.id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [melderId, month, year, role?.id]);
 
   const numInputs = useMemo(() => {
     const parsed: Record<string, { actual: number; target: number }> = {};
@@ -531,66 +552,132 @@ function NumField({ label, value, onChange, placeholder }: { label: string; valu
 // ─── Printable Report ────────────────────────────────────────────────────────
 
 function PrintableReport({ report }: { report: ReturnType<typeof buildReport> }) {
-  const healthLabel = { red: 'Low', yellow: 'Moderate', green: 'High', blue: 'Above Market' };
-  const healthBg = { red: '#fef2f2', yellow: '#fefce8', green: '#f0fdf4', blue: '#eff6ff' };
-  const healthBorder = { red: '#f87171', yellow: '#fbbf24', green: '#34d399', blue: '#60a5fa' };
-  const healthText = { red: '#b91c1c', yellow: '#92400e', green: '#065f46', blue: '#1e40af' };
+  const healthLabel  = { red: 'Low',      yellow: 'Moderate', green: 'High',    blue: 'Above Market' };
+  const healthBg     = { red: '#fef2f2',  yellow: '#fffbeb',  green: '#f0fdf4', blue: '#e8f4ff'  };
+  const healthBorder = { red: '#fca5a5',  yellow: '#fcd34d',  green: '#6ee7b7', blue: '#60aff5'  };
+  const healthText   = { red: '#b91c1c',  yellow: '#92400e',  green: '#065f46', blue: '#1175CC'  };
 
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', color: '#1e293b' }}>
-      {/* Header */}
-      <div style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', borderRadius: 16, padding: '32px', marginBottom: 24, color: 'white' }}>
-        <p style={{ opacity: 0.7, fontSize: 12, marginBottom: 4 }}>OUTCOME-TO-PAY REPORT · Property Meld</p>
-        <h1 style={{ fontSize: 28, fontWeight: 900, margin: 0 }}>{report.melderName}</h1>
-        <p style={{ opacity: 0.8, marginTop: 4 }}>{report.roleId} · {MONTHS[report.month - 1]} {report.year}</p>
+    <div style={{ fontFamily: "'Inter', system-ui, sans-serif", color: '#022935', background: '#f8fafc' }}>
+      {/* ── Header ── */}
+      <div style={{
+        background: 'linear-gradient(135deg, #022935 0%, #1175CC 100%)',
+        borderRadius: 16,
+        padding: '28px 32px 24px',
+        marginBottom: 20,
+        color: 'white',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-end',
+      }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+            <div style={{
+              width: 28, height: 28, borderRadius: 7,
+              background: '#FFB41B',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontWeight: 900, fontSize: 13, color: '#022935',
+            }}>M</div>
+            <span style={{ fontWeight: 800, fontSize: 14, letterSpacing: 0.4, opacity: 0.9 }}>Property Meld</span>
+          </div>
+          <h1 style={{ fontSize: 30, fontWeight: 900, margin: 0, letterSpacing: -0.5 }}>{report.melderName}</h1>
+          <p style={{ margin: '6px 0 0', opacity: 0.75, fontSize: 13, fontWeight: 500 }}>
+            {report.roleId} &nbsp;·&nbsp; {MONTHS[report.month - 1]} {report.year}
+          </p>
+        </div>
+        <div style={{
+          background: 'rgba(255,255,255,0.12)',
+          borderRadius: 10,
+          padding: '8px 16px',
+          fontSize: 11,
+          fontWeight: 700,
+          letterSpacing: 1,
+          textTransform: 'uppercase' as const,
+          opacity: 0.85,
+        }}>
+          OTP Report
+        </div>
       </div>
 
-      {/* Metric Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 24 }}>
+      {/* ── Metric Cards ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, marginBottom: 20 }}>
         {[
-          { title: 'OAP', q: 'Did we deliver to the plan?', value: report.oapResult.oap, health: report.oapResult.health },
-          { title: 'CAP', q: 'Did pay reflect delivery?', value: report.capResult.cap, health: report.capResult.health },
-          { title: 'Ratio', q: 'Competitive vs. market?', value: report.ratioResult.ratio, health: report.ratioResult.health },
+          { title: 'Outcome Attainment (OAP)',      q: 'Did we deliver to the plan?',      value: report.oapResult.oap,     health: report.oapResult.health },
+          { title: 'Compensation Attainment (CAP)', q: 'Did pay reflect that delivery?',   value: report.capResult.cap,     health: report.capResult.health },
+          { title: 'Compensation Ratio',            q: 'Competitive vs. market?',          value: report.ratioResult.ratio, health: report.ratioResult.health },
         ].map((m) => (
-          <div key={m.title} style={{ background: healthBg[m.health], border: `2px solid ${healthBorder[m.health]}`, borderRadius: 12, padding: 20 }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: healthText[m.health], textTransform: 'uppercase', letterSpacing: 1, margin: 0 }}>{m.title}</p>
-            <p style={{ fontSize: 11, color: healthText[m.health], opacity: 0.7, margin: '4px 0 8px' }}>{m.q}</p>
-            <p style={{ fontSize: 36, fontWeight: 900, color: healthText[m.health], margin: 0 }}>{m.value.toFixed(1)}%</p>
-            <p style={{ fontSize: 12, color: healthText[m.health], margin: '4px 0 0' }}>{healthLabel[m.health]}</p>
+          <div key={m.title} style={{
+            background: healthBg[m.health],
+            border: `1.5px solid ${healthBorder[m.health]}`,
+            borderRadius: 12,
+            padding: '18px 20px',
+          }}>
+            <p style={{ fontSize: 10, fontWeight: 800, color: healthText[m.health], textTransform: 'uppercase' as const, letterSpacing: 1, margin: 0 }}>{m.title}</p>
+            <p style={{ fontSize: 11, color: healthText[m.health], opacity: 0.65, margin: '3px 0 10px' }}>{m.q}</p>
+            <p style={{ fontSize: 34, fontWeight: 900, color: healthText[m.health], margin: 0, letterSpacing: -1 }}>{m.value.toFixed(1)}%</p>
+            <div style={{
+              display: 'inline-block', marginTop: 8,
+              padding: '2px 10px', borderRadius: 20,
+              background: healthBorder[m.health],
+              fontSize: 11, fontWeight: 700, color: healthText[m.health],
+            }}>{healthLabel[m.health]}</div>
           </div>
         ))}
       </div>
 
-      {/* OAP Detail */}
-      <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 12, padding: 20, marginBottom: 16 }}>
-        <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 700 }}>Outcome Breakdown</h3>
-        {report.oapResult.metricResults.map((r) => (
-          <div key={r.metricId} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f1f5f9', fontSize: 13 }}>
-            <span style={{ color: '#64748b' }}>{r.metricName} ({(r.weight * 100).toFixed(0)}%)</span>
-            <span style={{ fontWeight: 600 }}>{r.attainmentPct.toFixed(1)}% attainment → +{r.weightedContribution.toFixed(1)}%</span>
+      {/* ── Outcome Breakdown ── */}
+      <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 12, padding: '18px 20px', marginBottom: 14 }}>
+        <h3 style={{ margin: '0 0 12px', fontSize: 11, fontWeight: 800, color: '#022935', textTransform: 'uppercase' as const, letterSpacing: 1 }}>Outcome Breakdown</h3>
+        {report.oapResult.metricResults.map((r, i) => (
+          <div key={r.metricId} style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            padding: '9px 0',
+            borderBottom: i < report.oapResult.metricResults.length - 1 ? '1px solid #f1f5f9' : 'none',
+            fontSize: 13,
+          }}>
+            <span style={{ color: '#475569' }}>
+              <strong style={{ color: '#022935' }}>{r.abbreviation}</strong>
+              {' '}<span style={{ color: '#94a3b8', fontSize: 12 }}>({(r.weight * 100).toFixed(0)}%)</span>
+              {' · '}{r.metricName}
+            </span>
+            <span style={{ fontWeight: 700, color: '#1175CC', whiteSpace: 'nowrap' as const }}>
+              {r.attainmentPct.toFixed(1)}% attainment &nbsp;·&nbsp; +{r.weightedContribution.toFixed(1)}%
+            </span>
           </div>
         ))}
       </div>
 
-      {/* Alerts */}
+      {/* ── Alerts ── */}
       {report.alerts.length > 0 && (
-        <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 12, padding: 20, marginBottom: 16 }}>
-          <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 700 }}>Recommendations</h3>
-          {report.alerts.map((a, i) => (
-            <div key={i} style={{ marginBottom: 10, padding: '10px 14px', background: a.severity === 'critical' ? '#fef2f2' : a.severity === 'warning' ? '#fffbeb' : '#eff6ff', borderRadius: 8, fontSize: 13 }}>
-              <p style={{ fontWeight: 600, margin: '0 0 4px', color: a.severity === 'critical' ? '#b91c1c' : a.severity === 'warning' ? '#92400e' : '#1d4ed8' }}>{a.title}</p>
-              <p style={{ margin: 0, opacity: 0.8, color: a.severity === 'critical' ? '#b91c1c' : a.severity === 'warning' ? '#92400e' : '#1d4ed8' }}>{a.description}</p>
-            </div>
-          ))}
+        <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 12, padding: '18px 20px', marginBottom: 14 }}>
+          <h3 style={{ margin: '0 0 12px', fontSize: 11, fontWeight: 800, color: '#022935', textTransform: 'uppercase' as const, letterSpacing: 1 }}>Recommendations</h3>
+          {report.alerts.map((a, i) => {
+            const bg     = a.severity === 'critical' ? '#fef2f2' : a.severity === 'warning' ? '#fffbeb' : '#e8f4ff';
+            const border = a.severity === 'critical' ? '#fca5a5' : a.severity === 'warning' ? '#fcd34d' : '#93c5fd';
+            const text   = a.severity === 'critical' ? '#b91c1c' : a.severity === 'warning' ? '#92400e' : '#1175CC';
+            return (
+              <div key={i} style={{ marginBottom: 10, padding: '10px 14px', background: bg, border: `1px solid ${border}`, borderRadius: 8, fontSize: 13 }}>
+                <p style={{ fontWeight: 700, margin: '0 0 3px', color: text }}>{a.title}</p>
+                <p style={{ margin: 0, color: text, opacity: 0.8 }}>{a.description}</p>
+              </div>
+            );
+          })}
         </div>
       )}
 
+      {/* ── Notes ── */}
       {report.notes && (
-        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: 20 }}>
-          <h3 style={{ margin: '0 0 8px', fontSize: 14, fontWeight: 700 }}>Notes</h3>
-          <p style={{ margin: 0, fontSize: 13, color: '#475569' }}>{report.notes}</p>
+        <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 12, padding: '18px 20px', marginBottom: 14 }}>
+          <h3 style={{ margin: '0 0 8px', fontSize: 11, fontWeight: 800, color: '#022935', textTransform: 'uppercase' as const, letterSpacing: 1 }}>Notes</h3>
+          <p style={{ margin: 0, fontSize: 13, color: '#475569', lineHeight: 1.6 }}>{report.notes}</p>
         </div>
       )}
+
+      {/* ── Footer ── */}
+      <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#94a3b8' }}>
+        <span>Property Meld · Outcome-to-Pay Report</span>
+        <span>Generated {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+      </div>
     </div>
   );
 }
