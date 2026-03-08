@@ -3,10 +3,10 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { HealthBadge } from '../components/shared/HealthBadge';
 import { Header } from '../components/layout/Header';
-import type { AppStorage, HealthColor, Melder, MonthlyReport } from '../types';
+import type { AnnualSnapshot, AppStorage, HealthColor, Melder, MonthlyReport } from '../types';
 import { MONTHS } from '../types';
 import { aggregateTeamReports, fmtPct } from '../utils/calculations';
-import { deleteMelder, saveMelder } from '../utils/storage';
+import { deleteMelder, saveAnnualSnapshot, saveMelder } from '../utils/storage';
 
 interface Props {
   storage: AppStorage;
@@ -46,10 +46,20 @@ function StatCard({ label, value, sub, color }: { label: string; value: string; 
 const healthRank: Record<HealthColor, number> = { red: 0, yellow: 1, green: 2, blue: 3 };
 
 export function Dashboard({ storage, onSave }: Props) {
-  const { melders, reports, roles } = storage;
+  const { melders, reports, roles, annualSnapshots } = storage;
   const [editingMelder, setEditingMelder] = useState<Melder | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [editingSnapshot, setEditingSnapshot] = useState<AnnualSnapshot | null>(null);
   const [form, setForm] = useState<MelderForm>({ name: '', roleId: '', email: '', targetCompensation: '', marketRate: '' });
+
+  // Map snapshot by lowercased name for fast lookup (last snapshot wins if duplicate names)
+  const snapshotByName = useMemo(() => {
+    const map = new Map<string, AnnualSnapshot>();
+    for (const s of annualSnapshots) {
+      map.set(s.name.toLowerCase().trim(), s);
+    }
+    return map;
+  }, [annualSnapshots]);
 
   function openEdit(melder: Melder) {
     setEditingMelder(melder);
@@ -239,6 +249,7 @@ export function Dashboard({ storage, onSave }: Props) {
               .filter((r) => r.melderId === melder.id)
               .sort((a, b) => a.year - b.year || a.month - b.month)
               .slice(-6);
+            const snapshot = snapshotByName.get(melder.name.toLowerCase().trim());
             return (
               <MelderCard
                 key={melder.id}
@@ -246,8 +257,10 @@ export function Dashboard({ storage, onSave }: Props) {
                 report={report}
                 roleName={roleMap[melder.roleId] ?? melder.roleId}
                 sparkReports={melderHistory}
+                snapshot={snapshot}
                 onEdit={() => openEdit(melder)}
                 onDelete={() => setDeleteConfirm(melder.id)}
+                onEditSnapshot={() => snapshot && setEditingSnapshot(snapshot)}
               />
             );
           })}
@@ -302,6 +315,18 @@ export function Dashboard({ storage, onSave }: Props) {
         </div>
       )}
 
+      {/* Quarterly OA Edit Modal */}
+      {editingSnapshot && (
+        <QuarterlyEditModal
+          snapshot={editingSnapshot}
+          onSave={(updated) => {
+            onSave((s) => saveAnnualSnapshot(s, updated));
+            setEditingSnapshot(null);
+          }}
+          onClose={() => setEditingSnapshot(null)}
+        />
+      )}
+
       {/* Delete Confirm */}
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
@@ -336,15 +361,19 @@ function MelderCard({
   report,
   roleName,
   sparkReports,
+  snapshot,
   onEdit,
   onDelete,
+  onEditSnapshot,
 }: {
   melder: Melder;
   report?: MonthlyReport;
   roleName: string;
   sparkReports: MonthlyReport[];
+  snapshot?: AnnualSnapshot;
   onEdit: () => void;
   onDelete: () => void;
+  onEditSnapshot: () => void;
 }) {
   const monthLabel = report ? `${MONTHS[report.month - 1]} ${report.year}` : null;
 
@@ -420,6 +449,11 @@ function MelderCard({
           </Link>
         </div>
       )}
+
+      {/* 2025 Annual Snapshot */}
+      {snapshot && (
+        <AnnualSnapshotPanel snapshot={snapshot} onEdit={onEditSnapshot} />
+      )}
     </div>
   );
 }
@@ -434,6 +468,192 @@ function MetricRow({ label, value, health, question }: { label: string; value: n
       <div className="flex items-center gap-2">
         <span className="font-bold text-slate-900 text-sm">{value.toFixed(1)}%</span>
         <HealthBadge health={health} size="sm" />
+      </div>
+    </div>
+  );
+}
+
+// ── Annual Snapshot Panel ────────────────────────────────────────────────────────
+
+const QTR_COLORS = {
+  good:  { bar: '#22c55e', text: '#16a34a' },
+  ok:    { bar: '#f59e0b', text: '#b45309' },
+  low:   { bar: '#ef4444', text: '#b91c1c' },
+  none:  { bar: '#e2e8f0', text: '#94a3b8' },
+};
+
+function qtrColor(v: number | null) {
+  if (v === null) return QTR_COLORS.none;
+  if (v >= 100) return QTR_COLORS.good;
+  if (v >= 85)  return QTR_COLORS.ok;
+  return QTR_COLORS.low;
+}
+
+function fmt$(n: number | null) {
+  if (n === null) return '—';
+  return '$' + (n >= 1000 ? (n / 1000).toFixed(0) + 'k' : n.toFixed(0));
+}
+
+function AnnualSnapshotPanel({ snapshot, onEdit }: { snapshot: AnnualSnapshot; onEdit: () => void }) {
+  const qtrs: { label: string; val: number | null }[] = [
+    { label: 'Q1', val: snapshot.q1Oa },
+    { label: 'Q2', val: snapshot.q2Oa },
+    { label: 'Q3', val: snapshot.q3Oa },
+    { label: 'Q4', val: snapshot.q4Oa },
+  ];
+  const maxVal = Math.max(...qtrs.map((q) => q.val ?? 0), 130);
+
+  return (
+    <div className="border-t border-slate-100 px-5 py-4 bg-slate-50/60">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+            {snapshot.year} Annual
+          </span>
+          {snapshot.team && (
+            <span className="text-[10px] text-slate-300">· {snapshot.team}</span>
+          )}
+        </div>
+        <button
+          onClick={onEdit}
+          className="text-[10px] font-semibold text-[#1175CC] hover:underline"
+          title="Update quarterly OA"
+        >
+          Update Quarter
+        </button>
+      </div>
+
+      {/* Quarterly OA bars */}
+      <div className="grid grid-cols-4 gap-2 mb-3">
+        {qtrs.map((q) => {
+          const col = qtrColor(q.val);
+          const pct = q.val !== null ? Math.min((q.val / maxVal) * 100, 100) : 0;
+          return (
+            <div key={q.label} className="flex flex-col items-center gap-1">
+              <div className="w-full h-10 bg-slate-200 rounded-md overflow-hidden flex items-end">
+                <div
+                  className="w-full rounded-md transition-all"
+                  style={{ height: q.val !== null ? `${pct}%` : '100%', background: col.bar, opacity: q.val !== null ? 1 : 0.25 }}
+                />
+              </div>
+              <span className="text-[10px] font-bold" style={{ color: col.text }}>
+                {q.val !== null ? `${q.val.toFixed(0)}%` : '—'}
+              </span>
+              <span className="text-[9px] text-slate-400 font-medium">{q.label}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Key metrics row */}
+      <div className="grid grid-cols-3 gap-2 text-center">
+        {[
+          { label: 'OAP', value: snapshot.oaPct !== null ? `${snapshot.oaPct.toFixed(1)}%` : '—' },
+          { label: 'CAP', value: snapshot.capPct !== null ? `${snapshot.capPct.toFixed(1)}%` : '—' },
+          { label: 'Ratio', value: snapshot.compRatio !== null ? `${snapshot.compRatio.toFixed(1)}%` : '—' },
+        ].map((m) => (
+          <div key={m.label} className="bg-white rounded-lg px-2 py-1.5 border border-slate-100">
+            <p className="text-[9px] font-bold uppercase tracking-wide text-slate-400">{m.label}</p>
+            <p className="text-xs font-bold text-slate-800 mt-0.5">{m.value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Compensation detail */}
+      {(snapshot.currentSalary !== null || snapshot.marketSalary !== null) && (
+        <div className="mt-2 flex gap-2 text-[10px] text-slate-500">
+          {snapshot.currentSalary !== null && (
+            <span>Salary <strong className="text-slate-700">{fmt$(snapshot.currentSalary)}</strong></span>
+          )}
+          {snapshot.marketSalary !== null && (
+            <span className="ml-auto">Market <strong className="text-slate-700">{fmt$(snapshot.marketSalary)}</strong></span>
+          )}
+        </div>
+      )}
+      {snapshot.level && (
+        <div className="mt-1 text-[10px] text-slate-400">
+          Level <strong className="text-slate-600">{snapshot.level}</strong>
+          {snapshot.tenure && <> · Tenure <strong className="text-slate-600">{snapshot.tenure}</strong></>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Quarterly Edit Modal ─────────────────────────────────────────────────────────
+
+function QuarterlyEditModal({
+  snapshot,
+  onSave,
+  onClose,
+}: {
+  snapshot: AnnualSnapshot;
+  onSave: (updated: AnnualSnapshot) => void;
+  onClose: () => void;
+}) {
+  const [q1, setQ1] = useState(snapshot.q1Oa !== null ? String(snapshot.q1Oa) : '');
+  const [q2, setQ2] = useState(snapshot.q2Oa !== null ? String(snapshot.q2Oa) : '');
+  const [q3, setQ3] = useState(snapshot.q3Oa !== null ? String(snapshot.q3Oa) : '');
+  const [q4, setQ4] = useState(snapshot.q4Oa !== null ? String(snapshot.q4Oa) : '');
+
+  function toNum(s: string): number | null {
+    const n = parseFloat(s);
+    return isNaN(n) ? null : n;
+  }
+
+  function handleSave() {
+    const updated: AnnualSnapshot = {
+      ...snapshot,
+      q1Oa: toNum(q1),
+      q2Oa: toNum(q2),
+      q3Oa: toNum(q3),
+      q4Oa: toNum(q4),
+      // Recalculate annual OAP as average of available quarters
+      oaPct: (() => {
+        const vals = [toNum(q1), toNum(q2), toNum(q3), toNum(q4)].filter((v): v is number => v !== null);
+        return vals.length > 0 ? vals.reduce((s, v) => s + v, 0) / vals.length : snapshot.oaPct;
+      })(),
+    };
+    onSave(updated);
+  }
+
+  const qFields = [
+    { label: 'Q1 OA%', val: q1, set: setQ1 },
+    { label: 'Q2 OA%', val: q2, set: setQ2 },
+    { label: 'Q3 OA%', val: q3, set: setQ3 },
+    { label: 'Q4 OA%', val: q4, set: setQ4 },
+  ];
+
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+          <div>
+            <h2 className="font-bold text-slate-900 text-sm">{snapshot.name}</h2>
+            <p className="text-xs text-slate-400">{snapshot.year} · {snapshot.team} — Update Quarterly OA</p>
+          </div>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X className="w-5 h-5" /></button>
+        </div>
+        <div className="px-6 py-5 grid grid-cols-2 gap-4">
+          {qFields.map((f) => (
+            <div key={f.label}>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{f.label}</label>
+              <input
+                type="number"
+                value={f.val}
+                onChange={(e) => f.set(e.target.value)}
+                placeholder="—"
+                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1175CC]"
+              />
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-end gap-3 px-6 py-4 border-t border-slate-100">
+          <button onClick={onClose} className="px-4 py-2 text-sm text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200">Cancel</button>
+          <button onClick={handleSave} className="px-5 py-2 text-sm font-medium text-white bg-[#1175CC] rounded-xl hover:bg-[#0d62b0]">
+            Save Quarter
+          </button>
+        </div>
       </div>
     </div>
   );

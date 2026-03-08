@@ -116,12 +116,38 @@ export interface Alert {
   description: string;
 }
 
+// ─── Annual Performance Snapshot ──────────────────────────────────────────────
+
+export interface AnnualSnapshot {
+  id: string;                        // unique: slugified `${year}-${team}-${name}`
+  year: number;
+  team: string;
+  name: string;
+  level: string | null;
+  tenure: string | null;
+  oaPct: number | null;
+  capPct: number | null;
+  compRatio: number | null;
+  currentSalary: number | null;
+  marketSalary: number | null;
+  totalCashTargetMarket: number | null;
+  totalCashActualMeld: number | null;
+  ytdCashTarget: number | null;
+  ytdCashPaid: number | null;
+  annualCashPaid: number | null;
+  q1Oa: number | null;
+  q2Oa: number | null;
+  q3Oa: number | null;
+  q4Oa: number | null;
+}
+
 // ─── Storage Shape ─────────────────────────────────────────────────────────────
 
 export interface AppStorage {
   melders: Melder[];
   reports: MonthlyReport[];
   roles: Role[];
+  annualSnapshots: AnnualSnapshot[];
   version: number;
 }
 

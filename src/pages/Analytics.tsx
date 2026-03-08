@@ -20,7 +20,6 @@ interface Props {
 
 type PeriodFilter = '3' | '6' | '12' | 'all';
 type SortKey = 'name' | 'oap' | 'cap' | 'ratio';
-type ViewTab = 'summary' | 'charts' | 'roster';
 
 // ─── Brand tokens ────────────────────────────────────────────────────────────
 const MELD_BLUE = '#1175CC';
@@ -46,7 +45,6 @@ const HEALTH_LABEL: Record<HealthColor, string> = {
 export function Analytics({ storage }: Props) {
   const { melders, reports, roles } = storage;
   const [period, setPeriod] = useState<PeriodFilter>('all');
-  const [tab, setTab] = useState<ViewTab>('summary');
   const [sortKey, setSortKey] = useState<SortKey>('oap');
   const [sortAsc, setSortAsc] = useState(false);
 
@@ -161,12 +159,6 @@ export function Analytics({ storage }: Props) {
     else { setSortKey(key); setSortAsc(false); }
   }
 
-  const TABS: { key: ViewTab; label: string }[] = [
-    { key: 'summary', label: 'Summary' },
-    { key: 'charts',  label: 'Charts' },
-    { key: 'roster',  label: 'Roster' },
-  ];
-
   return (
     <div className="min-h-screen" style={{ background: '#F1F1F1' }}>
 
@@ -237,66 +229,45 @@ export function Analytics({ storage }: Props) {
             </div>
           )}
 
-          {/* View tabs */}
-          <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: 'rgba(255,255,255,0.12)' }}>
-            {TABS.map((t) => (
-              <button
-                key={t.key}
-                onClick={() => setTab(t.key)}
-                className="px-4 py-1.5 text-xs font-semibold rounded-lg transition-all"
-                style={tab === t.key
-                  ? { background: 'white', color: MELD_DARK }
-                  : { color: 'rgba(176,227,255,0.65)' }
-                }
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
 
       {/* ── Body ── */}
-      <div className="max-w-6xl mx-auto px-8 py-8">
+      <div className="max-w-6xl mx-auto px-8 py-8 space-y-6">
 
-        {tab === 'summary' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
-              <div className="xl:col-span-2">
-                <HealthDistributionBars dist={healthDist} total={latestByMelder.length} />
-              </div>
-              <div className="xl:col-span-3">
-                <RolePerformanceTable roles={rolePerf} />
-              </div>
-            </div>
-            {monthlyTrends.length >= 2 && (
-              <TeamTrendChart trends={monthlyTrends} />
-            )}
+        {/* Row 1: Health distribution + Role table */}
+        <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
+          <div className="xl:col-span-2">
+            <HealthDistributionBars dist={healthDist} total={latestByMelder.length} />
           </div>
-        )}
-
-        {tab === 'charts' && (
-          <div className="space-y-6">
-            <MelderBarChart reports={latestByMelder} melderMap={melderMap} />
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-              <OAPvsCAPScatter reports={latestByMelder} melderMap={melderMap} />
-              <RoleBarChart roles={rolePerf} />
-            </div>
-            {monthlyTrends.length >= 2 && (
-              <TeamTrendChart trends={monthlyTrends} />
-            )}
+          <div className="xl:col-span-3">
+            <RolePerformanceTable roles={rolePerf} />
           </div>
+        </div>
+
+        {/* Row 2: Melder bar chart (full width) */}
+        <MelderBarChart reports={latestByMelder} melderMap={melderMap} />
+
+        {/* Row 3: Scatter + Role bar chart */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+          <OAPvsCAPScatter reports={latestByMelder} melderMap={melderMap} />
+          <RoleBarChart roles={rolePerf} />
+        </div>
+
+        {/* Row 4: Trend chart (always render; single-point is fine) */}
+        {monthlyTrends.length >= 1 && (
+          <TeamTrendChart trends={monthlyTrends} />
         )}
 
-        {tab === 'roster' && (
-          <MelderRoster
-            reports={sortedRoster}
-            melderMap={melderMap}
-            sortKey={sortKey}
-            sortAsc={sortAsc}
-            onSort={toggleSort}
-          />
-        )}
+        {/* Row 5: Full melder roster */}
+        <MelderRoster
+          reports={sortedRoster}
+          melderMap={melderMap}
+          sortKey={sortKey}
+          sortAsc={sortAsc}
+          onSort={toggleSort}
+        />
+
       </div>
     </div>
   );
@@ -437,8 +408,8 @@ function RolePerformanceTable({ roles }: { roles: Array<{ roleId: string; roleNa
           {roles.map((role) => (
             <tr key={role.roleId} className="border-b border-slate-50 hover:bg-slate-50/50">
               <td className="px-5 py-3">
-                <p className="font-semibold text-slate-800 text-xs">{role.roleId}</p>
-                <p className="text-[10px] text-slate-400 truncate max-w-[160px]">{role.roleName !== role.roleId ? role.roleName : ''}</p>
+                <p className="font-semibold text-slate-800 text-sm leading-tight">{role.roleName !== role.roleId ? role.roleName : role.roleId}</p>
+                <p className="text-[10px] text-slate-400 mt-0.5 font-mono">{role.roleId}</p>
               </td>
               <td className="px-4 py-3 text-right text-slate-400 text-xs">{role.count}</td>
               <td className="px-4 py-3 text-right"><HealthBadge health={getOAPHealth(role.avgOAP)}   label={fmtPct(role.avgOAP)}   size="sm" /></td>
@@ -770,13 +741,23 @@ function RoleBarChart({ roles }: { roles: Array<{ roleId: string; roleName: stri
                   );
                 })}
                 {/* Role label */}
-                <text
-                  x={cx} y={PAD_T + CHART_H + 14}
-                  textAnchor="middle" fontSize={9} fontWeight={600} fill="#475569"
-                >
-                  {role.roleId}
-                </text>
-                <text x={cx} y={PAD_T + CHART_H + 26} textAnchor="middle" fontSize={8} fill="#94a3b8">
+                {(role.roleName !== role.roleId ? role.roleName : role.roleId)
+                  .split(' / ').join('\n').split(' ')
+                  .reduce<string[][]>((lines, word) => {
+                    const last = lines[lines.length - 1];
+                    if (last.join(' ').length + word.length < 14) last.push(word);
+                    else lines.push([word]);
+                    return lines;
+                  }, [[]])
+                  .slice(0, 2)
+                  .map((words, li) => (
+                    <text key={li} x={cx} y={PAD_T + CHART_H + 14 + li * 11}
+                      textAnchor="middle" fontSize={8} fontWeight={600} fill="#475569">
+                      {words.join(' ')}
+                    </text>
+                  ))
+                }
+                <text x={cx} y={PAD_T + CHART_H + 38} textAnchor="middle" fontSize={8} fill="#94a3b8">
                   n={role.count}
                 </text>
               </g>

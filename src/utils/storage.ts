@@ -1,6 +1,7 @@
-import type { AppStorage, Melder, MonthlyReport, Role } from '../types';
+import type { AnnualSnapshot, AppStorage, Melder, MonthlyReport, Role } from '../types';
 import { DEFAULT_MELDERS } from '../data/melders';
 import { DEFAULT_ROLES } from '../data/roles';
+import { SEED_2025_ANNUAL } from '../data/seed2025annual';
 
 const STORAGE_KEY = 'meld-otp-v1';
 const CURRENT_VERSION = 1;
@@ -10,6 +11,7 @@ function getDefaultStorage(): AppStorage {
     melders: DEFAULT_MELDERS,
     reports: [],
     roles: DEFAULT_ROLES,
+    annualSnapshots: SEED_2025_ANNUAL,
     version: CURRENT_VERSION,
   };
 }
@@ -26,6 +28,8 @@ export function loadStorage(): AppStorage {
       if (!defaultRole || role.isCustom) return role;
       return {
         ...role,
+        name: defaultRole.name,
+        fullName: defaultRole.fullName,
         metrics: role.metrics.map((metric) => {
           if (metric.targetDisplay) return metric;
           const defaultMetric = defaultRole.metrics.find((m) => m.id === metric.id);
@@ -34,7 +38,9 @@ export function loadStorage(): AppStorage {
       };
     });
     const melders = parsed.melders.length === 0 ? DEFAULT_MELDERS : parsed.melders;
-    return { ...parsed, melders, roles: [...missingDefaults, ...mergedRoles] };
+    // Seed annual snapshots if not yet stored
+    const annualSnapshots: AnnualSnapshot[] = parsed.annualSnapshots ?? SEED_2025_ANNUAL;
+    return { ...parsed, melders, roles: [...missingDefaults, ...mergedRoles], annualSnapshots };
   } catch {
     return getDefaultStorage();
   }
@@ -95,6 +101,17 @@ export function saveRole(storage: AppStorage, role: Role): AppStorage {
 
 export function deleteRole(storage: AppStorage, roleId: string): AppStorage {
   return { ...storage, roles: storage.roles.filter((r) => r.id !== roleId) };
+}
+
+// ─── Annual Snapshot CRUD ────────────────────────────────────────────────────
+
+export function saveAnnualSnapshot(storage: AppStorage, snapshot: AnnualSnapshot): AppStorage {
+  const existing = storage.annualSnapshots.findIndex((s) => s.id === snapshot.id);
+  const annualSnapshots =
+    existing >= 0
+      ? storage.annualSnapshots.map((s) => (s.id === snapshot.id ? snapshot : s))
+      : [...storage.annualSnapshots, snapshot];
+  return { ...storage, annualSnapshots };
 }
 
 // ─── JSON Export/Import ─────────────────────────────────────────────────────
