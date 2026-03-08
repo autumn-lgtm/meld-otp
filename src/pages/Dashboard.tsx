@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowDownRight, ArrowUpRight, Calculator, Edit2, PieChart, Plus, Trash2, TrendingUp, Users, X } from 'lucide-react';
+import { AlertTriangle, ArrowDownRight, ArrowUpRight, Calculator, Edit2, Eye, EyeOff, PieChart, Plus, Trash2, TrendingUp, Users, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { HealthBadge } from '../components/shared/HealthBadge';
@@ -51,6 +51,7 @@ export function Dashboard({ storage, onSave }: Props) {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [editingSnapshot, setEditingSnapshot] = useState<AnnualSnapshot | null>(null);
   const [form, setForm] = useState<MelderForm>({ name: '', roleId: '', email: '', targetCompensation: '', marketRate: '' });
+  const [showSalary, setShowSalary] = useState(false);
 
   // Map snapshot by lowercased name for fast lookup (last snapshot wins if duplicate names)
   const snapshotByName = useMemo(() => {
@@ -123,6 +124,16 @@ export function Dashboard({ storage, onSave }: Props) {
   }, [reports]);
 
   const roleMap = Object.fromEntries(roles.map((r) => [r.id, r.fullName]));
+
+  const snapshotGroups = useMemo(() => {
+    const filtered = annualSnapshots.filter((s) => s.name !== 'Aaron Seaholm');
+    const groups = new Map<string, AnnualSnapshot[]>();
+    for (const s of filtered) {
+      if (!groups.has(s.team)) groups.set(s.team, []);
+      groups.get(s.team)!.push(s);
+    }
+    return Array.from(groups.entries());
+  }, [annualSnapshots]);
 
   // Sort melders: by worst health first
   const sortedMelders = useMemo(() => {
@@ -264,6 +275,39 @@ export function Dashboard({ storage, onSave }: Props) {
               />
             );
           })}
+        </div>
+      )}
+
+      {/* 2025 Annual Review — Snapshot Cards */}
+      {snapshotGroups.length > 0 && (
+        <div className="mt-10">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">2025 Annual Review</h2>
+              <p className="text-sm text-slate-400">All Melders — quarterly performance &amp; compensation</p>
+            </div>
+            <button
+              onClick={() => setShowSalary((v) => !v)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              {showSalary ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+              {showSalary ? 'Hide Salary' : 'Show Salary'}
+            </button>
+          </div>
+          {snapshotGroups.map(([team, snaps]) => (
+            <div key={team} className="mb-8">
+              <div className="flex items-center gap-3 mb-3">
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">{team}</h3>
+                <div className="flex-1 h-px bg-slate-100" />
+                <span className="text-xs text-slate-300 font-medium">{snaps.length}</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {snaps.map((s) => (
+                  <SnapshotCard key={s.id} snapshot={s} showSalary={showSalary} />
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -719,6 +763,134 @@ function MiniSparkline({
         strokeWidth={1}
       />
     </svg>
+  );
+}
+
+// ── Snapshot Card (2025 Annual Review) ──────────────────────────────────────────
+
+function getActivityStatus(s: AnnualSnapshot) {
+  const qtrs = [s.q1Oa, s.q2Oa, s.q3Oa, s.q4Oa];
+  let firstNonNull = -1, lastNonNull = -1;
+  for (let i = 0; i < 4; i++) {
+    if (qtrs[i] !== null) {
+      if (firstNonNull === -1) firstNonNull = i;
+      lastNonNull = i;
+    }
+  }
+  if (firstNonNull === -1) return { noData: true, termed: false, started: false, startQ: 0, termedAfterQ: 0 };
+  return {
+    noData: false,
+    termed: lastNonNull < 3,
+    started: firstNonNull > 0,
+    startQ: firstNonNull + 1,
+    termedAfterQ: lastNonNull + 1,
+  };
+}
+
+function SnapshotCard({ snapshot: s, showSalary }: { snapshot: AnnualSnapshot; showSalary: boolean }) {
+  const qtrs = [
+    { label: 'Q1', val: s.q1Oa },
+    { label: 'Q2', val: s.q2Oa },
+    { label: 'Q3', val: s.q3Oa },
+    { label: 'Q4', val: s.q4Oa },
+  ];
+  const hasAnyQtr = qtrs.some((q) => q.val !== null);
+  const maxVal = Math.max(...qtrs.map((q) => q.val ?? 0), 130);
+  const { noData, termed, started, startQ, termedAfterQ } = getActivityStatus(s);
+
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-shadow">
+      {/* Header */}
+      <div className="px-5 py-4 border-b border-slate-100">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            <h3 className="font-bold text-slate-900 truncate">{s.name}</h3>
+            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+              {s.level && <span className="text-xs text-slate-500">{s.level}</span>}
+              {s.tenure && <span className="text-xs text-slate-400">· {s.tenure}</span>}
+            </div>
+          </div>
+          <div className="flex flex-col items-end gap-1 flex-shrink-0">
+            {termed && (
+              <span className="text-[10px] font-bold uppercase tracking-wide bg-red-50 text-red-500 px-2 py-0.5 rounded-full">
+                Termed Q{termedAfterQ}
+              </span>
+            )}
+            {started && (
+              <span className="text-[10px] font-bold uppercase tracking-wide bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full">
+                Started Q{startQ}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="px-5 py-4">
+        {hasAnyQtr ? (
+          <div className="grid grid-cols-4 gap-2 mb-3">
+            {qtrs.map((q) => {
+              const col = qtrColor(q.val);
+              const pct = q.val !== null ? Math.min((q.val / maxVal) * 100, 100) : 0;
+              return (
+                <div key={q.label} className="flex flex-col items-center gap-1">
+                  <div className="w-full h-10 bg-slate-100 rounded-md overflow-hidden flex items-end">
+                    <div
+                      className="w-full rounded-md"
+                      style={{ height: q.val !== null ? `${pct}%` : '100%', background: col.bar, opacity: q.val !== null ? 1 : 0.18 }}
+                    />
+                  </div>
+                  <span className="text-[10px] font-bold" style={{ color: col.text }}>
+                    {q.val !== null ? `${q.val.toFixed(0)}%` : '—'}
+                  </span>
+                  <span className="text-[9px] text-slate-400 font-medium">{q.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        ) : noData ? (
+          <div className="text-center py-3 mb-3">
+            <span className="text-xs text-slate-400">OA not tracked this year</span>
+          </div>
+        ) : null}
+
+        {/* Key metrics */}
+        <div className="grid grid-cols-3 gap-2 text-center">
+          {[
+            { label: 'OAP', val: s.oaPct },
+            { label: 'CAP', val: s.capPct },
+            { label: 'Ratio', val: s.compRatio },
+          ].map((m) => (
+            <div key={m.label} className="bg-slate-50 rounded-lg px-2 py-1.5 border border-slate-100">
+              <p className="text-[9px] font-bold uppercase tracking-wide text-slate-400">{m.label}</p>
+              <p className="text-xs font-bold text-slate-800 mt-0.5">{m.val !== null ? `${m.val.toFixed(1)}%` : '—'}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Salary — toggleable */}
+        {showSalary && (
+          <div className="mt-3 border-t border-slate-100 pt-3 space-y-1.5">
+            <div className="flex justify-between text-xs">
+              <span className="text-slate-400">Salary</span>
+              <span className="font-semibold text-slate-700">{fmt$(s.currentSalary)}</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-slate-400">Market</span>
+              <span className="font-semibold text-slate-700">{fmt$(s.marketSalary)}</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-slate-400">Total Cash (Meld)</span>
+              <span className="font-semibold text-slate-700">{fmt$(s.totalCashActualMeld)}</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-slate-400">YTD Paid</span>
+              <span className="font-semibold text-slate-700">{fmt$(s.ytdCashPaid)}</span>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 

@@ -87,5 +87,40 @@ export const SEED_2025_ANNUAL: AnnualSnapshot[] = [
   snap('Marketing', 'Michael Nasibog',    'IC 2',  '3y 6m',  163.0, 102.7, 104.9,  53400,  63000,  68000,  71350,  71350,  73261,  73261, 102.3,  82.0, 133.0,  82.0),
   snap('Marketing', 'Jon Martin',         'IC 3',  '2y 2m',  105.0,  89.8, 106.5,  75000, 110000,  92000,  98000,  98000,  88000,  88000, 105.0, 106.0, 116.0,  85.0),
   snap('Marketing', 'Molly Sperlich',     'IC 3',  '1y 3m',  117.0,  93.6, 101.6,  62000,  84000,  92000,  93500,  93500,  87491,  87491, 117.0, 118.0, 109.0,  80.0),
-  snap('Marketing', 'Madison',            'MGR 7', '4y 10m',  73.0,  79.8, 112.7, 136000, 151000, 169000, 190400, 190400, 151903, 151903,  73.0,  null,  null,  null),
+  snap('Marketing', 'Madison',            'MGR 7', '4y 10m',  73.0,  79.8, 112.7, 136000, 151000, 169000, 190400, 190400, 151903, 151903,  73.0,  80.0,  95.0,  80.0),
+
+  // ── Customer Support & Enablement ────────────────────────────────────────────
+  snap('Customer Support & Enablement', 'Nathanael Hockley',    'MGR 5', '2y 9m',  null,  92.7, 112.5,  75000,  90000, 100000, 112500, 112500, 104312, 104312,  null, 101.0, 107.0, 102.0),
+  snap('Customer Support & Enablement', 'Jeffrey Monson',       'IC 3',  '5y 8m',  null, 101.2,  89.3,  67000,  82000,  90000,  80400,  80400,  81348,  81348,  null, 100.0, 100.0, 100.0),
+  snap('Customer Support & Enablement', 'Aaron Trimble',        'IC 2',  '2y 11m', null,  99.5,  98.4,  50000,  57000,  61000,  60000,  60000,  59700,  59700,  null, 100.0, 100.0, 100.0),
+  snap('Customer Support & Enablement', 'Deepika Yalla-Colomb', 'IC 1',  '1y 3m',  null,  94.8,  98.4,  50000,  57000,  61000,  60000,  60000,  56857,  56857,  null, 100.0, 100.0, 100.0),
+  snap('Customer Support & Enablement', 'Michael Calabrese',    'IC 2',  '1m',     null, 105.7, 112.5,  72500,  75000,  86000,  96750,  48375,  51128,  51128,  null,  null, 107.0, 102.0),
+  snap('Customer Support & Enablement', 'Megan Byrd',           null,    null,     null,  null,   null,   null,   null,   null,   null,   null,   null,   null,  null,  null,  null, 100.0),
+
+  // ── People Ops ───────────────────────────────────────────────────────────────
+  snap('People Ops', 'Autumn Hughes', 'MGR 7', '5y 9m', null,  92.6,  90.3, 138600, 172000, 215000, 194040, 194040, 179732, 179732, 100.0,  98.0, 100.0, 100.0),
+  snap('People Ops', 'Amanda Green',  'IC 2',  '2m',    null, 102.9,  75.9,  60000,  66000,  79000,  60000,  60000,  61758,  61758, 100.0,  95.0, 100.0, 100.0),
+
+  // ── Product ──────────────────────────────────────────────────────────────────
+  snap('Product', 'Akinsola Ogunware', 'IC 4', '10m',   null,  58.2,  95.4, 146600, 145000, 165000, 157384, 131154,  76300,  40772, null, null, null, null),
+  snap('Product', 'Andrew Bien',       'IC 2', '5y 6m', null,  63.3, 102.9, 100000,  99000, 105000, 108000,  90000,  57001,  38950, null, null, null, null),
+  snap('Product', 'Aruna Rao',         'IC 3', '8m',    null,  63.3,  94.8,  12000, 123000, 135000, 128000, 106666,  67478,  27458, null, null, null, null),
+  snap('Product', 'Elizabeth Archer',  'IC 2', '4m',    null,  62.9, 112.7,  95000,  84000,  91000, 102600,  85500,  53820,  39743, null, null, null, null),
+
+  // ── Engineering & Data ───────────────────────────────────────────────────────
+  snap('Engineering & Data', 'Khalil Rutledge',  'IC 5',  '4m',    null,  63.3, 100.5, 160000, 151000, 172000, 172800, 144000,  91196,  61759, null, null, null, null),
+  snap('Engineering & Data', 'Matthew Hickey',   'IC 5',  '8m',    null,  63.8, 100.5, 160000, 151000, 172000, 172800, 144000,  91896,  62459, null, null, null, null),
+  snap('Engineering & Data', 'Zachary Levovitz', 'IC 5',  '3y 7m', null,  63.1, 101.1, 161000, 151000, 172000, 173880, 144900,  91443,  61840, null, null, null, null),
+  snap('Engineering & Data', 'David Turner',     'MGR 7', '4m',    null,  57.6, 126.0, 190000, 170000, 200000, 252000, 210000, 120916,  80249, null, null, null, null),
+
+  // ── Engineering ──────────────────────────────────────────────────────────────
+  snap('Engineering', 'Austin Wentz',      'MGR 6', '3y 4m',  null,  88.4, 115.8, 192000, 173000, 196000, 227000, 132416, 117113,  78707, null, null, null, null),
+  snap('Engineering', 'Cameron Powers',    'IC 3',  '1y 3m',  null,  98.1,  96.9, 125000, 117000, 129000, 125000,  72916,  71552,  48687, null, null, null, null),
+  snap('Engineering', 'Chamaka Senarath', 'IC 2',  '1y 11m', null,  90.5,  84.2,  85000, 103000, 109000,  91800,  53550,  48451,  33107, null, null, null, null),
+  snap('Engineering', 'Cody Hall',         'IC 2',  '3y',     null,  90.5,  84.2,  85000, 103000, 109000,  91800,  53550,  48451,  33108, null, null, null, null),
+  snap('Engineering', 'Dakota Walker',     'IC 1',  '2y',     null,  90.5,  93.1,  75000,  82000,  87000,  81000,  47250,  42752,  29213, null, null, null, null),
+  snap('Engineering', 'Eric Shea',         'IC 5',  '1y 7m',  null,  92.8, 100.5,  16000, 151000, 172000, 172800, 100800,  93563,  62793, null, null, null, null),
+  snap('Engineering', 'Martin Graham',     'IC 4',  '2y 3m',  null,  86.2,  97.8, 134000, 134000, 148000, 144720,  84420,  72738,  48534, null, null, null, null),
+  snap('Engineering', 'Tanner Hohn',       'IC 3',  '3y 8m',  null,  90.5,  79.5,  95000, 117000, 129000, 102600,  59850,  54152,  37003, null, null, null, null),
+  snap('Engineering', 'Rachel Terwilliger','IC 2',  '3y',     null,  90.5,  80.3,  81000, 103000, 109000,  87480,  51030,  46172,  31550, null, null, null, null),
 ];
