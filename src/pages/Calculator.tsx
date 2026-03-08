@@ -159,6 +159,12 @@ export function Calculator({ storage, onSave }: Props) {
 
   const hasEnoughData = role && oapResult && parseFloat(actualComp) > 0 && parseFloat(targetComp) > 0;
 
+  // Track whether user has entered any data yet (to avoid showing red zeroes on first load)
+  const hasAnyMetricData = Object.values(metricInputs).some((v) => parseFloat(v.actual) > 0);
+  const hasCompData = parseFloat(actualComp) > 0;
+  const hasTargetData = parseFloat(targetComp) > 0;
+  const hasMarketData = parseFloat(marketRate) > 0;
+
   // Sweet spot: all three metrics healthy
   const isSweetSpot =
     !!oapResult &&
@@ -312,6 +318,11 @@ export function Calculator({ storage, onSave }: Props) {
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-1.5">
                       <span className="text-xs font-semibold text-slate-600">{metric.abbreviation}</span>
+                      {metric.inverse && (
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: '#fff7ed', color: '#c2410c' }}>
+                          ↓ lower is better
+                        </span>
+                      )}
                       {metricValid && (
                         <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
                       )}
@@ -319,11 +330,6 @@ export function Calculator({ storage, onSave }: Props) {
                     <span className="text-xs text-slate-400">{(metric.weight * 100).toFixed(0)}% weight</span>
                   </div>
                   <p className="text-xs text-slate-400 mb-2">{metric.name}</p>
-                  {metric.inverse && (
-                    <p className="text-xs mb-2 px-2 py-1 rounded-lg font-medium" style={{ background: '#fff7ed', color: '#c2410c' }}>
-                      Lower is better — attainment = Target ÷ Actual
-                    </p>
-                  )}
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="text-xs text-slate-500">Actual</label>
@@ -369,9 +375,9 @@ export function Calculator({ storage, onSave }: Props) {
                 </div>
               );
             })()}
-            <NumField label="Actual Compensation ($)" value={actualComp} onChange={setActualComp} placeholder="e.g. 8500" />
-            <NumField label="Target Compensation ($)" value={targetComp} onChange={setTargetComp} placeholder="e.g. 9000" />
-            <NumField label="Market Rate ($)" value={marketRate} onChange={setMarketRate} placeholder="e.g. 9500" />
+            <NumField label="Actual Compensation ($/month)" value={actualComp} onChange={setActualComp} placeholder="e.g. 8500" />
+            <NumField label="Target Compensation ($/month)" value={targetComp} onChange={setTargetComp} placeholder="e.g. 9000" />
+            <NumField label="Market Rate ($/month)" value={marketRate} onChange={setMarketRate} placeholder="e.g. 9500" />
           </Section>
 
           {/* Notes */}
@@ -396,8 +402,16 @@ export function Calculator({ storage, onSave }: Props) {
 
           {role && oapResult && (
             <>
+              {/* Waiting state — no data entered yet */}
+              {!hasAnyMetricData && !hasCompData && (
+                <div className="flex flex-col items-center justify-center h-48 bg-white rounded-2xl border-2 border-dashed border-slate-200 text-center px-6">
+                  <p className="text-slate-500 font-medium text-sm">Enter metric values to see results</p>
+                  <p className="text-slate-400 text-xs mt-1">Fill in Actual values on the left to calculate OAP, CAP, and Comp Ratio.</p>
+                </div>
+              )}
+
               {/* Sweet Spot banner */}
-              {isSweetSpot && (
+              {isSweetSpot && hasEnoughData && (
                 <div
                   className="rounded-2xl px-5 py-4 flex items-center gap-3 text-white font-semibold text-sm shadow-md"
                   style={{ background: 'linear-gradient(135deg, #022935 0%, #1175CC 100%)' }}
@@ -410,76 +424,84 @@ export function Calculator({ storage, onSave }: Props) {
                 </div>
               )}
 
-              {/* Three metric cards */}
-              <MetricCard
-                title="Outcome Attainment (OAP)"
-                question="Did we deliver to the plan?"
-                value={oapResult.oap}
-                health={oapResult.health}
-                formula={`OAP = Σ (Actual/Target × Weight) × 100`}
-              >
-                <div className="space-y-2">
-                  {oapResult.metricResults.map((r) => (
-                    <div key={r.metricId} className="flex items-center justify-between text-sm">
-                      <span className="text-slate-500">{r.abbreviation} <span className="text-slate-300">({(r.weight * 100).toFixed(0)}%)</span></span>
-                      <div className="flex items-center gap-3">
-                        <span className="text-slate-400 text-xs">{fmtPct(r.attainmentPct)} attainment</span>
-                        <span className="font-semibold text-slate-700">+{fmtPct(r.weightedContribution)}</span>
+              {/* OAP card — only when metric data entered */}
+              {hasAnyMetricData && (
+                <MetricCard
+                  title="Outcome Attainment (OAP)"
+                  question="Did we deliver to the plan?"
+                  value={oapResult.oap}
+                  health={oapResult.health}
+                  formula={`OAP = Σ (Actual/Target × Weight) × 100`}
+                >
+                  <div className="space-y-2">
+                    {oapResult.metricResults.map((r) => (
+                      <div key={r.metricId} className="flex items-center justify-between text-sm">
+                        <span className="text-slate-500">{r.abbreviation} <span className="text-slate-300">({(r.weight * 100).toFixed(0)}%)</span></span>
+                        <div className="flex items-center gap-3">
+                          <span className="text-slate-400 text-xs">{fmtPct(r.attainmentPct)} attainment</span>
+                          <span className="font-semibold text-slate-700">+{fmtPct(r.weightedContribution)}</span>
+                        </div>
                       </div>
+                    ))}
+                  </div>
+                </MetricCard>
+              )}
+
+              {/* CAP card — only when actual + target comp entered */}
+              {hasCompData && hasTargetData && (
+                <MetricCard
+                  title="Compensation Attainment (CAP)"
+                  question="Did the Melders' pay reflect that delivery?"
+                  value={capResult.cap}
+                  health={capResult.health}
+                  formula={`CAP = (Actual Comp / Target Comp) × 100`}
+                >
+                  <div className="flex justify-between text-sm">
+                    <div>
+                      <p className="text-slate-400 text-xs">Actual</p>
+                      <p className="font-semibold text-slate-700">{fmtCurrency(capResult.actualCompensation)}</p>
                     </div>
-                  ))}
-                </div>
-              </MetricCard>
+                    <div className="text-right">
+                      <p className="text-slate-400 text-xs">Target</p>
+                      <p className="font-semibold text-slate-700">{fmtCurrency(capResult.targetCompensation)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-slate-400 text-xs">Gap</p>
+                      <p className={`font-semibold ${capResult.actualCompensation >= capResult.targetCompensation ? 'text-green-600' : 'text-red-600'}`}>
+                        {fmtCurrency(capResult.actualCompensation - capResult.targetCompensation)}
+                      </p>
+                    </div>
+                  </div>
+                </MetricCard>
+              )}
 
-              <MetricCard
-                title="Compensation Attainment (CAP)"
-                question="Did the Melders' pay reflect that delivery?"
-                value={capResult.cap}
-                health={capResult.health}
-                formula={`CAP = (Actual Comp / Target Comp) × 100`}
-              >
-                <div className="flex justify-between text-sm">
-                  <div>
-                    <p className="text-slate-400 text-xs">Actual</p>
-                    <p className="font-semibold text-slate-700">{fmtCurrency(capResult.actualCompensation)}</p>
+              {/* Ratio card — only when actual comp + market rate entered */}
+              {hasCompData && hasMarketData && (
+                <MetricCard
+                  title="Compensation Ratio"
+                  question="Are we paying competitively against the market?"
+                  value={ratioResult.ratio}
+                  health={ratioResult.health}
+                  formula={`Ratio = (Actual Comp / Market Rate) × 100`}
+                >
+                  <div className="flex justify-between text-sm">
+                    <div>
+                      <p className="text-slate-400 text-xs">Actual</p>
+                      <p className="font-semibold text-slate-700">{fmtCurrency(ratioResult.actualCompensation)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-slate-400 text-xs">Market Rate</p>
+                      <p className="font-semibold text-slate-700">{fmtCurrency(ratioResult.marketRate)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-slate-400 text-xs">vs Market</p>
+                      <p className={`font-semibold ${ratioResult.actualCompensation >= ratioResult.marketRate ? 'text-green-600' : 'text-red-600'}`}>
+                        {fmtCurrency(ratioResult.actualCompensation - ratioResult.marketRate)}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-slate-400 text-xs">Target</p>
-                    <p className="font-semibold text-slate-700">{fmtCurrency(capResult.targetCompensation)}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-slate-400 text-xs">Gap</p>
-                    <p className={`font-semibold ${capResult.actualCompensation >= capResult.targetCompensation ? 'text-green-600' : 'text-red-600'}`}>
-                      {fmtCurrency(capResult.actualCompensation - capResult.targetCompensation)}
-                    </p>
-                  </div>
-                </div>
-              </MetricCard>
-
-              <MetricCard
-                title="Compensation Ratio"
-                question="Are we paying competitively against the market?"
-                value={ratioResult.ratio}
-                health={ratioResult.health}
-                formula={`Ratio = (Actual Comp / Market Rate) × 100`}
-              >
-                <div className="flex justify-between text-sm">
-                  <div>
-                    <p className="text-slate-400 text-xs">Actual</p>
-                    <p className="font-semibold text-slate-700">{fmtCurrency(ratioResult.actualCompensation)}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-slate-400 text-xs">Market Rate</p>
-                    <p className="font-semibold text-slate-700">{fmtCurrency(ratioResult.marketRate)}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-slate-400 text-xs">vs Market</p>
-                    <p className={`font-semibold ${ratioResult.actualCompensation >= ratioResult.marketRate ? 'text-green-600' : 'text-red-600'}`}>
-                      {fmtCurrency(ratioResult.actualCompensation - ratioResult.marketRate)}
-                    </p>
-                  </div>
-                </div>
-              </MetricCard>
+                </MetricCard>
+              )}
 
               {/* Alerts */}
               {reportData && <AlertBanner alerts={reportData.alerts} />}

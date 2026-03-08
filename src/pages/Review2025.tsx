@@ -33,7 +33,7 @@ const TEAMS: TeamData[] = [
     id: 'support',
     name: 'Customer Support & Enablement',
     highlight: 'model',
-    note: 'Model team — only team to hit 100%+ OA annually.',
+    note: 'Model team — only team to hit 100%+ OAP annually.',
     total: { oa: 100, cap: 96.6, ratio: 100.3, salary: 242000, market: 286000 },
     melders: [
       { name: 'Nathanael Hockley',     oa: null, cap: 92.7,  ratio: 112.5, salary: 75000,  market: 90000, q: [0, 101, 107, 102] },
@@ -415,14 +415,14 @@ export function Review2025() {
           <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: MELD_LIGHT }}>
             Property Meld · Annual Review
           </p>
-          <div className="flex items-center gap-4 mb-2">
+          <div className="flex items-start justify-between gap-4 mb-2">
             <h1 className="text-4xl font-black text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
               2025 Year in Review
             </h1>
             <button
               onClick={() => setMasked((m) => !m)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
-              style={{ background: 'rgba(255,255,255,0.15)', color: 'white', backdropFilter: 'blur(4px)' }}
+              className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:bg-white/25 mt-1"
+              style={{ background: 'rgba(255,255,255,0.12)', color: 'white', border: '1px solid rgba(255,255,255,0.3)' }}
               title={masked ? 'Show salary data' : 'Hide salary data'}
             >
               {masked ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -439,7 +439,7 @@ export function Review2025() {
               { label: 'Company OAP (EOY)',  value: '~99%',  sub: 'Up from 72.6% in Q1', color: '#f59e0b' },
               { label: 'OAP Growth',         value: '+26 pts', sub: 'Q1 → Q4 improvement',  color: MELD_ACCENT },
               { label: 'BD Turnaround',      value: '+47 pts', sub: 'Biggest swing of 2025', color: MELD_ACCENT },
-              { label: 'Support Annual OA',  value: '100%+',  sub: 'Model team all year',   color: '#22c55e' },
+              { label: 'Support Annual OAP', value: '100%+',  sub: 'Model team all year',   color: '#22c55e' },
             ].map((s) => (
               <div key={s.label} className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(4px)' }}>
                 <p className="text-xs mb-1" style={{ color: MELD_LIGHT }}>{s.label}</p>
@@ -459,7 +459,7 @@ export function Review2025() {
             <Star className="w-4 h-4 mb-2" style={{ color: '#16a34a' }} />
             <p className="font-bold text-sm" style={{ color: '#15803d', fontFamily: 'Poppins, sans-serif' }}>Support: Model Team</p>
             <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-              The only team to hit 100%+ OA for the full year. Consistent execution across all Melders — the benchmark for the rest of the company.
+              The only team to hit 100%+ OAP for the full year. Consistent execution across all Melders — the benchmark for the rest of the company.
             </p>
           </div>
           <div className="rounded-2xl p-5 border-l-4" style={{ background: '#fffbeb', borderColor: MELD_ACCENT }}>

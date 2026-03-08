@@ -1,19 +1,22 @@
 import { BarChart2, Calculator, Clock, Download, Home, BookOpen, CalendarDays, PieChart, Settings, Upload, Users, AlertTriangle, Layers } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
-const nav = [
+const primaryNav = [
   { to: '/',            icon: BookOpen,     label: 'Overview' },
-  { to: '/roles',       icon: Layers,       label: 'Roles & Metrics' },
   { to: '/dashboard',   icon: Home,         label: 'Dashboard' },
   { to: '/calculator',  icon: Calculator,   label: 'Calculator' },
-  { to: '/melders',     icon: Users,        label: 'Melders' },
   { to: '/history',     icon: Clock,        label: 'History' },
   { to: '/trends',      icon: BarChart2,    label: 'Trends' },
   { to: '/analytics',   icon: PieChart,     label: 'Analytics' },
   { to: '/review-2025', icon: CalendarDays, label: '2025 Review' },
-  { to: '/import',      icon: Upload,       label: 'Import' },
-  { to: '/export',      icon: Download,     label: 'Export' },
-  { to: '/settings',    icon: Settings,     label: 'Settings' },
+];
+
+const systemNav = [
+  { to: '/roles',    icon: Layers,    label: 'Roles & Metrics' },
+  { to: '/melders',  icon: Users,     label: 'Melders' },
+  { to: '/import',   icon: Upload,    label: 'Import' },
+  { to: '/export',   icon: Download,  label: 'Export' },
+  { to: '/settings', icon: Settings,  label: 'Settings' },
 ];
 
 // Property Meld logo — house silhouette as a plus/cross with roof triangle cutout and wrench notch
@@ -39,6 +42,26 @@ function MeldIcon() {
   );
 }
 
+function NavItem({ to, icon: Icon, label }: { to: string; icon: React.ElementType; label: string }) {
+  return (
+    <NavLink
+      to={to}
+      end={to === '/' || to === '/dashboard'}
+      className={({ isActive }) =>
+        `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+          isActive
+            ? 'text-white shadow-sm'
+            : 'text-white/55 hover:text-white hover:bg-white/10'
+        }`
+      }
+      style={({ isActive }) => isActive ? { background: 'rgba(17,117,204,0.55)' } : {}}
+    >
+      <Icon className="w-4 h-4 flex-shrink-0" />
+      {label}
+    </NavLink>
+  );
+}
+
 export function Sidebar() {
   return (
     <aside className="w-60 min-h-screen flex flex-col shadow-xl" style={{ background: 'linear-gradient(180deg, #022935 0%, #0a3d52 60%, #1175CC 100%)' }}>
@@ -57,24 +80,14 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-0.5">
-        {nav.map(({ to, icon: Icon, label }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={to === '/' || to === '/dashboard'}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                isActive
-                  ? 'text-white shadow-sm'
-                  : 'text-white/55 hover:text-white hover:bg-white/10'
-              }`
-            }
-            style={({ isActive }) => isActive ? { background: 'rgba(17,117,204,0.55)' } : {}}
-          >
-            <Icon className="w-4 h-4 flex-shrink-0" />
-            {label}
-          </NavLink>
-        ))}
+        {primaryNav.map(item => <NavItem key={item.to} {...item} />)}
+
+        {/* System divider */}
+        <div className="pt-3 pb-1 px-3">
+          <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(176,227,255,0.35)' }}>System</p>
+        </div>
+
+        {systemNav.map(item => <NavItem key={item.to} {...item} />)}
       </nav>
 
       {/* Persistence warning */}

@@ -275,7 +275,7 @@ function RoleCard({
           <LevelBadge level={role.level} />
           <button
             onClick={enterEdit}
-            className="ml-1 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:scale-110 hover:bg-white/20"
+            className="ml-1 p-1.5 rounded-lg opacity-25 group-hover:opacity-100 transition-all hover:scale-110 hover:bg-white/20"
             style={{ color: 'rgba(255,255,255,0.7)' }}
             title="Edit metrics & weights"
           >
@@ -506,8 +506,7 @@ export function Roles({
             Roles &amp; Metrics
           </h1>
           <p className="text-sm mb-5" style={{ color: '#B0E3FF' }}>
-            Every OTP-covered role: what gets measured, how it's weighted, and what target defines success.{' '}
-            <span style={{ color: '#FFB41B', fontWeight: 600 }}>Hover any card to edit weights and metrics live.</span>
+            Every OTP-covered role: what gets measured, how it's weighted, and what target defines success. Click the pencil icon on any card to edit weights and metrics.
           </p>
 
           {/* Stats */}

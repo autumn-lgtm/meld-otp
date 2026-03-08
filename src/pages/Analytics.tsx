@@ -177,8 +177,11 @@ export function Analytics({ storage }: Props) {
             <PieChart className="w-8 h-8 text-[#1175CC]" />
           </div>
           <h2 className="text-lg font-bold text-slate-700 mb-2">No data yet</h2>
-          <p className="text-slate-400 text-sm mb-6 max-w-sm text-center">
-            Add Melders and save reports to unlock team-wide analytics, quadrant analysis, and pattern detection.
+          <p className="text-slate-400 text-sm mb-2 max-w-sm text-center">
+            Once you save reports for your team, this screen will show compensation quadrant analysis, health distribution, and cross-team patterns.
+          </p>
+          <p className="text-slate-300 text-xs mb-6 max-w-xs text-center">
+            Save 3+ reports to start seeing team-wide trends and outlier flags.
           </p>
           <Link
             to="/calculator"

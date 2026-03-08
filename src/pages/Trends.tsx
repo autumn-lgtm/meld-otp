@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, BarChart2, Minus } from 'lucide-react';
 import { Header } from '../components/layout/Header';
 import { HealthBadge } from '../components/shared/HealthBadge';
 import type { AppStorage, MonthlyReport } from '../types';
@@ -101,8 +101,17 @@ export function Trends({ storage }: Props) {
       )}
 
       {melder && melderReports.length === 0 && (
-        <div className="text-center py-16 bg-white rounded-2xl border border-slate-100">
-          <p className="text-slate-400 text-sm">No reports for {melder.name} yet. Create one in the Calculator.</p>
+        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-100 text-center px-8">
+          <div className="w-14 h-14 rounded-2xl bg-[#dceefa] flex items-center justify-center mb-4">
+            <BarChart2 className="w-7 h-7 text-[#1175CC]" />
+          </div>
+          <p className="text-slate-700 font-semibold text-sm mb-1">No reports for {melder.name} yet</p>
+          <p className="text-slate-400 text-sm max-w-xs">
+            Once you save 2+ monthly reports, this screen will show month-over-month OAP, CAP, and Ratio trajectories with momentum indicators.
+          </p>
+          <a href="/meld-otp/calculator" className="mt-5 px-5 py-2 bg-[#1175CC] text-white text-sm font-medium rounded-xl hover:bg-[#0d62b0]">
+            Create First Report
+          </a>
         </div>
       )}
 
