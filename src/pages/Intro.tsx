@@ -136,19 +136,24 @@ export function Intro() {
           </p>
           <div className="grid md:grid-cols-3 gap-5">
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-              <p className="text-xs font-bold uppercase tracking-wide mb-4" style={{ color: MELD_BLUE }}>OAP — Threshold: 90%</p>
+              <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: MELD_BLUE }}>OAP — Threshold: 90%</p>
+              <p className="text-xs text-slate-400 mb-4">Outcome Attainment Percentage</p>
               <ThresholdRow color="red" label="Red" range="0 – 89%" meaning="Below expectations" />
               <ThresholdRow color="yellow" label="Yellow" range="90 – 99%" meaning="Approaching target" />
               <ThresholdRow color="green" label="Green" range="100%+" meaning="At or above target" />
+              <ThresholdRow color="blue" label="Blue" range="110%+" meaning="Exceptional performance" />
             </div>
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-              <p className="text-xs font-bold uppercase tracking-wide mb-4" style={{ color: MELD_BLUE }}>CAP% — Threshold: 90%</p>
+              <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: MELD_BLUE }}>CAP% — Threshold: 90%</p>
+              <p className="text-xs text-slate-400 mb-4">Compensation Attainment Percentage</p>
               <ThresholdRow color="red" label="Red" range="0 – 89%" meaning="Below target compensation" />
               <ThresholdRow color="yellow" label="Yellow" range="90 – 99%" meaning="Approaching target" />
               <ThresholdRow color="green" label="Green" range="100%+" meaning="At or above target comp" />
+              <ThresholdRow color="blue" label="Blue" range="110%+" meaning="Exceeded comp plan" />
             </div>
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-              <p className="text-xs font-bold uppercase tracking-wide mb-4" style={{ color: '#0d4a6b' }}>Comp Ratio — Threshold: 80%</p>
+              <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: '#0d4a6b' }}>Comp Ratio — Threshold: 80%</p>
+              <p className="text-xs text-slate-400 mb-4">Compensation Ratio (Actual vs. Market)</p>
               <ThresholdRow color="red" label="Red" range="0 – 79%" meaning="Significant market gap" />
               <ThresholdRow color="yellow" label="Yellow" range="80 – 94%" meaning="Below market (may be intentional)" />
               <ThresholdRow color="green" label="Green" range="95%+" meaning="Competitive or above market" />
