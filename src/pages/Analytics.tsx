@@ -20,6 +20,7 @@ interface Props {
 
 type PeriodFilter = '3' | '6' | '12' | 'all';
 type SortKey = 'name' | 'oap' | 'cap' | 'ratio';
+type ViewTab = 'summary' | 'charts' | 'roster';
 
 // ─── Brand tokens ────────────────────────────────────────────────────────────
 const MELD_BLUE = '#1175CC';
@@ -45,6 +46,7 @@ const HEALTH_LABEL: Record<HealthColor, string> = {
 export function Analytics({ storage }: Props) {
   const { melders, reports, roles } = storage;
   const [period, setPeriod] = useState<PeriodFilter>('all');
+  const [tab, setTab] = useState<ViewTab>('summary');
   const [sortKey, setSortKey] = useState<SortKey>('oap');
   const [sortAsc, setSortAsc] = useState(false);
 
@@ -159,6 +161,12 @@ export function Analytics({ storage }: Props) {
     else { setSortKey(key); setSortAsc(false); }
   }
 
+  const TABS: { key: ViewTab; label: string }[] = [
+    { key: 'summary', label: 'Summary' },
+    { key: 'charts',  label: 'Charts' },
+    { key: 'roster',  label: 'Roster' },
+  ];
+
   return (
     <div className="min-h-screen" style={{ background: '#F1F1F1' }}>
 
@@ -204,7 +212,7 @@ export function Analytics({ storage }: Props) {
 
           {/* Compact pulse row */}
           {teamSummary && (
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-4 mb-6">
               <PulseCard
                 abbreviation="OAP"
                 label="Outcome Attainment"
@@ -228,41 +236,73 @@ export function Analytics({ storage }: Props) {
               />
             </div>
           )}
+
+          {/* View tabs */}
+          <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: 'rgba(255,255,255,0.12)' }}>
+            {TABS.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className="px-4 py-1.5 text-xs font-semibold rounded-lg transition-all"
+                style={tab === t.key
+                  ? { background: 'white', color: MELD_DARK }
+                  : { color: 'rgba(176,227,255,0.65)' }
+                }
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* ── Body ── */}
-      <div className="max-w-6xl mx-auto px-8 py-8 space-y-6">
+      <div className="max-w-6xl mx-auto px-8 py-8">
 
-        {/* Health Distribution + Role Performance side by side */}
-        <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
-          <div className="xl:col-span-2">
-            <HealthDistributionBars dist={healthDist} total={latestByMelder.length} />
+        {tab === 'summary' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
+              <div className="xl:col-span-2">
+                <HealthDistributionBars dist={healthDist} total={latestByMelder.length} />
+              </div>
+              <div className="xl:col-span-3">
+                <RolePerformanceTable roles={rolePerf} />
+              </div>
+            </div>
+            {monthlyTrends.length >= 2 && (
+              <TeamTrendChart trends={monthlyTrends} />
+            )}
           </div>
-          <div className="xl:col-span-3">
-            <RolePerformanceTable roles={rolePerf} />
-          </div>
-        </div>
-
-        {/* Team Trend */}
-        {monthlyTrends.length >= 2 && (
-          <TeamTrendChart trends={monthlyTrends} />
         )}
 
-        {/* Melder Roster */}
-        <MelderRoster
-          reports={sortedRoster}
-          melderMap={melderMap}
-          sortKey={sortKey}
-          sortAsc={sortAsc}
-          onSort={toggleSort}
-        />
+        {tab === 'charts' && (
+          <div className="space-y-6">
+            <MelderBarChart reports={latestByMelder} melderMap={melderMap} />
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+              <OAPvsCAPScatter reports={latestByMelder} melderMap={melderMap} />
+              <RoleBarChart roles={rolePerf} />
+            </div>
+            {monthlyTrends.length >= 2 && (
+              <TeamTrendChart trends={monthlyTrends} />
+            )}
+          </div>
+        )}
+
+        {tab === 'roster' && (
+          <MelderRoster
+            reports={sortedRoster}
+            melderMap={melderMap}
+            sortKey={sortKey}
+            sortAsc={sortAsc}
+            onSort={toggleSort}
+          />
+        )}
       </div>
     </div>
   );
 }
 
-// ─── Compact Pulse Card (in hero) ─────────────────────────────────────────────
+// ─── Compact Pulse Card ───────────────────────────────────────────────────────
 
 function PulseCard({
   abbreviation, label, value, health, delta,
@@ -288,22 +328,17 @@ function PulseCard({
         </p>
         <p className="text-xs text-white/60">{label}</p>
       </div>
-
       <div className="text-right flex items-end gap-2">
         <p className="text-3xl font-black leading-none" style={{ color, fontFamily: 'Poppins, sans-serif' }}>
           {value.toFixed(1)}%
         </p>
         {hasDelta && (
-          <div
-            className="flex items-center gap-0.5 text-xs font-semibold mb-0.5"
-            style={isUp ? { color: '#4ade80' } : { color: '#f87171' }}
-          >
+          <div className="flex items-center gap-0.5 text-xs font-semibold mb-0.5" style={isUp ? { color: '#4ade80' } : { color: '#f87171' }}>
             {isUp ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
             {Math.abs(delta!).toFixed(1)}
           </div>
         )}
       </div>
-
       <div
         className="flex items-center gap-1.5 px-2.5 py-1 rounded-full flex-shrink-0"
         style={{ background: color + '28', border: `1px solid ${color}55` }}
@@ -467,20 +502,16 @@ function TeamTrendChart({ trends }: { trends: Array<{ label: string; avgOAP: num
             ))}
             <clipPath id="tt-clip"><rect x={pad.left} y={pad.top} width={iW} height={iH} /></clipPath>
           </defs>
-
           <rect x={pad.left} y={toY(100)} width={iW} height={toY(90) - toY(100)} fill="#f0fdf4" opacity={0.6} clipPath="url(#tt-clip)" />
-
           {gridYs.map((v) => (
             <g key={v}>
               <line x1={pad.left} y1={toY(v)} x2={pad.left + iW} y2={toY(v)} stroke={v === 90 || v === 100 ? '#cbd5e1' : '#f1f5f9'} strokeWidth={1} strokeDasharray={v === 90 || v === 100 ? '3 2' : undefined} />
               <text x={pad.left - 6} y={toY(v) + 4} textAnchor="end" fontSize={9} fill="#cbd5e1">{v}%</text>
             </g>
           ))}
-
           {trends.map((t, i) => (
             <text key={t.label} x={toX(i)} y={H - 8} textAnchor="middle" fontSize={9} fill="#94a3b8">{t.label}</text>
           ))}
-
           {lines.map((l) => <path key={`ta-${l.key}`} d={makeArea(l.vals)} fill={`url(#ttg-${l.key})`} clipPath="url(#tt-clip)" />)}
           {lines.map((l) => <path key={`tl-${l.key}`} d={makePath(l.vals)} fill="none" stroke={l.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" clipPath="url(#tt-clip)" />)}
           {lines.map((l) => l.vals.map((v, i) => (
@@ -494,7 +525,272 @@ function TeamTrendChart({ trends }: { trends: Array<{ label: string; avgOAP: num
   );
 }
 
-// ─── Melder Roster ────────────────────────────────────────────────────────────
+// ─── Melder Bar Chart (Charts tab) ────────────────────────────────────────────
+
+function MelderBarChart({
+  reports, melderMap,
+}: {
+  reports: MonthlyReport[];
+  melderMap: Record<string, { name: string }>;
+}) {
+  const [metric, setMetric] = useState<'oap' | 'cap' | 'ratio'>('oap');
+
+  const sorted = useMemo(() => {
+    return [...reports].sort((a, b) => {
+      const va = metric === 'oap' ? a.oapResult.oap : metric === 'cap' ? a.capResult.cap : a.ratioResult.ratio;
+      const vb = metric === 'oap' ? b.oapResult.oap : metric === 'cap' ? b.capResult.cap : b.ratioResult.ratio;
+      return vb - va;
+    });
+  }, [reports, metric]);
+
+  const BAR_H = 26;
+  const GAP = 6;
+  const PAD_LEFT = 130;
+  const PAD_RIGHT = 50;
+  const PAD_V = 16;
+  const totalH = sorted.length * (BAR_H + GAP) + PAD_V * 2;
+  const W = 760;
+  const iW = W - PAD_LEFT - PAD_RIGHT;
+  const MAX_VAL = 160;
+
+  function val(r: MonthlyReport) {
+    return metric === 'oap' ? r.oapResult.oap : metric === 'cap' ? r.capResult.cap : r.ratioResult.ratio;
+  }
+  function health(r: MonthlyReport): HealthColor {
+    return metric === 'oap' ? r.oapResult.health : metric === 'cap' ? r.capResult.health : r.ratioResult.health;
+  }
+  const mark90  = (90  / MAX_VAL) * iW;
+  const mark100 = (100 / MAX_VAL) * iW;
+
+  const METRIC_LABELS = { oap: 'OAP — Outcome Attainment', cap: 'CAP% — Comp Attainment', ratio: 'Ratio — Market Ratio' };
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-xs font-bold uppercase tracking-widest" style={{ color: MELD_DARK, fontFamily: 'Poppins, sans-serif', opacity: 0.45 }}>
+          Melder Comparison — {METRIC_LABELS[metric]}
+        </p>
+        <div className="flex gap-1 p-1 rounded-lg" style={{ background: '#f1f5f9' }}>
+          {(['oap', 'cap', 'ratio'] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => setMetric(m)}
+              className="px-3 py-1 text-xs font-semibold rounded-md transition-all"
+              style={metric === m ? { background: MELD_BLUE, color: 'white' } : { color: '#64748b' }}
+            >
+              {m === 'oap' ? 'OAP' : m === 'cap' ? 'CAP%' : 'Ratio'}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="overflow-x-auto">
+        <svg width={W} height={totalH}>
+          {/* Target zone */}
+          <rect x={PAD_LEFT + mark90} y={PAD_V} width={mark100 - mark90} height={totalH - PAD_V * 2} fill="#f0fdf4" opacity={0.6} />
+          {/* Grid lines */}
+          {[90, 100, 120, 140].map((v) => {
+            const x = PAD_LEFT + (v / MAX_VAL) * iW;
+            return (
+              <g key={v}>
+                <line x1={x} y1={PAD_V} x2={x} y2={totalH - PAD_V} stroke={v === 90 || v === 100 ? '#cbd5e1' : '#f1f5f9'} strokeWidth={1} strokeDasharray={v === 100 ? '3 2' : undefined} />
+                <text x={x} y={PAD_V - 4} textAnchor="middle" fontSize={9} fill="#94a3b8">{v}%</text>
+              </g>
+            );
+          })}
+          {sorted.map((r, i) => {
+            const name = melderMap[r.melderId]?.name ?? r.melderName;
+            const shortName = name.split(' ').map((w, j) => j === 0 ? w : w[0] + '.').join(' ');
+            const v = val(r);
+            const bw = Math.max((Math.min(v, MAX_VAL) / MAX_VAL) * iW, 2);
+            const y = PAD_V + i * (BAR_H + GAP);
+            const color = HEALTH_COLOR[health(r)];
+            return (
+              <g key={r.id}>
+                <text x={PAD_LEFT - 8} y={y + BAR_H / 2 + 4} textAnchor="end" fontSize={10} fill="#64748b">
+                  {shortName.length > 16 ? shortName.slice(0, 15) + '…' : shortName}
+                </text>
+                <rect x={PAD_LEFT} y={y} width={iW} height={BAR_H} rx={5} fill="#f8fafc" />
+                <rect x={PAD_LEFT} y={y} width={bw} height={BAR_H} rx={5} fill={color} opacity={0.85} />
+                <text x={PAD_LEFT + bw + 6} y={y + BAR_H / 2 + 4} fontSize={10} fontWeight={700} fill={color}>
+                  {v.toFixed(0)}%
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+// ─── OAP vs CAP Scatter (Charts tab) ─────────────────────────────────────────
+
+function OAPvsCAPScatter({
+  reports, melderMap,
+}: {
+  reports: MonthlyReport[];
+  melderMap: Record<string, { name: string }>;
+}) {
+  const [hovered, setHovered] = useState<string | null>(null);
+  const W = 400, H = 360;
+  const pad = { top: 32, right: 24, bottom: 52, left: 52 };
+  const iW = W - pad.left - pad.right;
+  const iH = H - pad.top - pad.bottom;
+  const AXIS_MIN = 40, AXIS_MAX = 160;
+
+  function toX(v: number) { return pad.left + ((Math.min(Math.max(v, AXIS_MIN), AXIS_MAX) - AXIS_MIN) / (AXIS_MAX - AXIS_MIN)) * iW; }
+  function toY(v: number) { return pad.top + iH - ((Math.min(Math.max(v, AXIS_MIN), AXIS_MAX) - AXIS_MIN) / (AXIS_MAX - AXIS_MIN)) * iH; }
+
+  const qX = toX(90), qY = toY(90);
+  const gridLines = [60, 80, 100, 120, 140];
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+      <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: MELD_DARK, fontFamily: 'Poppins, sans-serif', opacity: 0.45 }}>
+        OAP vs CAP% — Scatter
+      </p>
+      <p className="text-[10px] text-slate-400 mb-3">Each dot = one Melder. Hover for name.</p>
+      <svg width={W} height={H}>
+        {/* Quadrant fills */}
+        <rect x={qX} y={pad.top} width={iW - (qX - pad.left)} height={qY - pad.top} fill="#f0fdf4" opacity={0.8} />
+        <rect x={qX} y={qY} width={iW - (qX - pad.left)} height={iH - (qY - pad.top)} fill="#fef2f2" opacity={0.8} />
+        <rect x={pad.left} y={pad.top} width={qX - pad.left} height={qY - pad.top} fill="#fffbeb" opacity={0.8} />
+        <rect x={pad.left} y={qY} width={qX - pad.left} height={iH - (qY - pad.top)} fill="#f8fafc" opacity={0.8} />
+
+        {/* Quadrant labels */}
+        <text x={(pad.left + qX) / 2} y={pad.top + 14} textAnchor="middle" fontSize={9} fontWeight={700} fill="#d97706">Overpaid</text>
+        <text x={(qX + pad.left + iW) / 2} y={pad.top + 14} textAnchor="middle" fontSize={9} fontWeight={700} fill="#059669">Sweet Spot</text>
+        <text x={(pad.left + qX) / 2} y={H - pad.bottom - 4} textAnchor="middle" fontSize={9} fontWeight={700} fill="#94a3b8">Needs Dev</text>
+        <text x={(qX + pad.left + iW) / 2} y={H - pad.bottom - 4} textAnchor="middle" fontSize={9} fontWeight={700} fill="#ef4444">Flight Risk</text>
+
+        {/* Grid */}
+        {gridLines.map((v) => (
+          <g key={v}>
+            <line x1={pad.left} y1={toY(v)} x2={pad.left + iW} y2={toY(v)} stroke={v === 90 ? '#cbd5e1' : '#f1f5f9'} strokeWidth={v === 90 ? 1.5 : 1} strokeDasharray={v === 90 ? '3 2' : undefined} />
+            <text x={pad.left - 5} y={toY(v) + 4} textAnchor="end" fontSize={8} fill="#cbd5e1">{v}%</text>
+            <line x1={toX(v)} y1={pad.top} x2={toX(v)} y2={pad.top + iH} stroke={v === 90 ? '#cbd5e1' : '#f1f5f9'} strokeWidth={v === 90 ? 1.5 : 1} strokeDasharray={v === 90 ? '3 2' : undefined} />
+            <text x={toX(v)} y={H - pad.bottom + 14} textAnchor="middle" fontSize={8} fill="#cbd5e1">{v}%</text>
+          </g>
+        ))}
+
+        <text x={W / 2} y={H - 4} textAnchor="middle" fontSize={10} fontWeight={600} fill="#94a3b8">OAP %</text>
+        <text x={10} y={H / 2} textAnchor="middle" fontSize={10} fontWeight={600} fill="#94a3b8" transform={`rotate(-90, 10, ${H / 2})`}>CAP%</text>
+
+        {/* Dots */}
+        {reports.map((r) => {
+          const cx = toX(r.oapResult.oap);
+          const cy = toY(r.capResult.cap);
+          const color = HEALTH_COLOR[r.oapResult.health];
+          const isHov = hovered === r.id;
+          const name = melderMap[r.melderId]?.name ?? r.melderName;
+          const tipX = cx > W - 130 ? cx - 128 : cx + 10;
+          const tipY = cy > H - 70 ? cy - 64 : cy - 30;
+          return (
+            <g key={r.id} onMouseEnter={() => setHovered(r.id)} onMouseLeave={() => setHovered(null)} style={{ cursor: 'pointer' }}>
+              {isHov && <circle cx={cx} cy={cy} r={12} fill={color} opacity={0.12} />}
+              <circle cx={cx} cy={cy} r={isHov ? 6 : 4.5} fill={color} stroke="white" strokeWidth={1.5} />
+              {isHov && (
+                <g>
+                  <rect x={tipX} y={tipY} width={120} height={56} rx={6} fill="white" stroke="#e2e8f0" strokeWidth={1} filter="drop-shadow(0 2px 8px rgba(0,0,0,0.12))" />
+                  <text x={tipX + 8} y={tipY + 16} fontSize={10} fontWeight={700} fill="#1e293b">{name.length > 15 ? name.slice(0, 14) + '…' : name}</text>
+                  <text x={tipX + 8} y={tipY + 30} fontSize={9} fill="#64748b">OAP: {r.oapResult.oap.toFixed(1)}%</text>
+                  <text x={tipX + 8} y={tipY + 44} fontSize={9} fill="#64748b">CAP: {r.capResult.cap.toFixed(1)}%</text>
+                </g>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+// ─── Role Bar Chart (Charts tab) ──────────────────────────────────────────────
+
+function RoleBarChart({ roles }: { roles: Array<{ roleId: string; roleName: string; avgOAP: number; avgCAP: number; avgRatio: number; count: number }> }) {
+  if (roles.length === 0) return null;
+
+  const W = 380, PAD_L = 20, PAD_R = 20, PAD_T = 16, PAD_B = 80;
+  const iW = W - PAD_L - PAD_R;
+  const CHART_H = 180;
+  const totalH = CHART_H + PAD_T + PAD_B;
+  const n = roles.length;
+  const groupW = iW / n;
+  const barW = Math.min(groupW * 0.22, 14);
+  const MAX_V = 130;
+
+  function toY(v: number) { return PAD_T + CHART_H - (Math.min(v, MAX_V) / MAX_V) * CHART_H; }
+
+  const bars = [
+    { key: 'oap',   label: 'OAP',   color: MELD_BLUE },
+    { key: 'cap',   label: 'CAP%',  color: '#22c55e' },
+    { key: 'ratio', label: 'Ratio', color: '#f59e0b' },
+  ];
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-xs font-bold uppercase tracking-widest" style={{ color: MELD_DARK, fontFamily: 'Poppins, sans-serif', opacity: 0.45 }}>
+          Role Comparison
+        </p>
+        <div className="flex gap-3">
+          {bars.map((b) => (
+            <div key={b.key} className="flex items-center gap-1">
+              <div className="w-2.5 h-2.5 rounded-sm" style={{ background: b.color }} />
+              <span className="text-[10px] text-slate-500">{b.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="overflow-x-auto">
+        <svg width={W} height={totalH}>
+          {/* Reference lines */}
+          {[90, 100].map((v) => (
+            <g key={v}>
+              <line x1={PAD_L} y1={toY(v)} x2={PAD_L + iW} y2={toY(v)} stroke={v === 100 ? '#cbd5e1' : '#f59e0b'} strokeWidth={1} strokeDasharray="3 2" opacity={0.6} />
+              <text x={PAD_L - 2} y={toY(v) + 4} textAnchor="end" fontSize={8} fill="#94a3b8">{v}%</text>
+            </g>
+          ))}
+          {/* Bars */}
+          {roles.map((role, i) => {
+            const cx = PAD_L + (i + 0.5) * groupW;
+            const vals = [role.avgOAP, role.avgCAP, role.avgRatio];
+            return (
+              <g key={role.roleId}>
+                {bars.map((b, bi) => {
+                  const v = vals[bi];
+                  const bx = cx + (bi - 1) * (barW + 2);
+                  const barH = (Math.min(v, MAX_V) / MAX_V) * CHART_H;
+                  return (
+                    <g key={b.key}>
+                      <rect x={bx - barW / 2} y={toY(v)} width={barW} height={barH} rx={2} fill={b.color} opacity={0.8}>
+                        <title>{role.roleId} {b.label}: {v.toFixed(1)}%</title>
+                      </rect>
+                    </g>
+                  );
+                })}
+                {/* Role label */}
+                <text
+                  x={cx} y={PAD_T + CHART_H + 14}
+                  textAnchor="middle" fontSize={9} fontWeight={600} fill="#475569"
+                >
+                  {role.roleId}
+                </text>
+                <text x={cx} y={PAD_T + CHART_H + 26} textAnchor="middle" fontSize={8} fill="#94a3b8">
+                  n={role.count}
+                </text>
+              </g>
+            );
+          })}
+          {/* Baseline */}
+          <line x1={PAD_L} y1={PAD_T + CHART_H} x2={PAD_L + iW} y2={PAD_T + CHART_H} stroke="#e2e8f0" strokeWidth={1} />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+// ─── Melder Roster (Roster tab) ───────────────────────────────────────────────
 
 function MelderRoster({
   reports, melderMap, sortKey, sortAsc, onSort,
