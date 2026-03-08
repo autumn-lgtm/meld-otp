@@ -47,7 +47,7 @@ export function Intro() {
             Outcome-to-Pay
           </h1>
           <p className="text-xl mb-8 max-w-3xl" style={{ color: MELD_LIGHT }}>
-            A transparent, measurable compensation framework that connects what Melders deliver directly to what they earn — no black boxes, no surprises.
+            Performance, pay, and market positioning have always been connected inside compensation. OTP is built on that relationship — not around it.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -80,8 +80,11 @@ export function Intro() {
         {/* What is OTP */}
         <Section>
           <SectionTitle>Three Numbers. One Chain.</SectionTitle>
+          <p className="text-slate-500 text-base mb-2">
+            OTP was born from a relational realization: <strong className="text-slate-700">performance, pay, and market positioning already live inside compensation together.</strong> They always have. Most systems just treat them separately.
+          </p>
           <p className="text-slate-500 text-base mb-6">
-            PropertyMeld designed OTP from scratch — not borrowed from any external framework. The core insight: performance, pay, and market positioning aren't three separate conversations. They're a chain. OAP drives the pay conversation. CAP holds the company accountable to the plan. Ratio anchors it all to market reality. Misalign any link, and it shows up immediately.
+            Once you see that relationship, the design follows naturally. OAP surfaces what was earned. CAP reveals whether the company delivered on its promise. Ratio shows where that pay lands against the real world. None of them mean much alone — together, they close the loop.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
@@ -89,21 +92,21 @@ export function Intro() {
                 icon: <TrendingUp className="w-6 h-6" />,
                 label: 'OAP%',
                 title: 'Did they earn it?',
-                desc: 'A weighted average of role-specific outcomes — objective, transparent, no opinions. This is the Melder\'s number. It starts the conversation.',
+                desc: 'A weighted composite of role-specific outcomes. No manager opinion, no subjective input. This is the Melder\'s score — what they actually produced, resolved to a single number.',
                 color: MELD_BLUE,
               },
               {
                 icon: <Calculator className="w-6 h-6" />,
                 label: 'CAP%',
                 title: 'Did we pay it?',
-                desc: 'Did the company follow through on the comp plan? Below 100% means the Melder outperformed their pay — a signal that demands a response.',
+                desc: 'Did the company honor the plan? If OAP is 100% and CAP is 85%, we underpaid. CAP makes that visible — and creates accountability on both sides of the table.',
                 color: '#0d4a6b',
               },
               {
                 icon: <BarChart2 className="w-6 h-6" />,
                 label: 'Ratio',
                 title: 'Is it market-fair?',
-                desc: 'Actual pay vs. external market rate. Our strategic lever — some roles sit intentionally below market, and the Ratio makes that honest and visible.',
+                desc: 'Actual pay as a percentage of market rate. Not every role targets 100% — some are intentionally positioned below. Ratio makes that strategy explicit instead of hidden.',
                 color: MELD_ACCENT,
               },
             ].map((card) => (
@@ -120,8 +123,8 @@ export function Intro() {
             ))}
           </div>
           <div className="mt-6 p-6 rounded-xl border-l-4 text-base" style={{ background: `${MELD_BLUE}0d`, borderColor: MELD_BLUE }}>
-            <strong style={{ color: MELD_DARK }}>Key distinction:</strong>
-            <span className="text-slate-600"> Ratio answers to the <em>market</em>. CAP answers to the <em>internal plan</em>. Both matter. Neither replaces the other.</span>
+            <strong style={{ color: MELD_DARK }}>The realization:</strong>
+            <span className="text-slate-600"> Each number answers to a different layer of compensation. OAP answers to the <em>Melder's output</em>. CAP answers to the <em>internal plan</em>. Ratio answers to the <em>external market</em>. They were always related — OTP just makes that relationship visible.</span>
           </div>
         </Section>
 

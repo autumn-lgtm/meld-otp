@@ -2,6 +2,7 @@ import type { AppStorage, Melder, MonthlyReport, Role } from '../types';
 import { DEFAULT_MELDERS } from '../data/melders';
 import { DEFAULT_ROLES } from '../data/roles';
 
+const STORAGE_KEY = 'meld-otp-v1';
 const CURRENT_VERSION = 1;
 
 function getDefaultStorage(): AppStorage {
@@ -13,50 +14,37 @@ function getDefaultStorage(): AppStorage {
   };
 }
 
-function mergeStorage(parsed: AppStorage): AppStorage {
-  const existingRoleIds = new Set(parsed.roles.map((r) => r.id));
-  const missingDefaults = DEFAULT_ROLES.filter((r) => !existingRoleIds.has(r.id));
-  const mergedRoles = parsed.roles.map((role) => {
-    const defaultRole = DEFAULT_ROLES.find((d) => d.id === role.id);
-    if (!defaultRole || role.isCustom) return role;
-    return {
-      ...role,
-      metrics: role.metrics.map((metric) => {
-        if (metric.targetDisplay) return metric;
-        const defaultMetric = defaultRole.metrics.find((m) => m.id === metric.id);
-        return defaultMetric?.targetDisplay ? { ...metric, targetDisplay: defaultMetric.targetDisplay } : metric;
-      }),
-    };
-  });
-  const melders = parsed.melders.length === 0 ? DEFAULT_MELDERS : parsed.melders;
-  return { ...parsed, melders, roles: [...missingDefaults, ...mergedRoles] };
-}
-
-// ─── Server-side persistence ────────────────────────────────────────────────
-
-const API = '/api/storage';
-
-export async function loadStorageAsync(): Promise<AppStorage> {
+export function loadStorage(): AppStorage {
   try {
-    const res = await fetch(API);
-    if (!res.ok) return getDefaultStorage();
-    const data = await res.json() as AppStorage | null;
-    if (!data) return getDefaultStorage();
-    return mergeStorage(data);
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return getDefaultStorage();
+    const parsed = JSON.parse(raw) as AppStorage;
+    const existingRoleIds = new Set(parsed.roles.map((r) => r.id));
+    const missingDefaults = DEFAULT_ROLES.filter((r) => !existingRoleIds.has(r.id));
+    const mergedRoles = parsed.roles.map((role) => {
+      const defaultRole = DEFAULT_ROLES.find((d) => d.id === role.id);
+      if (!defaultRole || role.isCustom) return role;
+      return {
+        ...role,
+        metrics: role.metrics.map((metric) => {
+          if (metric.targetDisplay) return metric;
+          const defaultMetric = defaultRole.metrics.find((m) => m.id === metric.id);
+          return defaultMetric?.targetDisplay ? { ...metric, targetDisplay: defaultMetric.targetDisplay } : metric;
+        }),
+      };
+    });
+    const melders = parsed.melders.length === 0 ? DEFAULT_MELDERS : parsed.melders;
+    return { ...parsed, melders, roles: [...missingDefaults, ...mergedRoles] };
   } catch {
     return getDefaultStorage();
   }
 }
 
-export async function saveStorageAsync(data: AppStorage): Promise<void> {
+export function saveStorage(data: AppStorage): void {
   try {
-    await fetch(API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (e) {
-    console.error('Failed to save storage:', e);
+    console.error('Failed to save to localStorage:', e);
   }
 }
 
