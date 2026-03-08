@@ -6,6 +6,7 @@ import { Dashboard } from './pages/Dashboard';
 import { Export } from './pages/Export';
 import { History } from './pages/History';
 import { Import } from './pages/Import';
+import { Analytics } from './pages/Analytics';
 import { Melders } from './pages/Melders';
 import { Settings } from './pages/Settings';
 import { Trends } from './pages/Trends';
@@ -25,6 +26,7 @@ export default function App() {
             <Route path="/history" element={<History storage={storage} onSave={update} />} />
             <Route path="/history/:melderId" element={<History storage={storage} onSave={update} />} />
             <Route path="/trends" element={<Trends storage={storage} />} />
+            <Route path="/analytics" element={<Analytics storage={storage} />} />
             <Route path="/import" element={<Import storage={storage} onSave={update} />} />
             <Route path="/export" element={<Export storage={storage} />} />
             <Route path="/settings" element={<Settings storage={storage} onSave={update} />} />

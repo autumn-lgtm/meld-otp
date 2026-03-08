@@ -1,4 +1,4 @@
-import { BarChart2, Calculator, Clock, Download, Home, Settings, Upload, Users } from 'lucide-react';
+import { BarChart2, Calculator, Clock, Download, Home, PieChart, Settings, Upload, Users } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
 const nav = [
@@ -7,6 +7,7 @@ const nav = [
   { to: '/melders',    icon: Users,      label: 'Melders' },
   { to: '/history',    icon: Clock,      label: 'History' },
   { to: '/trends',     icon: BarChart2,  label: 'Trends' },
+  { to: '/analytics',  icon: PieChart,   label: 'Analytics' },
   { to: '/import',     icon: Upload,     label: 'Import' },
   { to: '/export',     icon: Download,   label: 'Export' },
   { to: '/settings',   icon: Settings,   label: 'Settings' },
