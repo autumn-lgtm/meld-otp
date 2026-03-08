@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, ArrowDownRight, ArrowUpRight, PieChart } from 'lucide-react';
+import { AlertTriangle, ArrowDownRight, ArrowUpRight } from 'lucide-react';
 import { Header } from '../components/layout/Header';
 import { HealthBadge } from '../components/shared/HealthBadge';
 import type { AppStorage, HealthColor, MonthlyReport } from '../types';
@@ -203,17 +203,13 @@ export function Analytics({ storage }: Props) {
 
       {/* Seed data banner */}
       {isUsingSeed && (
-        <div className="flex items-start gap-3 px-4 py-3 rounded-xl text-sm" style={{ background: '#eff6ff', border: '1px solid #bfdbfe' }}>
-          <PieChart className="w-4 h-4 flex-shrink-0 mt-0.5 text-[#1175CC]" />
-          <div>
-            <span className="font-semibold" style={{ color: '#1e3a5f' }}>Showing 2025 Annual Review baseline</span>
-            <span className="text-slate-500"> — this data is pre-loaded from the 2025 performance review. </span>
-            <Link to="/calculator" className="font-semibold underline decoration-dotted" style={{ color: '#1175CC' }}>
-              Save your first report
-            </Link>
-            <span className="text-slate-500"> to start tracking live data.</span>
-          </div>
-        </div>
+        <p className="text-xs text-slate-400">
+          Showing 2025 Annual Review baseline.{' '}
+          <Link to="/calculator" className="underline decoration-dotted hover:text-slate-600">
+            Save a report
+          </Link>{' '}
+          to switch to live data.
+        </p>
       )}
 
       {/* 1 — Team Pulse */}
