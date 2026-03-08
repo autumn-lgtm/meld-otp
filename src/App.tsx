@@ -15,7 +15,15 @@ import { Settings } from './pages/Settings';
 import { Trends } from './pages/Trends';
 
 export default function App() {
-  const { storage, update } = useStorage();
+  const { storage, update, loading } = useStorage();
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center" style={{ background: '#F1F1F1' }}>
+        <div className="text-gray-400 text-sm">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <BrowserRouter>
