@@ -151,9 +151,11 @@ export function Import({ storage, onSave }: Props) {
           <div>
             <p className="text-sm text-slate-500 mb-3">CSV with these columns (header row required):</p>
             <code className="block bg-slate-50 rounded-xl p-4 text-xs font-mono text-slate-700 overflow-x-auto whitespace-pre">
-              {'Name,Role,Email,MarketRate,TargetCompensation\nJane Smith,CSM,jane@meld.com,9500,9000\nJohn Doe,BSE,,10000,9500\nSarah Lee,BDR,sarah@meld.com,7000,6500'}
+              {'Name,Role,HireDate,Email,MarketRate,TargetCompensation\nJane Smith,CSM,2024-03-15,jane@meld.com,9500,9000\nJohn Doe,BSE,2022-08-01,,10000,9500\nSarah Lee,BDR,2025-11-10,sarah@meld.com,7000,6500'}
             </code>
-            <p className="text-xs text-slate-400 mt-2">Role must match a role ID in the system (e.g. CSM, BSE, BDR, BDA). Email is optional.</p>
+            <p className="text-xs text-slate-400 mt-2">
+              Role must be a valid role ID. Valid values: <span className="font-mono font-semibold">BDA, BDR, SR-BDR, ASSOC-BSE, BSE, SR-BSE, CSM, MM-CSM, CSS, MMES, COM</span>. HireDate accepts YYYY-MM-DD or M/D/YYYY — used for proration when a Melder starts mid-period. Email and MarketRate are optional.
+            </p>
           </div>
         )}
 

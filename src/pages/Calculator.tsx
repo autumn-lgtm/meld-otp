@@ -38,6 +38,7 @@ import {
   calculateRatio,
   fmtCurrency,
   fmtPct,
+  getProratedFactor,
 } from '../utils/calculations';
 import { exportReportPDF } from '../utils/pdf';
 import { generateId, saveReport } from '../utils/storage';
@@ -66,19 +67,32 @@ export function Calculator({ storage, onSave }: Props) {
   const [notes, setNotes] = useState('');
   const [saved, setSaved] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [overrideRoleId, setOverrideRoleId] = useState('');
   const reportRef = useRef<HTMLDivElement>(null);
   const confettiFiredKey = useRef<string>('');
 
   const melder: Melder | undefined = melders.find((m) => m.id === melderId);
-  const role = roles.find((r) => r.id === melder?.roleId);
+  // Role: use melder's role if a melder is selected, otherwise fall back to manual override
+  const effectiveRoleId = melder?.roleId ?? overrideRoleId;
+  const role = roles.find((r) => r.id === effectiveRoleId);
 
-  // Pre-fill from melder defaults
+  // Pre-fill from melder defaults, applying proration when they started in the selected month
   useEffect(() => {
     if (melder) {
-      setTargetComp(melder.targetCompensation > 0 ? String(melder.targetCompensation) : '');
-      setMarketRate(melder.marketRate > 0 ? String(melder.marketRate) : '');
+      const factor = getProratedFactor(melder.startDate, month, year);
+      if (factor != null) {
+        // Start month — prorate to days worked out of monthly target (annual ÷ 12)
+        const proTarget = Math.round((melder.targetCompensation / 12) * factor);
+        const proMarket = Math.round((melder.marketRate / 12) * factor);
+        setTargetComp(proTarget > 0 ? String(proTarget) : '');
+        setMarketRate(proMarket > 0 ? String(proMarket) : '');
+      } else {
+        setTargetComp(melder.targetCompensation > 0 ? String(melder.targetCompensation) : '');
+        setMarketRate(melder.marketRate > 0 ? String(melder.marketRate) : '');
+      }
+      setOverrideRoleId('');
     }
-  }, [melder?.id]);
+  }, [melder?.id, month, year]);
 
   // Reset metric inputs when role changes, pre-filling targets from role defaults
   useEffect(() => {
@@ -122,7 +136,7 @@ export function Calculator({ storage, onSave }: Props) {
     [actualComp, marketRate]
   );
 
-  const hasEnoughData = melder && role && oapResult && parseFloat(actualComp) > 0 && parseFloat(targetComp) > 0;
+  const hasEnoughData = role && oapResult && parseFloat(actualComp) > 0 && parseFloat(targetComp) > 0;
 
   // Sweet spot: all three metrics healthy
   const isSweetSpot =
@@ -156,12 +170,12 @@ export function Calculator({ storage, onSave }: Props) {
   }, [oapResult?.oap, isSweetSpot]);
 
   const reportData = useMemo(() => {
-    if (!hasEnoughData || !role || !melder || !oapResult) return null;
+    if (!hasEnoughData || !role || !oapResult) return null;
     return buildReport({
       id: generateId(),
-      melderId: melder.id,
-      melderName: melder.name,
-      roleId: melder.roleId,
+      melderId: melder?.id ?? 'adhoc',
+      melderName: melder?.name ?? 'Ad-hoc Calculation',
+      roleId: effectiveRoleId,
       month,
       year,
       metrics: role.metrics,
@@ -242,6 +256,28 @@ export function Calculator({ storage, onSave }: Props) {
             </div>
           </Section>
 
+          {/* Role selector — shown when no melder selected so OAP inputs still appear */}
+          {!melder && (
+            <Section title="Role">
+              <p className="text-xs text-slate-400 mb-2">
+                No Melder selected — pick a role to calculate OAP metrics directly.
+              </p>
+              <label className="block">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Role</span>
+                <select
+                  value={overrideRoleId}
+                  onChange={(e) => { setOverrideRoleId(e.target.value); setSaved(false); }}
+                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1175CC]"
+                >
+                  <option value="">— select role —</option>
+                  {roles.map((r) => (
+                    <option key={r.id} value={r.id}>{r.level ? `[${r.level}] ` : ""}{r.id} — {r.fullName}</option>
+                  ))}
+                </select>
+              </label>
+            </Section>
+          )}
+
           {/* OAP Inputs */}
           {role && (
             <Section title="Outcome Attainment (OAP)">
@@ -297,6 +333,21 @@ export function Calculator({ storage, onSave }: Props) {
 
           {/* Compensation Inputs */}
           <Section title="Compensation">
+            {melder?.startDate && (() => {
+              const factor = getProratedFactor(melder.startDate, month, year);
+              if (!factor) return null;
+              const startD = new Date(melder.startDate);
+              const daysInMonth = new Date(year, month, 0).getDate();
+              const daysWorked = daysInMonth - startD.getDate() + 1;
+              return (
+                <div className="flex items-start gap-2 rounded-xl px-3 py-2.5 mb-1 text-xs" style={{ background: '#fffbeb', border: '1px solid #fde68a' }}>
+                  <span className="mt-0.5">⚡</span>
+                  <span style={{ color: '#92400e' }}>
+                    <strong>Prorated:</strong> started {startD.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — {daysWorked} of {daysInMonth} days ({Math.round(factor * 100)}%). Target and Market Rate pre-filled as prorated monthly amounts. Adjust if comp was handled differently.
+                  </span>
+                </div>
+              );
+            })()}
             <NumField label="Actual Compensation ($)" value={actualComp} onChange={setActualComp} placeholder="e.g. 8500" />
             <NumField label="Target Compensation ($)" value={targetComp} onChange={setTargetComp} placeholder="e.g. 9000" />
             <NumField label="Market Rate ($)" value={marketRate} onChange={setMarketRate} placeholder="e.g. 9500" />
@@ -316,13 +367,13 @@ export function Calculator({ storage, onSave }: Props) {
 
         {/* ── Right Panel: Results ── */}
         <div className="lg:col-span-2 space-y-5" ref={reportRef}>
-          {!melder && (
+          {!melder && !role && (
             <div className="flex items-center justify-center h-48 bg-white rounded-2xl border-2 border-dashed border-slate-200 text-slate-400 text-sm">
-              Select a Melder to begin
+              Select a Melder or choose a Role to begin
             </div>
           )}
 
-          {melder && role && oapResult && (
+          {role && oapResult && (
             <>
               {/* Sweet Spot banner */}
               {isSweetSpot && (

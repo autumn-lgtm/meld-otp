@@ -16,16 +16,25 @@ const nav = [
   { to: '/settings',    icon: Settings,     label: 'Settings' },
 ];
 
-// Property Meld house + wrench icon in brand SVG
+// Property Meld logo — house silhouette as a plus/cross with roof triangle cutout and wrench notch
 function MeldIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* House outline */}
-      <path d="M14 3L3 12H6V24H12V17H16V24H22V12H25L14 3Z" fill="white" fillOpacity="0.95" />
-      {/* Door */}
-      <rect x="12" y="17" width="4" height="7" rx="0.5" fill="#1175CC" />
-      {/* Chimney accent */}
-      <rect x="17" y="6" width="2.5" height="4" rx="0.5" fill="white" fillOpacity="0.6" />
+      <defs>
+        <mask id="pm-logo-mask">
+          {/* Cross/plus shape — chimney top arm */}
+          <rect x="9.5" y="0" width="9" height="11" rx="2.5" fill="white" />
+          {/* Cross/plus shape — wide wings body */}
+          <rect x="0" y="7.5" width="28" height="14" rx="3.5" fill="white" />
+          {/* Cross/plus shape — door bottom arm */}
+          <rect x="9.5" y="20.5" width="9" height="7.5" rx="2.5" fill="white" />
+          {/* Roof peak triangle cutout */}
+          <polygon points="14,9 0.5,20.5 27.5,20.5" fill="black" />
+          {/* Wrench/tool notch cutout (upper-right of body) */}
+          <rect x="19" y="11.5" width="4" height="6" rx="1" fill="black" />
+        </mask>
+      </defs>
+      <rect width="28" height="28" fill="white" mask="url(#pm-logo-mask)" />
     </svg>
   );
 }

@@ -25,7 +25,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Intro />} />
             <Route path="/roles" element={<Roles storage={storage} onSave={update} />} />
-            <Route path="/dashboard" element={<Dashboard storage={storage} />} />
+            <Route path="/dashboard" element={<Dashboard storage={storage} onSave={update} />} />
             <Route path="/calculator" element={<Calculator storage={storage} onSave={update} />} />
             <Route path="/melders" element={<Melders storage={storage} onSave={update} />} />
             <Route path="/history" element={<History storage={storage} onSave={update} />} />

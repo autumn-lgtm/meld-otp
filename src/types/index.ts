@@ -8,7 +8,8 @@ export interface MetricDefinition {
   abbreviation: string;
   weight: number; // 0–1, must sum to 1 across metrics for a role
   description: string;
-  defaultTarget?: number; // pre-filled quota for this role
+  defaultTarget?: number;  // pre-filled quota for this role (numeric)
+  targetDisplay?: string;  // human-readable target label, e.g. "$5,500/mo" or "98%"
   inverse?: boolean;       // true = lower actual is better (e.g. response time); uses target/actual
 }
 
@@ -16,6 +17,7 @@ export interface Role {
   id: RoleId;
   name: string;
   fullName: string;
+  level?: 'IC1' | 'IC2' | 'IC3' | 'IC4' | 'MGR' | 'L1' | 'L2' | 'L3' | 'L4';
   cadence: 'monthly' | 'quarterly';
   metrics: MetricDefinition[];
   isCustom?: boolean;

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, AlertTriangle, TrendingUp, Star } from 'lucide-react';
+import { ChevronDown, ChevronUp, AlertTriangle, TrendingUp, Star, Eye, EyeOff } from 'lucide-react';
 
 const MELD_BLUE = '#1175CC';
 const MELD_DARK = '#022935';
@@ -49,7 +49,7 @@ const TEAMS: TeamData[] = [
     name: 'Business Development (BD)',
     highlight: 'turnaround',
     note: 'BD and BS are intentionally positioned below market on Compensation Ratio — known, accepted design choice.',
-    total: { oa: 77.9, cap: 87.7, ratio: 70.5, salary: 366800, market: 526000 },
+    total: { oa: 92.5, cap: 87.7, ratio: 70.5, salary: 366800, market: 526000 },
     melders: [
       { name: 'Benjamin Capelle',    oa: 46,   cap: 70.8,  ratio: 86.6, salary: 43900,  market: 59000, q: [46, 125, null, null] },
       { name: 'Benjamin S Echols',   oa: 75,   cap: 67.9,  ratio: 102.4,salary: 47000,  market: 59000, q: [75, 77, null, null] },
@@ -58,10 +58,10 @@ const TEAMS: TeamData[] = [
       { name: 'Johnathon L Bintliff',oa: 124,  cap: 85.4,  ratio: 98.1, salary: 50000,  market: 85000, q: [124, 129, 148, 162] },
       { name: 'Nicholas J Nagel',    oa: 73,   cap: 105.8, ratio: 84.2, salary: 62000,  market: 94000, q: [73, 95, 100, 119] },
       { name: 'Winston Pinto',       oa: 120,  cap: 86.4,  ratio: 98.1, salary: 73000,  market: 85000, q: [120, 101, 158, 170] },
-      { name: 'Jace Holzer',         oa: null, cap: 96.9,  ratio: 96.4, salary: 60000,  market: 63000, q: [null, 125, 137, 93] },
-      { name: 'Seth Nichols',        oa: null, cap: 96.7,  ratio: 86.6, salary: 43900,  market: 59000, q: [null, null, 113, 158] },
-      { name: 'Megan Golliher',      oa: null, cap: 111.7, ratio: 86.6, salary: 43900,  market: 59000, q: [null, null, 120, 115] },
-      { name: 'Anthony',             oa: null, cap: 109.1, ratio: 86.6, salary: 43900,  market: 59000, q: [null, null, 109, 90] },
+      { name: 'Jace Holzer',         oa: 118,  cap: 96.9,  ratio: 96.4, salary: 60000,  market: 63000, q: [null, 125, 137, 93],  note: 'Avg of Q2–Q4' },
+      { name: 'Seth Nichols',        oa: 136,  cap: 96.7,  ratio: 86.6, salary: 43900,  market: 59000, q: [null, null, 113, 158], note: 'Avg of Q3–Q4' },
+      { name: 'Megan Golliher',      oa: 118,  cap: 111.7, ratio: 86.6, salary: 43900,  market: 59000, q: [null, null, 120, 115], note: 'Avg of Q3–Q4' },
+      { name: 'Anthony',             oa: 100,  cap: 109.1, ratio: 86.6, salary: 43900,  market: 59000, q: [null, null, 109, 90],  note: 'Avg of Q3–Q4' },
     ],
   },
   {
@@ -83,6 +83,7 @@ const TEAMS: TeamData[] = [
   {
     id: 'bs',
     name: 'Business Solutions (BS)',
+    highlight: 'turnaround',
     note: 'BS is intentionally positioned below market on Compensation Ratio — known, accepted design choice.',
     total: { oa: 88.3, cap: 84.1, ratio: 87.9, salary: 400000, market: 548000 },
     melders: [
@@ -97,7 +98,6 @@ const TEAMS: TeamData[] = [
     id: 'marketing',
     name: 'Marketing',
     highlight: 'watch',
-    note: 'Q1 numbers reflect a measurement methodology change, not true underperformance — always contextualize this.',
     total: { oa: 97.5, cap: 87.0, ratio: 96.6, salary: 426400, market: 541000 },
     melders: [
       { name: 'Elizabeth Greenway', oa: 90.3,  cap: 82.4,  ratio: 72.5,  salary: 100000, market: 133000, q: [90.3, 99, 83, 69] },
@@ -220,8 +220,9 @@ function QCell({ v }: { v: number | null }) {
 
 // ─── Team Section ─────────────────────────────────────────────────────────────
 
-function TeamSection({ team }: { team: TeamData }) {
+function TeamSection({ team, masked }: { team: TeamData; masked: boolean }) {
   const [open, setOpen] = useState(false);
+  const mask = (v: number | null) => masked ? '••••' : usd(v);
 
   const highlightStyle: Record<string, { bg: string; border: string; badge: string; badgeColor: string }> = {
     model:      { bg: '#f0fdf4', border: '#bbf7d0', badge: 'Model Team', badgeColor: '#16a34a' },
@@ -266,11 +267,11 @@ function TeamSection({ team }: { team: TeamData }) {
           </div>
           <div className="text-center hidden md:block">
             <p className="text-xs text-slate-400">Salary</p>
-            <p className="font-semibold text-slate-700">{usd(team.total.salary)}</p>
+            <p className="font-semibold text-slate-700">{mask(team.total.salary)}</p>
           </div>
           <div className="text-center hidden md:block">
             <p className="text-xs text-slate-400">Market</p>
-            <p className="font-semibold text-slate-500">{usd(team.total.market)}</p>
+            <p className="font-semibold text-slate-500">{mask(team.total.market)}</p>
           </div>
           {open ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
         </div>
@@ -303,7 +304,10 @@ function TeamSection({ team }: { team: TeamData }) {
               <tbody>
                 {team.melders.map((m) => (
                   <tr key={m.name} className="border-b border-slate-50 hover:bg-slate-50/50">
-                    <td className="px-6 py-2.5 font-medium text-slate-800">{m.name}</td>
+                    <td className="px-6 py-2.5 font-medium text-slate-800">
+                      {m.name}
+                      {m.note && <span className="ml-2 text-xs font-normal text-slate-400 italic">{m.note}</span>}
+                    </td>
                     <td className="px-3 py-2.5 text-right">
                       <Pill value={m.oa !== null ? pct(m.oa, 0) : '—'} color={oaColor(m.oa)} />
                     </td>
@@ -313,8 +317,8 @@ function TeamSection({ team }: { team: TeamData }) {
                     <td className="px-3 py-2.5 text-right">
                       {m.ratio ? <Pill value={pct(m.ratio, 1)} color={ratioColor(m.ratio)} /> : <span className="text-slate-300">—</span>}
                     </td>
-                    <td className="px-3 py-2.5 text-right text-slate-600">{usd(m.salary)}</td>
-                    <td className="px-3 py-2.5 text-right text-slate-400">{usd(m.market)}</td>
+                    <td className="px-3 py-2.5 text-right text-slate-600">{mask(m.salary)}</td>
+                    <td className="px-3 py-2.5 text-right text-slate-400">{mask(m.market)}</td>
                     <td className="px-3 py-2.5 text-center"><QCell v={m.q[0]} /></td>
                     <td className="px-3 py-2.5 text-center"><QCell v={m.q[1]} /></td>
                     <td className="px-3 py-2.5 text-center"><QCell v={m.q[2]} /></td>
@@ -330,8 +334,8 @@ function TeamSection({ team }: { team: TeamData }) {
                   </td>
                   <td className="px-3 py-2.5 text-right"><Pill value={pct(team.total.cap, 1)} color={capColor(team.total.cap)} /></td>
                   <td className="px-3 py-2.5 text-right"><Pill value={pct(team.total.ratio, 1)} color={ratioColor(team.total.ratio)} /></td>
-                  <td className="px-3 py-2.5 text-right">{usd(team.total.salary)}</td>
-                  <td className="px-3 py-2.5 text-right text-slate-400">{usd(team.total.market)}</td>
+                  <td className="px-3 py-2.5 text-right">{mask(team.total.salary)}</td>
+                  <td className="px-3 py-2.5 text-right text-slate-400">{mask(team.total.market)}</td>
                   <td colSpan={4} />
                 </tr>
               </tfoot>
@@ -343,8 +347,9 @@ function TeamSection({ team }: { team: TeamData }) {
   );
 }
 
-function ExcludedSection({ team }: { team: ExcludedTeam }) {
+function ExcludedSection({ team, masked }: { team: ExcludedTeam; masked: boolean }) {
   const [open, setOpen] = useState(false);
+  const mask = (v: number | null) => masked ? '••••' : usd(v);
   return (
     <div className="rounded-2xl overflow-hidden shadow-sm border border-slate-100 bg-white">
       <button className="w-full text-left px-6 py-4 flex items-center justify-between gap-4" onClick={() => setOpen((o) => !o)}>
@@ -385,8 +390,8 @@ function ExcludedSection({ team }: { team: ExcludedTeam }) {
                   </td>
                   <td className="px-3 py-2.5 text-right"><Pill value={pct(m.cap, 1)} color={capColor(m.cap)} /></td>
                   <td className="px-3 py-2.5 text-right"><Pill value={pct(m.ratio, 1)} color={ratioColor(m.ratio)} /></td>
-                  <td className="px-3 py-2.5 text-right text-slate-600">{usd(m.salary)}</td>
-                  <td className="px-3 py-2.5 text-right text-slate-400">{usd(m.market)}</td>
+                  <td className="px-3 py-2.5 text-right text-slate-600">{mask(m.salary)}</td>
+                  <td className="px-3 py-2.5 text-right text-slate-400">{mask(m.market)}</td>
                 </tr>
               ))}
             </tbody>
@@ -400,6 +405,7 @@ function ExcludedSection({ team }: { team: ExcludedTeam }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export function Review2025() {
+  const [masked, setMasked] = useState(true);
   return (
     <div className="min-h-screen" style={{ background: '#F1F1F1' }}>
 
@@ -409,9 +415,20 @@ export function Review2025() {
           <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: MELD_LIGHT }}>
             Property Meld · Annual Review
           </p>
-          <h1 className="text-4xl font-black text-white mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            2025 Year in Review
-          </h1>
+          <div className="flex items-center gap-4 mb-2">
+            <h1 className="text-4xl font-black text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
+              2025 Year in Review
+            </h1>
+            <button
+              onClick={() => setMasked((m) => !m)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
+              style={{ background: 'rgba(255,255,255,0.15)', color: 'white', backdropFilter: 'blur(4px)' }}
+              title={masked ? 'Show salary data' : 'Hide salary data'}
+            >
+              {masked ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+              {masked ? 'Salaries hidden' : 'Salaries visible'}
+            </button>
+          </div>
           <p className="text-lg mb-8" style={{ color: MELD_LIGHT }}>
             Company-wide Outcome-to-Pay performance across all teams.
           </p>
@@ -419,8 +436,8 @@ export function Review2025() {
           {/* Company Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: 'Company OA (EOY)',   value: '~93%',  sub: 'Up from 72.6% in Q1', color: '#22c55e' },
-              { label: 'OA Growth',          value: '+20 pts', sub: 'Q1 → Q4 improvement',  color: MELD_ACCENT },
+              { label: 'Company OAP (EOY)',  value: '~99%',  sub: 'Up from 72.6% in Q1', color: '#f59e0b' },
+              { label: 'OAP Growth',         value: '+26 pts', sub: 'Q1 → Q4 improvement',  color: MELD_ACCENT },
               { label: 'BD Turnaround',      value: '+47 pts', sub: 'Biggest swing of 2025', color: MELD_ACCENT },
               { label: 'Support Annual OA',  value: '100%+',  sub: 'Model team all year',   color: '#22c55e' },
             ].map((s) => (
@@ -447,16 +464,16 @@ export function Review2025() {
           </div>
           <div className="rounded-2xl p-5 border-l-4" style={{ background: '#fffbeb', borderColor: MELD_ACCENT }}>
             <TrendingUp className="w-4 h-4 mb-2" style={{ color: '#d97706' }} />
-            <p className="font-bold text-sm" style={{ color: '#92400e', fontFamily: 'Poppins, sans-serif' }}>BD: Turnaround Story</p>
+            <p className="font-bold text-sm" style={{ color: '#92400e', fontFamily: 'Poppins, sans-serif' }}>BD &amp; BS: Turnaround Story</p>
             <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-              Business Development went from 78% OA in Q1 to 125% in Q4 — a +47-point swing. The story of the year for Meld.
+              Business Development swung from 78% OAP in Q1 to 125%+ in Q4 — a +47-point turnaround. Business Solutions followed the same arc, rebuilding from a weak Q1 to consistent Q3/Q4 performance. Both teams closed 2025 with real momentum.
             </p>
           </div>
           <div className="rounded-2xl p-5 border-l-4" style={{ background: '#fef2f2', borderColor: '#ef4444' }}>
             <AlertTriangle className="w-4 h-4 mb-2" style={{ color: '#dc2626' }} />
             <p className="font-bold text-sm" style={{ color: '#991b1b', fontFamily: 'Poppins, sans-serif' }}>Action Item: COM + Marketing</p>
             <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-              Both teams ended the year with comp structure questions. Reassess compensation design for 2026. Note: Marketing Q1 reflects a methodology change, not true underperformance.
+              Both teams ended the year with comp structure questions. Reassess compensation design for 2026.
             </p>
           </div>
         </div>
@@ -474,7 +491,7 @@ export function Review2025() {
           </h2>
           <div className="space-y-3">
             {TEAMS.map((team) => (
-              <TeamSection key={team.id} team={team} />
+              <TeamSection key={team.id} team={team} masked={masked} />
             ))}
           </div>
         </div>
@@ -487,7 +504,7 @@ export function Review2025() {
           <p className="text-xs text-slate-400 mb-3">Tracked but no OTP metrics assigned — OAP = 0 by design.</p>
           <div className="space-y-3">
             {EXCLUDED_TEAMS.map((team) => (
-              <ExcludedSection key={team.name} team={team} />
+              <ExcludedSection key={team.name} team={team} masked={masked} />
             ))}
           </div>
         </div>

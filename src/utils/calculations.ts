@@ -9,6 +9,24 @@ import type {
   RatioResult,
 } from '../types';
 
+// ─── Proration ─────────────────────────────────────────────────────────────────
+// Returns the fraction of a month worked (0–1) if the Melder's startDate falls
+// within the given month/year. Returns null when no proration applies.
+
+export function getProratedFactor(
+  startDate: string | undefined,
+  month: number,
+  year: number
+): number | null {
+  if (!startDate) return null;
+  const start = new Date(startDate);
+  if (isNaN(start.getTime())) return null;
+  if (start.getFullYear() !== year || start.getMonth() + 1 !== month) return null;
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const daysWorked = daysInMonth - start.getDate() + 1;
+  return Math.min(Math.max(daysWorked / daysInMonth, 0), 1);
+}
+
 // ─── Health Thresholds ─────────────────────────────────────────────────────────
 
 export function getOAPHealth(oap: number): HealthColor {
@@ -26,7 +44,7 @@ export function getCAPHealth(cap: number): HealthColor {
 export function getRatioHealth(ratio: number): HealthColor {
   if (ratio > 105) return 'blue';
   if (ratio >= 95) return 'green';
-  if (ratio >= 85) return 'yellow';
+  if (ratio >= 80) return 'yellow';
   return 'red';
 }
 

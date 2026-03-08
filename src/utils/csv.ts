@@ -101,6 +101,12 @@ export function importSalaryReportCSV(
         if (!name) { errors.push(`Row ${lineNum}: Missing Name — skipped`); return; }
 
         const roleId = (row['Role'] ?? row['role'] ?? '').trim().toUpperCase() || null;
+        const hireDateRaw = (row['HireDate'] ?? row['Hire Date'] ?? row['StartDate'] ?? row['Start Date'] ?? '').trim();
+        let startDate: string | undefined;
+        if (hireDateRaw) {
+          const d = new Date(hireDateRaw);
+          if (!isNaN(d.getTime())) startDate = d.toISOString().slice(0, 10);
+        }
 
         const currentSalary = parseDollar(row['Current Salary'] ?? row['current_salary']);
         const marketSalary  = parseDollar(row['Market Salary Target'] ?? row['Market Salary'] ?? row['market_salary']);
@@ -130,6 +136,7 @@ export function importSalaryReportCSV(
             id: generateId(),
             name,
             roleId,
+            startDate,
             marketRate: effectiveMarketRate,
             targetCompensation: effectiveTargetComp,
             createdAt: new Date().toISOString(),
@@ -175,6 +182,7 @@ export function importMeldersFromCSV(
         const roleId = row['Role']?.trim()?.toUpperCase();
         const marketRate = parseFloat(row['MarketRate'] ?? row['Market Rate'] ?? '0');
         const targetComp = parseFloat(row['TargetCompensation'] ?? row['Target Compensation'] ?? '0');
+        const hireDateRaw = (row['HireDate'] ?? row['Hire Date'] ?? row['StartDate'] ?? row['Start Date'] ?? '').trim();
 
         if (!name) { errors.push(`Row ${idx + 2}: Missing Name`); return; }
         if (!roleId) { errors.push(`Row ${idx + 2}: Missing Role`); return; }
@@ -182,11 +190,19 @@ export function importMeldersFromCSV(
         const roleExists = currentStorage.roles.some((r) => r.id === roleId);
         if (!roleExists) { errors.push(`Row ${idx + 2}: Unknown role "${roleId}"`); return; }
 
+        // Normalise hire date to ISO (YYYY-MM-DD), supporting M/D/YYYY and YYYY-MM-DD input
+        let startDate: string | undefined;
+        if (hireDateRaw) {
+          const d = new Date(hireDateRaw);
+          if (!isNaN(d.getTime())) startDate = d.toISOString().slice(0, 10);
+        }
+
         const melder: Melder = {
           id: generateId(),
           name,
           roleId,
           email: row['Email']?.trim() ?? undefined,
+          startDate,
           marketRate: isNaN(marketRate) ? 0 : marketRate,
           targetCompensation: isNaN(targetComp) ? 0 : targetComp,
           createdAt: new Date().toISOString(),

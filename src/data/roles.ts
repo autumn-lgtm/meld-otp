@@ -6,6 +6,7 @@ export const DEFAULT_ROLES: Role[] = [
     id: 'BDA',
     name: 'BDA',
     fullName: 'Business Development Associate',
+    level: 'IC1',
     cadence: 'monthly',
     metrics: [
       {
@@ -15,6 +16,7 @@ export const DEFAULT_ROLES: Role[] = [
         weight: 0.5,
         description: 'Sales Qualified Leads generated per month',
         defaultTarget: 8,
+        targetDisplay: '8 SQLs/mo',
       },
       {
         id: 'BDA-VD',
@@ -23,6 +25,7 @@ export const DEFAULT_ROLES: Role[] = [
         weight: 0.5,
         description: 'Pipeline value demonstrated through meetings and demos',
         defaultTarget: 2000,
+        targetDisplay: '$2,000/mo',
       },
     ],
   },
@@ -30,6 +33,7 @@ export const DEFAULT_ROLES: Role[] = [
     id: 'BDR',
     name: 'BDR',
     fullName: 'Business Development Representative',
+    level: 'IC2',
     cadence: 'monthly',
     metrics: [
       {
@@ -39,6 +43,7 @@ export const DEFAULT_ROLES: Role[] = [
         weight: 0.5,
         description: 'Sales Qualified Leads generated per month',
         defaultTarget: 8,
+        targetDisplay: '8 SQLs/mo',
       },
       {
         id: 'BDR-VD',
@@ -47,6 +52,7 @@ export const DEFAULT_ROLES: Role[] = [
         weight: 0.5,
         description: 'Pipeline value demonstrated through meetings and demos',
         defaultTarget: 3000,
+        targetDisplay: '$3,000/mo',
       },
     ],
   },
@@ -54,6 +60,7 @@ export const DEFAULT_ROLES: Role[] = [
     id: 'SR-BDR',
     name: 'SR-BDR',
     fullName: 'Senior / Principal BDR',
+    level: 'IC3',
     cadence: 'monthly',
     metrics: [
       {
@@ -63,6 +70,7 @@ export const DEFAULT_ROLES: Role[] = [
         weight: 0.5,
         description: 'Sales Qualified Leads generated per month',
         defaultTarget: 8,
+        targetDisplay: '8 SQLs/mo',
       },
       {
         id: 'SRBDR-VD',
@@ -71,6 +79,7 @@ export const DEFAULT_ROLES: Role[] = [
         weight: 0.5,
         description: 'Pipeline value demonstrated through meetings and demos',
         defaultTarget: 5000,
+        targetDisplay: '$5,000/mo',
       },
     ],
   },
@@ -80,6 +89,7 @@ export const DEFAULT_ROLES: Role[] = [
     id: 'ASSOC-BSE',
     name: 'ASSOC-BSE',
     fullName: 'Associate Business Solutions Executive',
+    level: 'IC1',
     cadence: 'monthly',
     metrics: [
       {
@@ -89,6 +99,7 @@ export const DEFAULT_ROLES: Role[] = [
         weight: 0.75,
         description: 'New MRR closed from net-new logos during the period',
         defaultTarget: 4500,
+        targetDisplay: '$4,500/mo',
       },
       {
         id: 'ABSE-OUTBOUND',
@@ -97,6 +108,7 @@ export const DEFAULT_ROLES: Role[] = [
         weight: 0.125,
         description: 'Percentage of outbound opportunities converted to closed-won',
         defaultTarget: 18,
+        targetDisplay: '18%',
       },
       {
         id: 'ABSE-INBOUND',
@@ -105,6 +117,7 @@ export const DEFAULT_ROLES: Role[] = [
         weight: 0.125,
         description: 'Percentage of inbound opportunities converted to closed-won',
         defaultTarget: 25,
+        targetDisplay: '25%',
       },
     ],
   },
@@ -112,6 +125,7 @@ export const DEFAULT_ROLES: Role[] = [
     id: 'BSE',
     name: 'BSE',
     fullName: 'Business Solutions Executive',
+    level: 'IC2',
     cadence: 'monthly',
     metrics: [
       {
@@ -121,6 +135,7 @@ export const DEFAULT_ROLES: Role[] = [
         weight: 0.75,
         description: 'New MRR closed from net-new logos during the period',
         defaultTarget: 5500,
+        targetDisplay: '$5,500/mo',
       },
       {
         id: 'BSE-OUTBOUND',
@@ -129,6 +144,7 @@ export const DEFAULT_ROLES: Role[] = [
         weight: 0.125,
         description: 'Percentage of outbound opportunities converted to closed-won',
         defaultTarget: 20,
+        targetDisplay: '20%',
       },
       {
         id: 'BSE-INBOUND',
@@ -137,6 +153,7 @@ export const DEFAULT_ROLES: Role[] = [
         weight: 0.125,
         description: 'Percentage of inbound opportunities converted to closed-won',
         defaultTarget: 30,
+        targetDisplay: '30%',
       },
     ],
   },
@@ -144,6 +161,7 @@ export const DEFAULT_ROLES: Role[] = [
     id: 'SR-BSE',
     name: 'SR-BSE',
     fullName: 'Senior Business Solutions Executive',
+    level: 'IC3',
     cadence: 'monthly',
     metrics: [
       {
@@ -153,6 +171,7 @@ export const DEFAULT_ROLES: Role[] = [
         weight: 0.75,
         description: 'New MRR closed from net-new logos during the period',
         defaultTarget: 6500,
+        targetDisplay: '$6,500/mo',
       },
       {
         id: 'SRBSE-CONV',
@@ -161,6 +180,7 @@ export const DEFAULT_ROLES: Role[] = [
         weight: 0.25,
         description: 'Overall percentage of qualified opportunities converted to closed-won',
         defaultTarget: 35,
+        targetDisplay: '35%',
       },
     ],
   },
@@ -170,6 +190,7 @@ export const DEFAULT_ROLES: Role[] = [
     id: 'CSM',
     name: 'CSM',
     fullName: 'Customer Success Manager (SMB)',
+    level: 'IC2',
     cadence: 'monthly',
     metrics: [
       {
@@ -178,6 +199,8 @@ export const DEFAULT_ROLES: Role[] = [
         abbreviation: 'GRR',
         weight: 0.65,
         description: 'Percentage of recurring revenue retained from existing customers (excluding expansion)',
+        defaultTarget: 98,
+        targetDisplay: '98%',
       },
       {
         id: 'CSM-UCR',
@@ -185,6 +208,8 @@ export const DEFAULT_ROLES: Role[] = [
         abbreviation: 'UCR',
         weight: 0.35,
         description: 'Revenue from upsells and expansions closed during the period',
+        defaultTarget: 15000,
+        targetDisplay: '$15,000/mo',
       },
     ],
   },
@@ -192,6 +217,7 @@ export const DEFAULT_ROLES: Role[] = [
     id: 'MM-CSM',
     name: 'MM-CSM',
     fullName: 'Mid Market Customer Success Manager',
+    level: 'IC4',
     cadence: 'monthly',
     metrics: [
       {
@@ -200,6 +226,8 @@ export const DEFAULT_ROLES: Role[] = [
         abbreviation: 'GRR',
         weight: 0.8,
         description: 'Percentage of recurring revenue retained from existing customers',
+        defaultTarget: 99,
+        targetDisplay: '99%',
       },
       {
         id: 'MMCSM-NRR',
@@ -207,6 +235,8 @@ export const DEFAULT_ROLES: Role[] = [
         abbreviation: 'NRR',
         weight: 0.2,
         description: 'Net revenue retained including expansion (upsell captured in NRR)',
+        defaultTarget: 105,
+        targetDisplay: '105%',
       },
     ],
   },
@@ -216,6 +246,7 @@ export const DEFAULT_ROLES: Role[] = [
     id: 'CSS',
     name: 'CSS',
     fullName: 'Customer Support Specialist',
+    level: 'IC2',
     cadence: 'monthly',
     metrics: [
       {
@@ -225,6 +256,7 @@ export const DEFAULT_ROLES: Role[] = [
         weight: 0.5,
         description: 'Customer satisfaction score as a percentage',
         defaultTarget: 97.99,
+        targetDisplay: '97.99%',
       },
       {
         id: 'CSS-CRT',
@@ -233,6 +265,7 @@ export const DEFAULT_ROLES: Role[] = [
         weight: 0.5,
         description: 'Average chat response time in minutes — lower is better (attainment = Target ÷ Actual)',
         defaultTarget: 0.4,
+        targetDisplay: '0.4 min',
         inverse: true,
       },
     ],
@@ -241,6 +274,7 @@ export const DEFAULT_ROLES: Role[] = [
     id: 'MMES',
     name: 'MMES',
     fullName: 'Mid Market Customer Enablement Specialist',
+    level: 'IC4',
     cadence: 'monthly',
     metrics: [
       {
@@ -250,6 +284,7 @@ export const DEFAULT_ROLES: Role[] = [
         weight: 0.5,
         description: 'Gross revenue retained from Mid Market customers (excluding expansion)',
         defaultTarget: 94,
+        targetDisplay: '94%',
       },
       {
         id: 'MMES-CSAT',
@@ -258,8 +293,35 @@ export const DEFAULT_ROLES: Role[] = [
         weight: 0.5,
         description: 'Customer satisfaction score as a percentage',
         defaultTarget: 97.99,
+        targetDisplay: '97.99%',
       },
     ],
+  },
+
+  // ── Marketing Track (comp-tracking only — OAP metrics TBD) ─────────────────
+  {
+    id: 'MKT-IC2',
+    name: 'MKT-IC2',
+    fullName: 'Marketing — Standard IC',
+    level: 'IC2',
+    cadence: 'monthly',
+    metrics: [],
+  },
+  {
+    id: 'MKT-IC3',
+    name: 'MKT-IC3',
+    fullName: 'Marketing — Senior / Manager',
+    level: 'IC3',
+    cadence: 'monthly',
+    metrics: [],
+  },
+  {
+    id: 'MKT-L4',
+    name: 'MKT-L4',
+    fullName: 'Marketing — Leadership (L4)',
+    level: 'L4',
+    cadence: 'monthly',
+    metrics: [],
   },
 
   // ── Onboarding Track ────────────────────────────────────────────────────────
@@ -267,6 +329,7 @@ export const DEFAULT_ROLES: Role[] = [
     id: 'COM',
     name: 'COM',
     fullName: 'Customer Onboarding Manager',
+    level: 'IC2',
     cadence: 'quarterly',
     metrics: [
       {
@@ -275,6 +338,8 @@ export const DEFAULT_ROLES: Role[] = [
         abbreviation: '14-Day Conv',
         weight: 0.5,
         description: 'Average 14-day conversion rate across the quarter',
+        defaultTarget: 75,
+        targetDisplay: '75%',
       },
       {
         id: 'COM-90DAY',
@@ -282,6 +347,8 @@ export const DEFAULT_ROLES: Role[] = [
         abbreviation: '90-Day Conv',
         weight: 0.5,
         description: 'Percentage of onboarded customers fully converted at 90 days',
+        defaultTarget: 85,
+        targetDisplay: '85%',
       },
     ],
   },

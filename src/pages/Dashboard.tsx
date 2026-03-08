@@ -1,14 +1,24 @@
-import { AlertTriangle, ArrowDownRight, ArrowUpRight, Calculator, PieChart, TrendingUp, Users } from 'lucide-react';
-import { useMemo } from 'react';
+import { AlertTriangle, ArrowDownRight, ArrowUpRight, Calculator, Edit2, PieChart, Plus, Trash2, TrendingUp, Users, X } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { HealthBadge } from '../components/shared/HealthBadge';
 import { Header } from '../components/layout/Header';
 import type { AppStorage, HealthColor, Melder, MonthlyReport } from '../types';
 import { MONTHS } from '../types';
 import { aggregateTeamReports, fmtPct } from '../utils/calculations';
+import { deleteMelder, saveMelder } from '../utils/storage';
 
 interface Props {
   storage: AppStorage;
+  onSave: (updater: (s: AppStorage) => AppStorage) => void;
+}
+
+interface MelderForm {
+  name: string;
+  roleId: string;
+  email: string;
+  targetCompensation: string;
+  marketRate: string;
 }
 
 // Latest report per melder
@@ -35,8 +45,42 @@ function StatCard({ label, value, sub, color }: { label: string; value: string; 
 
 const healthRank: Record<HealthColor, number> = { red: 0, yellow: 1, green: 2, blue: 3 };
 
-export function Dashboard({ storage }: Props) {
+export function Dashboard({ storage, onSave }: Props) {
   const { melders, reports, roles } = storage;
+  const [editingMelder, setEditingMelder] = useState<Melder | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [form, setForm] = useState<MelderForm>({ name: '', roleId: '', email: '', targetCompensation: '', marketRate: '' });
+
+  function openEdit(melder: Melder) {
+    setEditingMelder(melder);
+    setForm({
+      name: melder.name,
+      roleId: melder.roleId,
+      email: melder.email ?? '',
+      targetCompensation: melder.targetCompensation > 0 ? String(melder.targetCompensation) : '',
+      marketRate: melder.marketRate > 0 ? String(melder.marketRate) : '',
+    });
+  }
+
+  function handleSaveEdit() {
+    if (!editingMelder || !form.name.trim() || !form.roleId) return;
+    const updated: Melder = {
+      ...editingMelder,
+      name: form.name.trim(),
+      roleId: form.roleId,
+      email: form.email.trim() || undefined,
+      targetCompensation: parseFloat(form.targetCompensation) || 0,
+      marketRate: parseFloat(form.marketRate) || 0,
+      updatedAt: new Date().toISOString(),
+    };
+    onSave((s) => saveMelder(s, updated));
+    setEditingMelder(null);
+  }
+
+  function handleDelete(id: string) {
+    onSave((s) => deleteMelder(s, id));
+    setDeleteConfirm(null);
+  }
 
   const latestReports = useMemo(() => getLatestReports(melders, reports), [melders, reports]);
 
@@ -90,13 +134,22 @@ export function Dashboard({ storage }: Props) {
         title="OTP Dashboard"
         subtitle="Overview of all Melders — sorted by compensation health"
         actions={
-          <Link
-            to="/calculator"
-            className="flex items-center gap-2 px-4 py-2 bg-[#1175CC] text-white text-sm font-medium rounded-xl hover:bg-[#0d62b0] transition-colors"
-          >
-            <Calculator className="w-4 h-4" />
-            New Report
-          </Link>
+          <div className="flex gap-2">
+            <Link
+              to="/melders"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 text-sm font-medium rounded-xl hover:bg-slate-200 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              Add Melder
+            </Link>
+            <Link
+              to="/calculator"
+              className="flex items-center gap-2 px-4 py-2 bg-[#1175CC] text-white text-sm font-medium rounded-xl hover:bg-[#0d62b0] transition-colors"
+            >
+              <Calculator className="w-4 h-4" />
+              New Report
+            </Link>
+          </div>
         }
       />
 
@@ -193,11 +246,87 @@ export function Dashboard({ storage }: Props) {
                 report={report}
                 roleName={roleMap[melder.roleId] ?? melder.roleId}
                 sparkReports={melderHistory}
+                onEdit={() => openEdit(melder)}
+                onDelete={() => setDeleteConfirm(melder.id)}
               />
             );
           })}
         </div>
       )}
+
+      {/* Edit Melder Modal */}
+      {editingMelder && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+              <h2 className="font-bold text-slate-900">Edit Melder</h2>
+              <button onClick={() => setEditingMelder(null)} className="text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="px-6 py-5 space-y-4">
+              <FormField label="Name">
+                <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1175CC]" />
+              </FormField>
+              <FormField label="Role">
+                <select value={form.roleId} onChange={(e) => setForm({ ...form, roleId: e.target.value })}
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1175CC]">
+                  <option value="">— select —</option>
+                  {roles.map((r) => <option key={r.id} value={r.id}>{r.id} — {r.fullName}</option>)}
+                </select>
+              </FormField>
+              <FormField label="Email (optional)">
+                <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1175CC]" />
+              </FormField>
+              <div className="grid grid-cols-2 gap-3">
+                <FormField label="Target Comp ($/mo)">
+                  <input type="number" value={form.targetCompensation} onChange={(e) => setForm({ ...form, targetCompensation: e.target.value })}
+                    className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1175CC]" placeholder="e.g. 9000" />
+                </FormField>
+                <FormField label="Market Rate ($/mo)">
+                  <input type="number" value={form.marketRate} onChange={(e) => setForm({ ...form, marketRate: e.target.value })}
+                    className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1175CC]" placeholder="e.g. 9500" />
+                </FormField>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 px-6 py-4 border-t border-slate-100">
+              <button onClick={() => setEditingMelder(null)} className="px-4 py-2 text-sm text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200">Cancel</button>
+              <button onClick={handleSaveEdit} disabled={!form.name.trim() || !form.roleId}
+                className="px-5 py-2 text-sm font-medium text-white bg-[#1175CC] rounded-xl hover:bg-[#0d62b0] disabled:opacity-40">
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirm */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
+            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+              <Trash2 className="w-6 h-6 text-red-500" />
+            </div>
+            <h3 className="font-bold text-slate-900 mb-2">Delete this Melder?</h3>
+            <p className="text-slate-500 text-sm mb-5">This will also delete all their reports. Cannot be undone.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setDeleteConfirm(null)} className="flex-1 px-4 py-2 text-sm text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200">Cancel</button>
+              <button onClick={() => handleDelete(deleteConfirm)} className="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-xl hover:bg-red-600">Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FormField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{label}</label>
+      {children}
     </div>
   );
 }
@@ -207,11 +336,15 @@ function MelderCard({
   report,
   roleName,
   sparkReports,
+  onEdit,
+  onDelete,
 }: {
   melder: Melder;
   report?: MonthlyReport;
   roleName: string;
   sparkReports: MonthlyReport[];
+  onEdit: () => void;
+  onDelete: () => void;
 }) {
   const monthLabel = report ? `${MONTHS[report.month - 1]} ${report.year}` : null;
 
@@ -220,11 +353,11 @@ function MelderCard({
       {/* Card Header */}
       <div className="px-5 py-4 border-b border-slate-100">
         <div className="flex items-start justify-between">
-          <div>
-            <h3 className="font-bold text-slate-900">{melder.name}</h3>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-bold text-slate-900 truncate">{melder.name}</h3>
             <p className="text-slate-500 text-sm">{roleName}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 ml-2 flex-shrink-0">
             {sparkReports.length >= 2 && (
               <MiniSparkline reports={sparkReports} melderId={melder.id} />
             )}
@@ -233,6 +366,12 @@ function MelderCard({
                 {monthLabel}
               </span>
             )}
+            <button onClick={onEdit} className="p-1.5 text-slate-300 hover:text-[#1175CC] hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
+              <Edit2 className="w-3.5 h-3.5" />
+            </button>
+            <button onClick={onDelete} className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
       </div>

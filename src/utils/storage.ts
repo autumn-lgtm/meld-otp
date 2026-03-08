@@ -1,4 +1,5 @@
 import type { AppStorage, Melder, MonthlyReport, Role } from '../types';
+import { DEFAULT_MELDERS } from '../data/melders';
 import { DEFAULT_ROLES } from '../data/roles';
 
 const STORAGE_KEY = 'meld-otp-v1';
@@ -6,7 +7,7 @@ const CURRENT_VERSION = 1;
 
 function getDefaultStorage(): AppStorage {
   return {
-    melders: [],
+    melders: DEFAULT_MELDERS,
     reports: [],
     roles: DEFAULT_ROLES,
     version: CURRENT_VERSION,
@@ -18,12 +19,28 @@ export function loadStorage(): AppStorage {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return getDefaultStorage();
     const parsed = JSON.parse(raw) as AppStorage;
-    // Merge in default roles if missing (for upgrades)
+    // Add any roles that are new in defaults
     const existingRoleIds = new Set(parsed.roles.map((r) => r.id));
     const missingDefaults = DEFAULT_ROLES.filter((r) => !existingRoleIds.has(r.id));
+    // Backfill targetDisplay from defaults for existing system roles (non-destructive)
+    const mergedRoles = parsed.roles.map((role) => {
+      const defaultRole = DEFAULT_ROLES.find((d) => d.id === role.id);
+      if (!defaultRole || role.isCustom) return role;
+      return {
+        ...role,
+        metrics: role.metrics.map((metric) => {
+          if (metric.targetDisplay) return metric;
+          const defaultMetric = defaultRole.metrics.find((m) => m.id === metric.id);
+          return defaultMetric?.targetDisplay ? { ...metric, targetDisplay: defaultMetric.targetDisplay } : metric;
+        }),
+      };
+    });
+    // Backfill seed melders if storage has none
+    const melders = parsed.melders.length === 0 ? DEFAULT_MELDERS : parsed.melders;
     return {
       ...parsed,
-      roles: [...missingDefaults, ...parsed.roles],
+      melders,
+      roles: [...missingDefaults, ...mergedRoles],
     };
   } catch {
     return getDefaultStorage();
@@ -84,6 +101,10 @@ export function saveRole(storage: AppStorage, role: Role): AppStorage {
       ? storage.roles.map((r) => (r.id === role.id ? role : r))
       : [...storage.roles, role];
   return { ...storage, roles };
+}
+
+export function deleteRole(storage: AppStorage, roleId: string): AppStorage {
+  return { ...storage, roles: storage.roles.filter((r) => r.id !== roleId) };
 }
 
 // ─── JSON Export/Import ────────────────────────────────────────────────────────

@@ -1,0 +1,28 @@
+import type { Melder } from '../types';
+
+export const DEFAULT_MELDERS: Melder[] = [
+  { id: 'melder-aaron-trimble',       name: 'Aaron Trimble',        roleId: 'CSS',       targetCompensation: 50000, marketRate: 0, createdAt: '2022-06-20T00:00:00Z', updatedAt: '2022-06-20T00:00:00Z' },
+  { id: 'melder-andrew-mcglashan',    name: 'Andrew McGlashan',     roleId: 'ASSOC-BSE', targetCompensation: 55000, marketRate: 0, createdAt: '2022-08-01T00:00:00Z', updatedAt: '2022-08-01T00:00:00Z' },
+  { id: 'melder-johnathon-bintliff',  name: 'Johnathon Bintliff',   roleId: 'SR-BDR',    targetCompensation: 50000, marketRate: 0, createdAt: '2022-07-26T00:00:00Z', updatedAt: '2022-07-26T00:00:00Z' },
+  { id: 'melder-deepika-yalla',       name: 'Deepika Yalla-Colomb', roleId: 'CSS',       targetCompensation: 50000, marketRate: 0, createdAt: '2023-05-15T00:00:00Z', updatedAt: '2023-05-15T00:00:00Z' },
+  { id: 'melder-nathanael-hockley',   name: 'Nathanael Hockley',    roleId: 'CSS',       targetCompensation: 75000, marketRate: 0, createdAt: '2022-08-01T00:00:00Z', updatedAt: '2022-08-01T00:00:00Z' },
+  { id: 'melder-kristoffer-hewlett',  name: 'Kristoffer Hewlett',   roleId: 'COM',       targetCompensation: 83000, marketRate: 0, createdAt: '2023-07-24T00:00:00Z', updatedAt: '2023-07-24T00:00:00Z' },
+  { id: 'melder-aaron-costello',      name: 'Aaron Costello',       roleId: 'BSE',       targetCompensation: 80000, marketRate: 0, createdAt: '2024-07-22T00:00:00Z', updatedAt: '2024-07-22T00:00:00Z' },
+  { id: 'melder-bryce-codr',          name: 'Bryce Codr',           roleId: 'CSM',       targetCompensation: 66000, marketRate: 0, createdAt: '2024-06-26T00:00:00Z', updatedAt: '2024-06-26T00:00:00Z' },
+  { id: 'melder-bridget-marshall',    name: 'Bridget Marshall',     roleId: 'BDR',       targetCompensation: 47000, marketRate: 0, createdAt: '2024-10-16T00:00:00Z', updatedAt: '2024-10-16T00:00:00Z' },
+  { id: 'melder-benjamin-capelle',    name: 'Benjamin Capelle',     roleId: 'CSM',       targetCompensation: 63000, marketRate: 0, createdAt: '2025-01-15T00:00:00Z', updatedAt: '2025-01-15T00:00:00Z' },
+  { id: 'melder-christopher-erickson',name: 'Christopher Erickson', roleId: 'BSE',       targetCompensation: 68000, marketRate: 0, createdAt: '2025-01-06T00:00:00Z', updatedAt: '2025-01-06T00:00:00Z' },
+  { id: 'melder-jace-holzer',         name: 'Jace Holzer',          roleId: 'SR-BDR',    targetCompensation: 60000, marketRate: 0, createdAt: '2025-04-01T00:00:00Z', updatedAt: '2025-04-01T00:00:00Z' },
+  { id: 'melder-seth-nichols',        name: 'Seth Nichols',         roleId: 'BDA',       targetCompensation: 43900, marketRate: 0, createdAt: '2025-06-30T00:00:00Z', updatedAt: '2025-06-30T00:00:00Z' },
+  { id: 'melder-anthony-drealan',     name: 'Anthony Drealan',      roleId: 'BDA',       targetCompensation: 43900, marketRate: 0, createdAt: '2025-08-25T00:00:00Z', updatedAt: '2025-08-25T00:00:00Z' },
+  { id: 'melder-johnny-trokey',       name: 'Johnny Trokey',        roleId: 'CSM',       targetCompensation: 70000, marketRate: 0, createdAt: '2025-09-02T00:00:00Z', updatedAt: '2025-09-02T00:00:00Z' },
+  { id: 'melder-megan-byrd',          name: 'Megan Byrd',           roleId: 'CSS',       targetCompensation: 16800, marketRate: 0, createdAt: '2025-10-15T00:00:00Z', updatedAt: '2025-10-15T00:00:00Z' },
+  { id: 'melder-jessica-brown',       name: 'Jessica Brown',        roleId: 'MM-CSM',    targetCompensation: 90000, marketRate: 0, createdAt: '2025-12-29T00:00:00Z', updatedAt: '2025-12-29T00:00:00Z' },
+  { id: 'melder-bailey-dunlap',       name: 'Bailey Dunlap',        roleId: 'CSM',       targetCompensation: 60000, marketRate: 0, createdAt: '2026-02-09T00:00:00Z', updatedAt: '2026-02-09T00:00:00Z' },
+  { id: 'melder-jarek-glenn',         name: 'Jarek Glenn',          roleId: 'BDA',       targetCompensation: 43900, marketRate: 0, createdAt: '2026-02-17T00:00:00Z', updatedAt: '2026-02-17T00:00:00Z' },
+  { id: 'melder-jeffrey-monson',      name: 'Jeffrey Monson',       roleId: 'CSS',       targetCompensation: 67000, marketRate: 0, createdAt: '2019-08-26T00:00:00Z', updatedAt: '2019-08-26T00:00:00Z' },
+  { id: 'melder-molly-sperlich',      name: 'Molly Sperlich',       roleId: 'MKT-IC3',   targetCompensation: 72000, marketRate: 0, createdAt: '2022-10-21T00:00:00Z', updatedAt: '2022-10-21T00:00:00Z' },
+  { id: 'melder-jonathan-martin',     name: 'Jonathan Martin',      roleId: 'MKT-IC3',   targetCompensation: 65000, marketRate: 0, createdAt: '2023-02-13T00:00:00Z', updatedAt: '2023-02-13T00:00:00Z' },
+  { id: 'melder-michael-nasibog',     name: 'Michael Nasibog',      roleId: 'MKT-IC2',   targetCompensation: 53400, marketRate: 0, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
+  { id: 'melder-madison',             name: 'Madison',              roleId: 'MKT-L4',    targetCompensation: 0,     marketRate: 0, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
+];
