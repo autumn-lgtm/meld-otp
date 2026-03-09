@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowDownRight, ArrowUpRight, Calculator, Edit2, Eye, EyeOff, PieChart, Plus, Search, Shield, Trash2, TrendingUp, Users, X } from 'lucide-react';
+import { AlertTriangle, ArrowDownRight, ArrowUpRight, Calculator, Edit2, Eye, EyeOff, GraduationCap, PieChart, Plus, Search, Shield, Trash2, TrendingUp, Users, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useSalaryVisible } from '../hooks/useSalaryVisible';
 import { Link } from 'react-router-dom';
@@ -17,6 +17,7 @@ interface Props {
 interface MelderForm {
   name: string;
   roleId: string;
+  department: string;
   email: string;
   targetCompensation: string;
   marketRate: string;
@@ -87,24 +88,61 @@ function melderDept(melder: { roleId: string; department?: string }, snapshot?: 
 
 // Explicit department leader IDs — drives "leader card" styling and sort-first within dept
 const DEPT_LEADER_IDS = new Set([
-  'melder-madison',            // Marketing
-  'melder-nicholas-nagel',     // Business Development
+  'melder-madison',             // Marketing
+  'melder-elizabeth-greenway',  // Marketing (reports to Madison)
+  'melder-nicholas-nagel',      // Business Development
   'melder-john-kearns',        // Business Solutions
   'melder-aaron-seaholm',      // Customer Onboarding
   'melder-anna-torvi',         // Customer Success
   'melder-nathanael-hockley',  // Customer Support & Enablement
   'melder-autumn-hughes',      // People Ops
   'melder-austin-wentz',       // Engineering
+  'melder-martin-graham',      // Engineering
   'melder-david-turner',       // Engineering & Data
   'melder-erin-karam',         // Engineering & Data
 ]);
+
+// Name-based fallback — matches regardless of stored ID (handles CSV imports / localStorage drift)
+const DEPT_LEADER_NAMES = new Set([
+  'Madison',
+  'Elizabeth Greenway', 'Liz Greenway',
+  'Nicholas J Nagel', 'Nicholas Nagel', 'Nick Nagel',
+  'John Kearns',
+  'Aaron Seaholm',
+  'Anna Torvi',
+  'Nathanael Hockley',
+  'Autumn Hughes',
+  'Austin Wentz',
+  'Martin Graham',
+  'David Turner',
+  'Erin Karam',
+]);
+
+function isLeader(melder: Melder): boolean {
+  return DEPT_LEADER_IDS.has(melder.id) || DEPT_LEADER_NAMES.has(melder.name.trim());
+}
+
+function isIntern(melder: Melder): boolean {
+  return melder.roleId === 'INTERN';
+}
+
+// Nickname → canonical seed name for snapshot lookup (lowercased keys)
+const NAME_ALIASES: Record<string, string> = {
+  'nick nagel':           'nicholas j nagel',
+  'nicholas nagel':       'nicholas j nagel',
+  'liz greenway':         'elizabeth greenway',
+  'jonathan martin':      'jon martin',
+  'andrew mcglashan':     'andrew d mcglashan',
+  'johnathon bintliff':   'johnathon l bintliff',
+  'jonathon bintliff':    'johnathon l bintliff',
+};
 
 export function Dashboard({ storage, onSave }: Props) {
   const { melders, reports, roles, annualSnapshots } = storage;
   const [editingMelder, setEditingMelder] = useState<Melder | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [editingSnapshot, setEditingSnapshot] = useState<AnnualSnapshot | null>(null);
-  const [form, setForm] = useState<MelderForm>({ name: '', roleId: '', email: '', targetCompensation: '', marketRate: '' });
+  const [form, setForm] = useState<MelderForm>({ name: '', roleId: '', department: '', email: '', targetCompensation: '', marketRate: '' });
   const { salaryVisible: showSalary, toggleSalary } = useSalaryVisible();
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -117,11 +155,18 @@ export function Dashboard({ storage, onSave }: Props) {
     return map;
   }, [annualSnapshots]);
 
+  // Resolve a melder's stored name to a snapshot, accounting for nicknames/aliases
+  const getSnapshot = (name: string): AnnualSnapshot | undefined => {
+    const key = name.toLowerCase().trim();
+    return snapshotByName.get(key) ?? snapshotByName.get(NAME_ALIASES[key] ?? '');
+  };
+
   function openEdit(melder: Melder) {
     setEditingMelder(melder);
     setForm({
       name: melder.name,
       roleId: melder.roleId,
+      department: KNOWN_DEPTS.has(melder.department ?? '') ? (melder.department ?? '') : '',
       email: melder.email ?? '',
       targetCompensation: melder.targetCompensation > 0 ? String(Math.round(melder.targetCompensation * 12)) : '',
       marketRate: melder.marketRate > 0 ? String(Math.round(melder.marketRate * 12)) : '',
@@ -134,6 +179,7 @@ export function Dashboard({ storage, onSave }: Props) {
       ...editingMelder,
       name: form.name.trim(),
       roleId: form.roleId,
+      department: form.department || undefined,
       email: form.email.trim() || undefined,
       targetCompensation: (parseFloat(form.targetCompensation) || 0) / 12,
       marketRate: (parseFloat(form.marketRate) || 0) / 12,
@@ -184,14 +230,16 @@ export function Dashboard({ storage, onSave }: Props) {
   // Sort melders: by department (customer journey order), leaders first, then worst OTP health
   const sortedMelders = useMemo(() => {
     return [...melders].sort((a, b) => {
-      const snapA = snapshotByName.get(a.name.toLowerCase().trim());
-      const snapB = snapshotByName.get(b.name.toLowerCase().trim());
+      const snapA = getSnapshot(a.name);
+      const snapB = getSnapshot(b.name);
       const teamA = melderDept(a, snapA);
       const teamB = melderDept(b, snapB);
       const teamCmp = deptRank(teamA) - deptRank(teamB);
       if (teamCmp !== 0) return teamCmp;
-      const aLead = DEPT_LEADER_IDS.has(a.id), bLead = DEPT_LEADER_IDS.has(b.id);
+      const aLead = isLeader(a), bLead = isLeader(b);
       if (aLead !== bLead) return aLead ? -1 : 1;
+      const aIntern = isIntern(a), bIntern = isIntern(b);
+      if (aIntern !== bIntern) return aIntern ? 1 : -1;
       const ra = latestReports.get(a.id);
       const rb = latestReports.get(b.id);
       if (!ra && !rb) return 0;
@@ -211,7 +259,7 @@ export function Dashboard({ storage, onSave }: Props) {
   const groupedMelders = useMemo(() => {
     const groups: [string, Melder[]][] = [];
     for (const m of sortedMelders) {
-      const snap = snapshotByName.get(m.name.toLowerCase().trim());
+      const snap = getSnapshot(m.name);
       const team = melderDept(m, snap);
       const last = groups[groups.length - 1];
       if (last && last[0] === team) last[1].push(m);
@@ -367,8 +415,9 @@ export function Dashboard({ storage, onSave }: Props) {
                     .filter((r) => r.melderId === melder.id)
                     .sort((a, b) => a.year - b.year || a.month - b.month)
                     .slice(-6);
-                  const snapshot = snapshotByName.get(melder.name.toLowerCase().trim());
-                  const isLead = DEPT_LEADER_IDS.has(melder.id);
+                  const snapshot = getSnapshot(melder.name);
+                  const isLead = isLeader(melder);
+                  const isInt = isIntern(melder);
                   return (
                     <MelderCard
                       key={melder.id}
@@ -378,6 +427,7 @@ export function Dashboard({ storage, onSave }: Props) {
                       sparkReports={melderHistory}
                       snapshot={snapshot}
                       isLead={isLead}
+                      isIntern={isInt}
                       onEdit={() => openEdit(melder)}
                       onDelete={() => setDeleteConfirm(melder.id)}
                       onEditSnapshot={() => snapshot && setEditingSnapshot(snapshot)}
@@ -413,6 +463,13 @@ export function Dashboard({ storage, onSave }: Props) {
                   {roles.map((r) => <option key={r.id} value={r.id}>{r.id} — {r.fullName}</option>)}
                 </select>
                 <Link to="/roles" className="text-xs text-[#1175CC] hover:underline mt-1 inline-block">+ Add new role</Link>
+              </FormField>
+              <FormField label="Department">
+                <select value={form.department} onChange={(e) => setForm({ ...form, department: e.target.value })}
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1175CC]">
+                  <option value="">— auto (from role) —</option>
+                  {DEPT_ORDER.map((d) => <option key={d} value={d}>{d}</option>)}
+                </select>
               </FormField>
               <FormField label="Email (optional)">
                 <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -488,6 +545,7 @@ function MelderCard({
   sparkReports,
   snapshot,
   isLead,
+  isIntern: isInt,
   onEdit,
   onDelete,
   onEditSnapshot,
@@ -498,37 +556,55 @@ function MelderCard({
   sparkReports: MonthlyReport[];
   snapshot?: AnnualSnapshot;
   isLead: boolean;
+  isIntern: boolean;
   onEdit: () => void;
   onDelete: () => void;
   onEditSnapshot: () => void;
 }) {
   const monthLabel = report ? `${MONTHS[report.month - 1]} ${report.year}` : null;
 
+  const cardWrap = isLead
+    ? 'bg-white border border-[#0d4a6b]'
+    : isInt
+      ? 'bg-[#fdf8f0] border border-[#e8c97a]'
+      : 'bg-[#f4faff] border border-[#B0E3FF]';
+  const headerBg = isLead
+    ? 'border-white/10 bg-gradient-to-br from-[#1175CC] to-[#0a3a5c]'
+    : isInt
+      ? 'border-[#e8c97a]/40 bg-gradient-to-br from-[#fef3c7] to-[#fde68a]'
+      : 'border-[#c8e8f8] bg-gradient-to-br from-[#dceefa] to-[#B0E3FF]';
+  const nameColor = isLead ? 'text-white' : isInt ? 'text-[#78350f]' : 'text-[#022935]';
+  const roleColor = isLead ? 'text-white/70' : isInt ? 'text-[#92400e]/80' : 'text-[#1175CC]/80';
+  const chipColor = isLead ? 'text-white/60 bg-white/10' : isInt ? 'text-[#92400e]/60 bg-white/40' : 'text-[#1175CC]/60 bg-white/50';
+  const editColor = isLead ? 'text-white/40 hover:text-white hover:bg-white/10' : isInt ? 'text-[#92400e]/40 hover:text-[#78350f] hover:bg-white/60' : 'text-[#1175CC]/40 hover:text-[#1175CC] hover:bg-white/60';
+  const deleteColor = isLead ? 'text-white/40 hover:text-red-300 hover:bg-white/10' : isInt ? 'text-[#92400e]/40 hover:text-red-600 hover:bg-red-50' : 'text-[#1175CC]/40 hover:text-red-500 hover:bg-red-50';
+
   return (
-    <div className={`rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow ${isLead ? 'bg-white border border-[#0d4a6b]' : 'bg-[#f4faff] border border-[#B0E3FF]'}`}>
+    <div className={`rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow ${cardWrap}`}>
       {/* Card Header */}
-      <div className={`px-5 py-4 border-b ${isLead ? 'border-white/10 bg-gradient-to-br from-[#1175CC] to-[#0a3a5c]' : 'border-[#c8e8f8] bg-gradient-to-br from-[#dceefa] to-[#B0E3FF]'}`}>
+      <div className={`px-5 py-4 border-b ${headerBg}`}>
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               {isLead && <Shield className="w-3.5 h-3.5 text-white/80 flex-shrink-0" />}
-              <h3 className={`font-bold truncate ${isLead ? 'text-white' : 'text-[#022935]'}`}>{melder.name}</h3>
+              {isInt && <GraduationCap className="w-3.5 h-3.5 text-[#92400e]/70 flex-shrink-0" />}
+              <h3 className={`font-bold truncate ${nameColor}`}>{melder.name}</h3>
             </div>
-            <p className={`text-sm ${isLead ? 'text-white/70' : 'text-[#1175CC]/80'}`}>{roleName}</p>
+            <p className={`text-sm ${roleColor}`}>{roleName}</p>
           </div>
           <div className="flex items-center gap-1.5 ml-2 flex-shrink-0">
             {sparkReports.length >= 2 && (
               <MiniSparkline reports={sparkReports} melderId={melder.id} />
             )}
             {report && (
-              <span className={`text-xs px-2 py-1 rounded-lg ${isLead ? 'text-white/60 bg-white/10' : 'text-[#1175CC]/60 bg-white/50'}`}>
+              <span className={`text-xs px-2 py-1 rounded-lg ${chipColor}`}>
                 {monthLabel}
               </span>
             )}
-            <button onClick={onEdit} className={`p-1.5 rounded-lg transition-colors ${isLead ? 'text-white/40 hover:text-white hover:bg-white/10' : 'text-[#1175CC]/40 hover:text-[#1175CC] hover:bg-white/60'}`} title="Edit">
+            <button onClick={onEdit} className={`p-1.5 rounded-lg transition-colors ${editColor}`} title="Edit">
               <Edit2 className="w-3.5 h-3.5" />
             </button>
-            <button onClick={onDelete} className={`p-1.5 rounded-lg transition-colors ${isLead ? 'text-white/40 hover:text-red-300 hover:bg-white/10' : 'text-[#1175CC]/40 hover:text-red-500 hover:bg-red-50'}`} title="Delete">
+            <button onClick={onDelete} className={`p-1.5 rounded-lg transition-colors ${deleteColor}`} title="Delete">
               <Trash2 className="w-3.5 h-3.5" />
             </button>
           </div>

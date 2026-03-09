@@ -52,7 +52,7 @@ const TEAMS: TeamData[] = [
     note: 'BD and BS are intentionally positioned below market on Compensation Ratio — known, accepted design choice.',
     total: { oa: 92.5, cap: 87.7, ratio: 70.5, salary: 366800, market: 526000 },
     melders: [
-      { name: 'Benjamin Capelle',    oa: 46,   cap: 70.8,  ratio: 86.6, salary: 43900,  market: 59000, q: [46, 125, null, null] },
+      { name: 'Benjamin Capelle',    oa: 88,   cap: 70.8,  ratio: 86.6, salary: 43900,  market: 59000, q: [46, 125, null, null], note: 'Q1–Q2 BD; moved to CSM Q3' },
       { name: 'Benjamin S Echols',   oa: 75,   cap: 67.9,  ratio: 102.4,salary: 47000,  market: 59000, q: [75, 77, null, null] },
       { name: 'Bridget Marshall',    oa: 64,   cap: 84.2,  ratio: 86.6, salary: 43900,  market: 59000, q: [64, 66, 117, 94] },
       { name: 'Emilee L Willey',     oa: 43,   cap: 90.7,  ratio: 102.4,salary: 47000,  market: 85000, q: [43, 117, 76, null] },
@@ -77,7 +77,7 @@ const TEAMS: TeamData[] = [
       { name: 'Bryce Codr',             oa: 144,   cap: 87.9,  ratio: 122,   salary: 66000,  market: 61000,  q: [144, 116, 44, 91] },
       { name: 'Kalico Jordan',          oa: 58,    cap: 98.7,  ratio: 110.6, salary: 72000,  market: 83000,  q: [58, 108, null, null] },
       { name: 'David Herr',             oa: 95,    cap: 66.9,  ratio: 109,   salary: 70000,  market: 83000,  q: [null, null, 97, 93],   note: 'Avg of Q3–Q4' },
-      { name: 'Benjamin Capelle',       oa: 90.5,  cap: 85.2,  ratio: 109.0, salary: 63000,  market: 61000,  q: [null, null, 113, 68],  note: 'Avg of Q3–Q4' },
+      { name: 'Benjamin Capelle',       oa: 88,    cap: 85.2,  ratio: 109.0, salary: 63000,  market: 61000,  q: [46, 125, 113, 68],    note: 'BD Q1–Q2 → CSM Q3–Q4' },
       { name: 'Johnny Trokey',          oa: 116,   cap: 79.2,  ratio: 109,   salary: 70000,  market: 83000,  q: [null, null, null, 116], note: 'Q4 only' },
     ],
   },

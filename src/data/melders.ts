@@ -2,8 +2,8 @@ import type { Melder } from '../types';
 
 export const DEFAULT_MELDERS: Melder[] = [
   { id: 'melder-aaron-trimble',       name: 'Aaron Trimble',        roleId: 'CSS',       targetCompensation: 4167,  marketRate: 0, createdAt: '2022-06-20T00:00:00Z', updatedAt: '2022-06-20T00:00:00Z' },
-  { id: 'melder-andrew-mcglashan',    name: 'Andrew McGlashan',     roleId: 'ASSOC-BSE', targetCompensation: 4583,  marketRate: 0, createdAt: '2022-08-01T00:00:00Z', updatedAt: '2022-08-01T00:00:00Z' },
-  { id: 'melder-johnathon-bintliff',  name: 'Johnathon Bintliff',   roleId: 'SR-BDR',    targetCompensation: 4167,  marketRate: 0, createdAt: '2022-07-26T00:00:00Z', updatedAt: '2022-07-26T00:00:00Z' },
+  { id: 'melder-andrew-mcglashan',    name: 'Andrew D McGlashan',   roleId: 'ASSOC-BSE', targetCompensation: 4583,  marketRate: 0, createdAt: '2022-08-01T00:00:00Z', updatedAt: '2022-08-01T00:00:00Z' },
+  { id: 'melder-johnathon-bintliff',  name: 'Johnathon L Bintliff', roleId: 'SR-BDR',    targetCompensation: 4167,  marketRate: 0, createdAt: '2022-07-26T00:00:00Z', updatedAt: '2022-07-26T00:00:00Z' },
   { id: 'melder-deepika-yalla',       name: 'Deepika Yalla-Colomb', roleId: 'CSS',       targetCompensation: 4167,  marketRate: 0, createdAt: '2023-05-15T00:00:00Z', updatedAt: '2023-05-15T00:00:00Z' },
   { id: 'melder-nathanael-hockley',   name: 'Nathanael Hockley',    roleId: 'CSS-MGR',   targetCompensation: 6250,  marketRate: 0, createdAt: '2022-08-01T00:00:00Z', updatedAt: '2022-08-01T00:00:00Z' },
   { id: 'melder-kristoffer-hewlett',  name: 'Kristoffer Hewlett',   roleId: 'COM',       targetCompensation: 6917,  marketRate: 0, createdAt: '2023-07-24T00:00:00Z', updatedAt: '2023-07-24T00:00:00Z' },

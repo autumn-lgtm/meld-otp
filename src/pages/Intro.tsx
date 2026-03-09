@@ -384,9 +384,9 @@ export function Intro() {
             </div>
           </div>
 
-          <div className="p-6 rounded-xl border-l-4 text-base mb-5" style={{ background: `${MELD_BLUE}0d`, borderColor: MELD_BLUE }}>
-            <strong style={{ color: MELD_DARK }}>The realization:</strong>
-            <span className="text-slate-600"> Performance, pay, and market positioning were always connected inside compensation. Most systems treat them separately. OTP just makes the cycle visible — and keeps everyone accountable to their part of it.</span>
+          <div className="p-6 rounded-xl text-base mb-5" style={{ background: MELD_DARK }}>
+            <strong style={{ color: MELD_LIGHT }}>The realization: </strong>
+            <span style={{ color: `${MELD_LIGHT}cc` }}>Performance, pay, and market positioning were always connected inside compensation. Most systems treat them separately. OTP just makes the cycle visible — and keeps everyone accountable to their part of it.</span>
           </div>
 
           {/* When to redesign the plan */}
