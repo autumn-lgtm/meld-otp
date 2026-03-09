@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowDownRight, ArrowUpRight, Calculator, Edit2, Eye, EyeOff, GraduationCap, PieChart, Plus, Search, Shield, Trash2, TrendingUp, Users, X } from 'lucide-react';
+import { AlertTriangle, ArrowDownRight, ArrowUpRight, Calculator, ChevronDown, ChevronRight, Edit2, Eye, EyeOff, GraduationCap, PieChart, Plus, Search, Shield, Trash2, TrendingUp, Users, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useSalaryVisible } from '../hooks/useSalaryVisible';
 import { Link } from 'react-router-dom';
@@ -145,6 +145,14 @@ export function Dashboard({ storage, onSave }: Props) {
   const [form, setForm] = useState<MelderForm>({ name: '', roleId: '', department: '', email: '', targetCompensation: '', marketRate: '' });
   const { salaryVisible: showSalary, toggleSalary } = useSalaryVisible();
   const [searchQuery, setSearchQuery] = useState('');
+  const [collapsedDepts, setCollapsedDepts] = useState<Set<string>>(new Set());
+
+  const toggleDept = (dept: string) =>
+    setCollapsedDepts((prev) => {
+      const next = new Set(prev);
+      next.has(dept) ? next.delete(dept) : next.add(dept);
+      return next;
+    });
 
   // Map snapshot by lowercased name for fast lookup (last snapshot wins if duplicate names)
   const snapshotByName = useMemo(() => {
@@ -400,43 +408,65 @@ export function Dashboard({ storage, onSave }: Props) {
       {melders.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="space-y-8">
-          {groupedMelders.map(([dept, deptMelders]) => (
-            <div key={dept}>
-              <div className="flex items-center gap-3 mb-4">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 whitespace-nowrap">{dept}</h2>
-                <div className="flex-1 h-px bg-slate-200" />
-                <span className="text-xs font-medium text-slate-300">{deptMelders.length}</span>
+        <div className="space-y-4">
+          {groupedMelders.map(([dept, deptMelders]) => {
+            const collapsed = collapsedDepts.has(dept);
+            const deptOaps = deptMelders.map((m) => latestReports.get(m.id)?.oapResult.oap).filter((v): v is number => v !== null && v !== undefined);
+            const avgOap = deptOaps.length > 0 ? deptOaps.reduce((s, v) => s + v, 0) / deptOaps.length : null;
+            const avgHealth: HealthColor | null = avgOap === null ? null : avgOap >= 110 ? 'blue' : avgOap >= 100 ? 'green' : avgOap >= 90 ? 'yellow' : 'red';
+            const healthDot: Record<HealthColor, string> = { blue: 'bg-[#1175CC]', green: 'bg-green-500', yellow: 'bg-yellow-500', red: 'bg-red-500' };
+            return (
+              <div key={dept}>
+                <button
+                  onClick={() => toggleDept(dept)}
+                  className="w-full flex items-center gap-3 mb-3 group cursor-pointer"
+                >
+                  {collapsed
+                    ? <ChevronRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 transition-colors flex-shrink-0" />
+                    : <ChevronDown className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 transition-colors flex-shrink-0" />
+                  }
+                  <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 whitespace-nowrap group-hover:text-slate-600 transition-colors">{dept}</h2>
+                  {avgOap !== null && avgHealth && (
+                    <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+                      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${healthDot[avgHealth]}`} />
+                      {avgOap.toFixed(1)}% OAP
+                    </span>
+                  )}
+                  <div className="flex-1 h-px bg-slate-200" />
+                  <span className="text-xs font-medium text-slate-300">{deptMelders.length}</span>
+                </button>
+                {!collapsed && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {deptMelders.map((melder) => {
+                      const report = latestReports.get(melder.id);
+                      const melderHistory = reports
+                        .filter((r) => r.melderId === melder.id)
+                        .sort((a, b) => a.year - b.year || a.month - b.month)
+                        .slice(-6);
+                      const snapshot = getSnapshot(melder.name);
+                      const isLead = isLeader(melder);
+                      const isInt = isIntern(melder);
+                      return (
+                        <MelderCard
+                          key={melder.id}
+                          melder={melder}
+                          report={report}
+                          roleName={roleMap[melder.roleId] ?? melder.roleId}
+                          sparkReports={melderHistory}
+                          snapshot={snapshot}
+                          isLead={isLead}
+                          isIntern={isInt}
+                          onEdit={() => openEdit(melder)}
+                          onDelete={() => setDeleteConfirm(melder.id)}
+                          onEditSnapshot={() => snapshot && setEditingSnapshot(snapshot)}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {deptMelders.map((melder) => {
-                  const report = latestReports.get(melder.id);
-                  const melderHistory = reports
-                    .filter((r) => r.melderId === melder.id)
-                    .sort((a, b) => a.year - b.year || a.month - b.month)
-                    .slice(-6);
-                  const snapshot = getSnapshot(melder.name);
-                  const isLead = isLeader(melder);
-                  const isInt = isIntern(melder);
-                  return (
-                    <MelderCard
-                      key={melder.id}
-                      melder={melder}
-                      report={report}
-                      roleName={roleMap[melder.roleId] ?? melder.roleId}
-                      sparkReports={melderHistory}
-                      snapshot={snapshot}
-                      isLead={isLead}
-                      isIntern={isInt}
-                      onEdit={() => openEdit(melder)}
-                      onDelete={() => setDeleteConfirm(melder.id)}
-                      onEditSnapshot={() => snapshot && setEditingSnapshot(snapshot)}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
