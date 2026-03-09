@@ -68,9 +68,8 @@ const TEAMS: TeamData[] = [
   {
     id: 'csm',
     name: 'Customer Success (CSM)',
-    total: { oa: 110.6, cap: 87.4, ratio: 106.1, salary: 334000, market: 357000 },
+    total: { oa: 107.7, cap: 84.4, ratio: 108.8, salary: 607000, market: 667000 },
     melders: [
-      { name: 'Aaron Seaholm',         oa: null,  cap: 96.4,  ratio: 133,   salary: 233000, market: 181000, q: [101, 107, 105, 99] },
       { name: 'Andrew T Conniff',       oa: 115,   cap: 95.3,  ratio: 107.8, salary: 70000,  market: 83000,  q: [115, 79, 25, null] },
       { name: 'Anna Torvi',             oa: 113.6, cap: 75.1,  ratio: 95.8,  salary: 128000, market: 130000, q: [113.6, 68, 93, 91] },
       { name: 'Christopher M Erickson', oa: 132,   cap: 87.2,  ratio: 107,   salary: 68000,  market: 83000,  q: [132, 79, null, null] },
@@ -101,7 +100,7 @@ const TEAMS: TeamData[] = [
     total: { oa: 97.5, cap: 87.0, ratio: 96.6, salary: 426400, market: 541000 },
     melders: [
       { name: 'Elizabeth Greenway', oa: 90.2,  cap: 82.4,  ratio: 72.5,  salary: 100000, market: 133000, q: [90.2, 99, 83, 69] },
-      { name: 'Michael Nasibog',    oa: 163,   cap: 102.7, ratio: 104.9, salary: 53400,  market: 63000,  q: [102.3, 82, 133, 82] },
+      { name: 'Michael Nasibog',    oa: 150,   cap: 102.7, ratio: 104.9, salary: 53400,  market: 63000,  q: [102.3, 82, 133, 82] },
       { name: 'Jon Martin',         oa: 103,   cap: 89.8,  ratio: 106.5, salary: 75000,  market: 110000, q: [105, 106, 116, 85] },
       { name: 'Molly Sperlich',     oa: 117,   cap: 93.6,  ratio: 101.6, salary: 62000,  market: 84000,  q: [117, 118, 109, 80] },
       { name: 'Madison',            oa: 73,    cap: 79.8,  ratio: 112.7, salary: 136000, market: 151000, q: [73, 80, 95, 80] },
@@ -231,23 +230,17 @@ function TeamSection({ team, masked }: { team: TeamData; masked: boolean }) {
     watch:      { bg: '#f0f9ff', border: '#bae6fd', badge: 'Context Note', badgeColor: '#0284c7' },
   };
 
-  const hs = team.highlight ? highlightStyle[team.highlight] : null;
+  // Row background always driven by OAP health (keeps badge text meaningful, colors reflect outcome)
+  const oaBg = (() => {
+    const oa = team.total.oa;
+    if (oa === null || oa >= 110) return { bg: '#eff6ff', border: '#bfdbfe' };
+    if (oa >= 100) return { bg: '#f0fdf4', border: '#bbf7d0' };
+    if (oa >= 90)  return { bg: '#fffbeb', border: '#fed7aa' };
+    return { bg: '#fff1f2', border: '#fecdd3' };
+  })();
 
-  // For teams without an explicit highlight, derive background from worst metric health
-  const healthBg = !hs ? (() => {
-    const { oa, cap, ratio } = team.total;
-    const oaRank  = oa === null ? 3 : oa >= 100 ? 2 : oa >= 90 ? 1 : 0;
-    const capRank  = cap >= 100 ? 2 : cap >= 90 ? 1 : 0;
-    const ratioRank = ratio > 105 ? 3 : ratio >= 85 ? 2 : ratio >= 70 ? 1 : 0;
-    const worst = Math.min(oaRank, capRank, ratioRank);
-    if (worst === 0) return { bg: '#fff1f2', border: '#fecdd3' };
-    if (worst === 1) return { bg: '#fffbeb', border: '#fed7aa' };
-    if (worst === 2) return { bg: '#f0fdf4', border: '#bbf7d0' };
-    return { bg: '#eff6ff', border: '#bfdbfe' };
-  })() : null;
-
-  const rowBg     = hs ? hs.bg     : healthBg!.bg;
-  const rowBorder = hs ? hs.border : healthBg!.border;
+  const rowBg     = oaBg.bg;
+  const rowBorder = oaBg.border;
 
   return (
     <div
