@@ -187,6 +187,7 @@ function usd(v: number | null): string {
 
 function oaColor(v: number | null): string {
   if (v === null) return '#94a3b8';
+  if (v >= 110) return MELD_BLUE;
   if (v >= 100) return '#22c55e';
   if (v >= 90) return '#f59e0b';
   return '#ef4444';
@@ -232,10 +233,26 @@ function TeamSection({ team, masked }: { team: TeamData; masked: boolean }) {
 
   const hs = team.highlight ? highlightStyle[team.highlight] : null;
 
+  // For teams without an explicit highlight, derive background from worst metric health
+  const healthBg = !hs ? (() => {
+    const { oa, cap, ratio } = team.total;
+    const oaRank  = oa === null ? 3 : oa >= 100 ? 2 : oa >= 90 ? 1 : 0;
+    const capRank  = cap >= 100 ? 2 : cap >= 90 ? 1 : 0;
+    const ratioRank = ratio > 105 ? 3 : ratio >= 85 ? 2 : ratio >= 70 ? 1 : 0;
+    const worst = Math.min(oaRank, capRank, ratioRank);
+    if (worst === 0) return { bg: '#fff1f2', border: '#fecdd3' };
+    if (worst === 1) return { bg: '#fffbeb', border: '#fed7aa' };
+    if (worst === 2) return { bg: '#f0fdf4', border: '#bbf7d0' };
+    return { bg: '#eff6ff', border: '#bfdbfe' };
+  })() : null;
+
+  const rowBg     = hs ? hs.bg     : healthBg!.bg;
+  const rowBorder = hs ? hs.border : healthBg!.border;
+
   return (
     <div
       className="rounded-2xl overflow-hidden shadow-sm border"
-      style={{ borderColor: hs ? hs.border : '#e2e8f0', background: hs ? hs.bg : 'white' }}
+      style={{ borderColor: rowBorder, background: rowBg }}
     >
       {/* Header row */}
       <button

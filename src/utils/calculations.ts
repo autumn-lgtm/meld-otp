@@ -63,7 +63,7 @@ export function calculateOAP(
       // Lower actual = better; attainment = target / actual (capped at 150%)
       attainmentPct = input.actual > 0 ? Math.min((input.target / input.actual) * 100, 150) : 0;
     } else {
-      attainmentPct = input.target > 0 ? (input.actual / input.target) * 100 : 0;
+      attainmentPct = input.target > 0 ? Math.min((input.actual / input.target) * 100, 150) : 0;
     }
     const weightedContribution = attainmentPct * metric.weight;
     return {
