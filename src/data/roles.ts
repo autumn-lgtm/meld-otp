@@ -504,7 +504,7 @@ export const DEFAULT_ROLES: Role[] = [
   {
     id: 'EXEC',
     name: 'EXEC',
-    fullName: 'Executive / CEO',
+    fullName: 'Executive',
     cadence: 'monthly',
     metrics: [],
   },

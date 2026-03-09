@@ -122,6 +122,11 @@ function isLeader(melder: Melder): boolean {
   return DEPT_LEADER_IDS.has(melder.id) || DEPT_LEADER_NAMES.has(melder.name.trim());
 }
 
+const MASK_RATIO_NAMES = new Set(['Aaron Seaholm', 'Erin Karam']);
+function shouldMaskRatio(melder: Melder): boolean {
+  return MASK_RATIO_NAMES.has(melder.name.trim());
+}
+
 function isIntern(melder: Melder): boolean {
   return melder.roleId === 'INTERN';
 }
@@ -456,6 +461,7 @@ export function Dashboard({ storage, onSave }: Props) {
                           snapshot={snapshot}
                           isLead={isLead}
                           isIntern={isInt}
+                          maskRatio={shouldMaskRatio(melder)}
                           onEdit={() => openEdit(melder)}
                           onDelete={() => setDeleteConfirm(melder.id)}
                           onEditSnapshot={() => snapshot && setEditingSnapshot(snapshot)}
@@ -576,6 +582,7 @@ function MelderCard({
   snapshot,
   isLead,
   isIntern: isInt,
+  maskRatio,
   onEdit,
   onDelete,
   onEditSnapshot,
@@ -587,6 +594,7 @@ function MelderCard({
   snapshot?: AnnualSnapshot;
   isLead: boolean;
   isIntern: boolean;
+  maskRatio: boolean;
   onEdit: () => void;
   onDelete: () => void;
   onEditSnapshot: () => void;
@@ -646,7 +654,7 @@ function MelderCard({
         <div className="px-5 py-4 space-y-3">
           <MetricRow label="OAP" value={report.oapResult.oap} health={report.oapResult.health} question="Did we deliver to the plan?" />
           <MetricRow label="CAP" value={report.capResult.cap} health={report.capResult.health} question="Did pay reflect delivery?" />
-          <MetricRow label="Ratio" value={report.ratioResult.ratio} health={report.ratioResult.health} question="Are we paying competitively?" />
+          {!maskRatio && <MetricRow label="Ratio" value={report.ratioResult.ratio} health={report.ratioResult.health} question="Are we paying competitively?" />}
 
           {/* Alerts */}
           {report.alerts.length > 0 && (
@@ -688,7 +696,7 @@ function MelderCard({
 
       {/* 2025 Annual Snapshot */}
       {snapshot && (
-        <AnnualSnapshotPanel snapshot={snapshot} onEdit={onEditSnapshot} />
+        <AnnualSnapshotPanel snapshot={snapshot} onEdit={onEditSnapshot} maskRatio={maskRatio} />
       )}
     </div>
   );
@@ -730,7 +738,7 @@ function fmt$(n: number | null) {
   return '$' + (n >= 1000 ? (n / 1000).toFixed(0) + 'k' : n.toFixed(0));
 }
 
-function AnnualSnapshotPanel({ snapshot, onEdit }: { snapshot: AnnualSnapshot; onEdit: () => void }) {
+function AnnualSnapshotPanel({ snapshot, onEdit, maskRatio }: { snapshot: AnnualSnapshot; onEdit: () => void; maskRatio?: boolean }) {
   const { salaryVisible } = useSalaryVisible();
   const qtrs: { label: string; val: number | null }[] = [
     { label: 'Q1', val: snapshot.q1Oa },
@@ -787,7 +795,7 @@ function AnnualSnapshotPanel({ snapshot, onEdit }: { snapshot: AnnualSnapshot; o
         {[
           { label: 'OAP', value: snapshot.oaPct !== null ? `${snapshot.oaPct.toFixed(1)}%` : '—' },
           { label: 'CAP', value: snapshot.capPct !== null ? `${snapshot.capPct.toFixed(1)}%` : '—' },
-          { label: 'Ratio', value: snapshot.compRatio !== null ? `${snapshot.compRatio.toFixed(1)}%` : '—' },
+          { label: 'Ratio', value: maskRatio ? '••••' : snapshot.compRatio !== null ? `${snapshot.compRatio.toFixed(1)}%` : '—' },
         ].map((m) => (
           <div key={m.label} className="bg-white rounded-lg px-2 py-1.5 border border-slate-100">
             <p className="text-[9px] font-bold uppercase tracking-wide text-slate-400">{m.label}</p>

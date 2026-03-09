@@ -52,12 +52,12 @@ function snap(
 
 export const SEED_2025_ANNUAL: AnnualSnapshot[] = [
   // ── Customer Onboarding ──────────────────────────────────────────────────────
-  snap('Customer Onboarding', 'Aaron Seaholm',           'EX 9', '3y 8m', 101.0, 96.4,  133.0, 233000, 181000, 232000, 308000,  77000,  74208,  74208, 101.0, 101.0,  null,  null),
+  snap('Customer Onboarding', 'Aaron Seaholm',           'EX 9', '3y 8m',  null, 96.4,  133.0, 233000, 181000, 232000, 308000,  77000,  74208,  74208, 101.0, 107.0, 105.0,  99.0),
   snap('Customer Onboarding', 'Brianna Pesek',           'IC 3', '6y 4m',  76.0,100.0,  108.9,  68000,  83000,  99000, 107800, 107021, 107021,  74837,  76.0, 119.0, 113.0,  90.0),
   snap('Customer Onboarding', 'Kristoffer Hewlett',      'IC 4', '1y 8m',  99.0,100.0,  105.3,  83000,  96000, 118000, 124290, 131970, 131970,  93906,  99.0, 115.0, 104.0,  93.0),
 
   // ── Customer Success ─────────────────────────────────────────────────────────
-  snap('Customer Success', 'Aaron Seaholm',         'EX 9',  '3y 8m', 101.0,  96.4, 133.0, 233000, 181000, 232000, 308000,  77000,  74208,  74208, 101.0, 101.0,  null,  null),
+  snap('Customer Success', 'Aaron Seaholm',         'EX 9',  '3y 8m',  null,  96.4, 133.0, 233000, 181000, 232000, 308000,  77000,  74208,  74208, 101.0, 107.0, 105.0,  99.0),
   snap('Customer Success', 'Andrew T Conniff',      'IC 3',  '2y 1m', 115.0,  95.3, 107.8,  70000,  83000,  99000, 106729, 106729, 101680, 101680, 115.0,  79.0,  25.0,  null),
   snap('Customer Success', 'Anna Torvi',            'MGR 6', '3y 6m', 113.6,  75.1,  95.8, 128000, 130000, 187000, 179200, 179200, 134579, 134579, 113.6,  68.0,  93.0,  91.0),
   snap('Customer Success', 'Christopher M Erickson','IC 3',  '2m',    132.0,  87.2, 107.0,  68000,  83000,  99000, 105900,  52950,  46151,  46151, 132.0,  79.0,  null,  null),

@@ -70,7 +70,7 @@ const TEAMS: TeamData[] = [
     name: 'Customer Success (CSM)',
     total: { oa: 110.6, cap: 87.4, ratio: 106.1, salary: 334000, market: 357000 },
     melders: [
-      { name: 'Aaron Seaholm',         oa: 101,   cap: 96.4,  ratio: 133,   salary: 233000, market: 181000, q: [101, 101, null, null] },
+      { name: 'Aaron Seaholm',         oa: null,  cap: 96.4,  ratio: 133,   salary: 233000, market: 181000, q: [101, 107, 105, 99] },
       { name: 'Andrew T Conniff',       oa: 115,   cap: 95.3,  ratio: 107.8, salary: 70000,  market: 83000,  q: [115, 79, 25, null] },
       { name: 'Anna Torvi',             oa: 113.6, cap: 75.1,  ratio: 95.8,  salary: 128000, market: 130000, q: [113.6, 68, 93, 91] },
       { name: 'Christopher M Erickson', oa: 132,   cap: 87.2,  ratio: 107,   salary: 68000,  market: 83000,  q: [132, 79, null, null] },
@@ -112,7 +112,7 @@ const TEAMS: TeamData[] = [
     name: 'Customer Onboarding (COM)',
     total: { oa: 92, cap: 99.1, ratio: 106.9, salary: 151000, market: 179000 },
     melders: [
-      { name: 'Aaron Seaholm',            oa: 101, cap: 96.4,  ratio: 133,   salary: 233000, market: 181000, q: [101, 101, null, null] },
+      { name: 'Aaron Seaholm',            oa: null, cap: 96.4,  ratio: 133,   salary: 233000, market: 181000, q: [101, 107, 105, 99] },
       { name: 'Brianna Pesek',             oa: 76,  cap: 100,   ratio: 108.9, salary: 68000,  market: 83000,  q: [76, 119, 113, 90] },
       { name: 'Kristoffer Allen Hewlett',  oa: 99,  cap: 100,   ratio: 105.3, salary: 83000,  market: 96000,  q: [99, 115, 104, 93] },
     ],
