@@ -85,7 +85,7 @@ const DEPT_LEADER_IDS = new Set([
   'melder-anna-torvi',         // Customer Success
   'melder-nathanael-hockley',  // Customer Support & Enablement
   'melder-austin-wentz',       // Engineering
-  'melder-erin',               // Engineering & Data
+  'melder-erin-karam',         // Engineering & Data
 ]);
 
 function isLeaderRole(roleId: string, melderId?: string): boolean {

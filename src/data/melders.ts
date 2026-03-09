@@ -65,7 +65,7 @@ export const DEFAULT_MELDERS: Melder[] = [
   { id: 'melder-elizabeth-archer',    name: 'Elizabeth Archer',     roleId: 'PROD-IC2',  targetCompensation: 7917,  marketRate: 0, createdAt: '2024-10-01T00:00:00Z', updatedAt: '2024-10-01T00:00:00Z' },
 
   // ── Engineering & Data ───────────────────────────────────────────────────────
-  { id: 'melder-erin',                name: 'Erin',                 roleId: 'DATA-MGR',  targetCompensation: 0,     marketRate: 0, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
+  { id: 'melder-erin-karam',           name: 'Erin Karam',           roleId: 'DATA-MGR',  targetCompensation: 0,     marketRate: 0, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
   { id: 'melder-david-turner',        name: 'David Turner',         roleId: 'DATA-MGR',  targetCompensation: 15833, marketRate: 0, createdAt: '2024-10-01T00:00:00Z', updatedAt: '2024-10-01T00:00:00Z' },
   { id: 'melder-khalil-rutledge',     name: 'Khalil Rutledge',      roleId: 'DATA-IC5',  targetCompensation: 13333, marketRate: 0, createdAt: '2024-10-01T00:00:00Z', updatedAt: '2024-10-01T00:00:00Z' },
   { id: 'melder-matthew-hickey',      name: 'Matthew Hickey',       roleId: 'DATA-IC5',  targetCompensation: 13333, marketRate: 0, createdAt: '2024-06-01T00:00:00Z', updatedAt: '2024-06-01T00:00:00Z' },
