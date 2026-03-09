@@ -411,7 +411,7 @@ export function Dashboard({ storage, onSave }: Props) {
         <div className="space-y-4">
           {groupedMelders.map(([dept, deptMelders]) => {
             const collapsed = collapsedDepts.has(dept);
-            const deptOaps = deptMelders.map((m) => latestReports.get(m.id)?.oapResult.oap).filter((v): v is number => v !== null && v !== undefined);
+            const deptOaps = deptMelders.map((m) => latestReports.get(m.id)?.oapResult.oap ?? getSnapshot(m.name)?.oaPct ?? null).filter((v): v is number => v !== null);
             const avgOap = deptOaps.length > 0 ? deptOaps.reduce((s, v) => s + v, 0) / deptOaps.length : null;
             const avgHealth: HealthColor | null = avgOap === null ? null : avgOap >= 110 ? 'blue' : avgOap >= 100 ? 'green' : avgOap >= 90 ? 'yellow' : 'red';
             const healthDot: Record<HealthColor, string> = { blue: 'bg-[#1175CC]', green: 'bg-green-500', yellow: 'bg-yellow-500', red: 'bg-red-500' };
@@ -596,18 +596,18 @@ function MelderCard({
   const cardWrap = isLead
     ? 'bg-white border border-[#0d4a6b]'
     : isInt
-      ? 'bg-[#fdf8f0] border border-[#e8c97a]'
+      ? 'bg-[#fffbeb] border border-[#c98a00]'
       : 'bg-[#f4faff] border border-[#B0E3FF]';
   const headerBg = isLead
     ? 'border-white/10 bg-gradient-to-br from-[#1175CC] to-[#0a3a5c]'
     : isInt
-      ? 'border-[#e8c97a]/40 bg-gradient-to-br from-[#fef3c7] to-[#fde68a]'
+      ? 'border-[#c98a00]/30 bg-gradient-to-br from-[#FFB41B] to-[#b87a00]'
       : 'border-[#c8e8f8] bg-gradient-to-br from-[#dceefa] to-[#B0E3FF]';
-  const nameColor = isLead ? 'text-white' : isInt ? 'text-[#78350f]' : 'text-[#022935]';
-  const roleColor = isLead ? 'text-white/70' : isInt ? 'text-[#92400e]/80' : 'text-[#1175CC]/80';
-  const chipColor = isLead ? 'text-white/60 bg-white/10' : isInt ? 'text-[#92400e]/60 bg-white/40' : 'text-[#1175CC]/60 bg-white/50';
-  const editColor = isLead ? 'text-white/40 hover:text-white hover:bg-white/10' : isInt ? 'text-[#92400e]/40 hover:text-[#78350f] hover:bg-white/60' : 'text-[#1175CC]/40 hover:text-[#1175CC] hover:bg-white/60';
-  const deleteColor = isLead ? 'text-white/40 hover:text-red-300 hover:bg-white/10' : isInt ? 'text-[#92400e]/40 hover:text-red-600 hover:bg-red-50' : 'text-[#1175CC]/40 hover:text-red-500 hover:bg-red-50';
+  const nameColor = isLead ? 'text-white' : isInt ? 'text-[#451a03]' : 'text-[#022935]';
+  const roleColor = isLead ? 'text-white/70' : isInt ? 'text-[#451a03]/70' : 'text-[#1175CC]/80';
+  const chipColor = isLead ? 'text-white/60 bg-white/10' : isInt ? 'text-[#451a03]/60 bg-black/10' : 'text-[#1175CC]/60 bg-white/50';
+  const editColor = isLead ? 'text-white/40 hover:text-white hover:bg-white/10' : isInt ? 'text-[#451a03]/40 hover:text-[#451a03] hover:bg-black/10' : 'text-[#1175CC]/40 hover:text-[#1175CC] hover:bg-white/60';
+  const deleteColor = isLead ? 'text-white/40 hover:text-red-300 hover:bg-white/10' : isInt ? 'text-[#451a03]/40 hover:text-red-700 hover:bg-black/10' : 'text-[#1175CC]/40 hover:text-red-500 hover:bg-red-50';
 
   return (
     <div className={`rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow ${cardWrap}`}>
@@ -617,7 +617,7 @@ function MelderCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               {isLead && <Shield className="w-3.5 h-3.5 text-white/80 flex-shrink-0" />}
-              {isInt && <GraduationCap className="w-3.5 h-3.5 text-[#92400e]/70 flex-shrink-0" />}
+              {isInt && <GraduationCap className="w-3.5 h-3.5 text-[#451a03]/60 flex-shrink-0" />}
               <h3 className={`font-bold truncate ${nameColor}`}>{melder.name}</h3>
             </div>
             <p className={`text-sm ${roleColor}`}>{roleName}</p>
