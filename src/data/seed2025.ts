@@ -48,7 +48,7 @@ const SEED_MELDERS: SeedMelder[] = [
   { id: 'csm-bcapelle',  name: 'Benjamin Capelle',         roleId: 'CSM',     oa: 90.5,  cap: 85.2,  ratio: 109,   salary: 63000,  market: 61000  },
   { id: 'csm-jtrokey',   name: 'Johnny Trokey',            roleId: 'CSM',     oa: 116,   cap: 79.2,  ratio: 109,   salary: 70000,  market: 83000  },
   // Business Solutions
-  { id: 'bs-amcglashan', name: 'Andrew D McGlashan',       roleId: 'BSE',     oa: 100,   cap: 107.4, ratio: 77.2,  salary: 55000,  market: 56000  },
+  { id: 'bs-amcglashan', name: 'Andrew D McGlashan',       roleId: 'BSE',     oa: 107.3, cap: 107.4, ratio: 77.2,  salary: 55000,  market: 56000  },
   { id: 'bs-janderson',  name: 'Jesse Anderson',           roleId: 'SR-BSE',  oa: 125,   cap: 100.1, ratio: 73.5,  salary: 70000,  market: 110000 },
   { id: 'bs-cerickson',  name: 'Christopher Erickson',     roleId: 'BSE',     oa: 105.5, cap: 95.6,  ratio: 73.5,  salary: 68000,  market: 110000 },
   { id: 'bs-acostello',  name: 'Aaron Costello',           roleId: 'BSE',     oa: 51,    cap: 75.4,  ratio: 94.7,  salary: 81000,  market: 121000 },
@@ -56,7 +56,7 @@ const SEED_MELDERS: SeedMelder[] = [
   // Marketing
   { id: 'mkt-egreenway', name: 'Elizabeth Greenway',       roleId: 'MKT-IC2', oa: 90.2,  cap: 82.4,  ratio: 72.5,  salary: 100000, market: 133000 },
   { id: 'mkt-mnasibog',  name: 'Michael Nasibog',          roleId: 'MKT-IC3', oa: 163,   cap: 102.7, ratio: 104.9, salary: 53400,  market: 63000  },
-  { id: 'mkt-jmartin',   name: 'Jon Martin',               roleId: 'MKT-L4',  oa: 105,   cap: 89.8,  ratio: 106.5, salary: 75000,  market: 110000 },
+  { id: 'mkt-jmartin',   name: 'Jon Martin',               roleId: 'MKT-L4',  oa: 103,   cap: 89.8,  ratio: 106.5, salary: 75000,  market: 110000 },
   { id: 'mkt-msperlich', name: 'Molly Sperlich',           roleId: 'MKT-IC3', oa: 117,   cap: 93.6,  ratio: 101.6, salary: 62000,  market: 84000  },
   { id: 'mkt-madison',   name: 'Madison',                  roleId: 'MKT-IC2', oa: 73,    cap: 79.8,  ratio: 112.7, salary: 136000, market: 151000 },
   // Customer Onboarding

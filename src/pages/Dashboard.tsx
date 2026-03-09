@@ -77,8 +77,12 @@ const ROLE_TO_DEPT: Record<string, string> = {
   'ENG-IC3': 'Engineering', 'ENG-IC4': 'Engineering', 'ENG-IC5': 'Engineering',
 };
 
+const KNOWN_DEPTS = new Set(DEPT_ORDER);
+
 function melderDept(melder: { roleId: string; department?: string }, snapshot?: { team: string }): string {
-  return melder.department ?? snapshot?.team ?? ROLE_TO_DEPT[melder.roleId] ?? 'Other';
+  // Only accept melder.department if it's a recognized dept name (ignores CSV values like 'OpEx', 'CAC')
+  const explicitDept = melder.department && KNOWN_DEPTS.has(melder.department) ? melder.department : undefined;
+  return explicitDept ?? snapshot?.team ?? ROLE_TO_DEPT[melder.roleId] ?? 'Other';
 }
 
 // Explicit department leader IDs — drives "leader card" styling and sort-first within dept
@@ -89,7 +93,9 @@ const DEPT_LEADER_IDS = new Set([
   'melder-aaron-seaholm',      // Customer Onboarding
   'melder-anna-torvi',         // Customer Success
   'melder-nathanael-hockley',  // Customer Support & Enablement
+  'melder-autumn-hughes',      // People Ops
   'melder-austin-wentz',       // Engineering
+  'melder-david-turner',       // Engineering & Data
   'melder-erin-karam',         // Engineering & Data
 ]);
 
@@ -499,30 +505,30 @@ function MelderCard({
   const monthLabel = report ? `${MONTHS[report.month - 1]} ${report.year}` : null;
 
   return (
-    <div className={`bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow ${isLead ? 'border border-[#0d4a6b]' : 'border border-slate-100'}`}>
+    <div className={`rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow ${isLead ? 'bg-white border border-[#0d4a6b]' : 'bg-[#f4faff] border border-[#B0E3FF]'}`}>
       {/* Card Header */}
-      <div className={`px-5 py-4 border-b ${isLead ? 'border-white/10 bg-gradient-to-br from-[#1175CC] to-[#0a3a5c]' : 'border-slate-100'}`}>
+      <div className={`px-5 py-4 border-b ${isLead ? 'border-white/10 bg-gradient-to-br from-[#1175CC] to-[#0a3a5c]' : 'border-[#c8e8f8] bg-gradient-to-br from-[#dceefa] to-[#B0E3FF]'}`}>
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               {isLead && <Shield className="w-3.5 h-3.5 text-white/80 flex-shrink-0" />}
-              <h3 className={`font-bold truncate ${isLead ? 'text-white' : 'text-slate-900'}`}>{melder.name}</h3>
+              <h3 className={`font-bold truncate ${isLead ? 'text-white' : 'text-[#022935]'}`}>{melder.name}</h3>
             </div>
-            <p className={`text-sm ${isLead ? 'text-white/70' : 'text-slate-500'}`}>{roleName}</p>
+            <p className={`text-sm ${isLead ? 'text-white/70' : 'text-[#1175CC]/80'}`}>{roleName}</p>
           </div>
           <div className="flex items-center gap-1.5 ml-2 flex-shrink-0">
             {sparkReports.length >= 2 && (
               <MiniSparkline reports={sparkReports} melderId={melder.id} />
             )}
             {report && (
-              <span className={`text-xs px-2 py-1 rounded-lg ${isLead ? 'text-white/60 bg-white/10' : 'text-slate-400 bg-slate-50'}`}>
+              <span className={`text-xs px-2 py-1 rounded-lg ${isLead ? 'text-white/60 bg-white/10' : 'text-[#1175CC]/60 bg-white/50'}`}>
                 {monthLabel}
               </span>
             )}
-            <button onClick={onEdit} className={`p-1.5 rounded-lg transition-colors ${isLead ? 'text-white/40 hover:text-white hover:bg-white/10' : 'text-slate-300 hover:text-[#1175CC] hover:bg-blue-50'}`} title="Edit">
+            <button onClick={onEdit} className={`p-1.5 rounded-lg transition-colors ${isLead ? 'text-white/40 hover:text-white hover:bg-white/10' : 'text-[#1175CC]/40 hover:text-[#1175CC] hover:bg-white/60'}`} title="Edit">
               <Edit2 className="w-3.5 h-3.5" />
             </button>
-            <button onClick={onDelete} className={`p-1.5 rounded-lg transition-colors ${isLead ? 'text-white/40 hover:text-red-300 hover:bg-white/10' : 'text-slate-300 hover:text-red-500 hover:bg-red-50'}`} title="Delete">
+            <button onClick={onDelete} className={`p-1.5 rounded-lg transition-colors ${isLead ? 'text-white/40 hover:text-red-300 hover:bg-white/10' : 'text-[#1175CC]/40 hover:text-red-500 hover:bg-red-50'}`} title="Delete">
               <Trash2 className="w-3.5 h-3.5" />
             </button>
           </div>

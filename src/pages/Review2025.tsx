@@ -88,7 +88,7 @@ const TEAMS: TeamData[] = [
     note: 'BS is intentionally positioned below market on Compensation Ratio — known, accepted design choice.',
     total: { oa: 88.3, cap: 84.1, ratio: 87.9, salary: 400000, market: 548000 },
     melders: [
-      { name: 'Andrew D McGlashan', oa: 100,  cap: 107.4, ratio: 77.2, salary: 55000,  market: 56000,  q: [100, 90, 103, 136] },
+      { name: 'Andrew D McGlashan', oa: 107.3, cap: 107.4, ratio: 77.2, salary: 55000,  market: 56000,  q: [100, 90, 103, 136] },
       { name: 'Jesse Anderson',      oa: 125,  cap: 100.1, ratio: 73.5, salary: 70000,  market: 110000, q: [125, 114, 112, null] },
       { name: 'Christopher Erickson',oa: 105.5, cap: 95.6,  ratio: 73.5, salary: 68000, market: 110000, q: [null, null, 109, 102], note: 'Avg of Q3–Q4' },
       { name: 'Aaron Costello',      oa: 51,   cap: 75.4,  ratio: 94.7, salary: 81000,  market: 121000, q: [51, 111, 82, 104] },
@@ -102,7 +102,7 @@ const TEAMS: TeamData[] = [
     melders: [
       { name: 'Elizabeth Greenway', oa: 90.2,  cap: 82.4,  ratio: 72.5,  salary: 100000, market: 133000, q: [90.2, 99, 83, 69] },
       { name: 'Michael Nasibog',    oa: 163,   cap: 102.7, ratio: 104.9, salary: 53400,  market: 63000,  q: [102.3, 82, 133, 82] },
-      { name: 'Jon Martin',         oa: 105,   cap: 89.8,  ratio: 106.5, salary: 75000,  market: 110000, q: [105, 106, 116, 85] },
+      { name: 'Jon Martin',         oa: 103,   cap: 89.8,  ratio: 106.5, salary: 75000,  market: 110000, q: [105, 106, 116, 85] },
       { name: 'Molly Sperlich',     oa: 117,   cap: 93.6,  ratio: 101.6, salary: 62000,  market: 84000,  q: [117, 118, 109, 80] },
       { name: 'Madison',            oa: 73,    cap: 79.8,  ratio: 112.7, salary: 136000, market: 151000, q: [73, 80, 95, 80] },
     ],

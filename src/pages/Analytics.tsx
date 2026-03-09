@@ -52,11 +52,12 @@ export function Analytics({ storage }: Props) {
   const activeReports = isUsingSeed ? SEED_REPORTS_2025 : reports;
 
   const filteredReports = useMemo(() => {
-    if (period === 'all') return activeReports;
+    // Seed data is a 2025 annual baseline — always show it regardless of period filter
+    if (isUsingSeed || period === 'all') return activeReports;
     const cutoff = new Date();
     cutoff.setMonth(cutoff.getMonth() - parseInt(period));
     return activeReports.filter((r) => new Date(r.year, r.month - 1) >= cutoff);
-  }, [activeReports, period]);
+  }, [activeReports, period, isUsingSeed]);
 
   const latestByMelder = useMemo(() => {
     const map = new Map<string, MonthlyReport>();
