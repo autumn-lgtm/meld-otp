@@ -1,5 +1,6 @@
 import { Edit2, Plus, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
+import { useSalaryVisible } from '../hooks/useSalaryVisible';
 import { Header } from '../components/layout/Header';
 import type { AppStorage, Melder, Role } from '../types';
 import { deleteMelder, generateId, saveMelder, saveRole } from '../utils/storage';
@@ -24,15 +25,19 @@ type FormState = typeof emptyForm;
 const ROLE_DEPT: Record<string, string> = {
   BDA: 'Business Development', BDR: 'Business Development', 'SR-BDR': 'Business Development', 'BD-MGR': 'Business Development',
   'ASSOC-BSE': 'Business Solutions', BSE: 'Business Solutions', 'SR-BSE': 'Business Solutions', 'BS-DIR': 'Business Solutions',
-  CSM: 'Customer Success', 'MM-CSM': 'Customer Success', 'CS-MGR': 'Customer Success',
+  CSM: 'Customer Success', 'MM-CSM': 'Customer Success', 'CS-MGR': 'Customer Success', 'ASSOC-CSM': 'Customer Success',
   CSS: 'Customer Support & Enablement', MMES: 'Customer Support & Enablement', 'CSS-MGR': 'Customer Support & Enablement',
   COM: 'Customer Onboarding',
   'MKT-IC2': 'Marketing', 'MKT-IC3': 'Marketing', 'MKT-L4': 'Marketing',
   'ENG-IC1': 'Engineering', 'ENG-IC2': 'Engineering', 'ENG-IC3': 'Engineering',
   'ENG-IC4': 'Engineering', 'ENG-IC5': 'Engineering', 'ENG-MGR': 'Engineering',
-  'DATA-IC5': 'Engineering', 'DATA-MGR': 'Engineering',
+  'UXUI-IC': 'Engineering', 'INTERN': 'Engineering',
+  'DATA-IC1': 'Engineering & Data', 'DATA-IC2': 'Engineering & Data', 'DATA-IC3': 'Engineering & Data',
+  'DATA-IC4': 'Engineering & Data', 'DATA-IC5': 'Engineering & Data', 'DATA-MGR': 'Engineering & Data',
   'PROD-IC2': 'Product', 'PROD-IC3': 'Product', 'PROD-IC4': 'Product',
   'PEOPLE-OPS-IC': 'People Ops', 'PEOPLE-OPS-MGR': 'People Ops',
+  'SALES-DIR': 'Business Solutions',
+  'EXEC': 'Leadership', 'ADMIN-IC': 'Leadership',
 };
 
 const DEPT_ORDER = [
@@ -43,8 +48,10 @@ const DEPT_ORDER = [
   'Customer Onboarding',
   'Marketing',
   'Engineering',
+  'Engineering & Data',
   'Product',
   'People Ops',
+  'Leadership',
   'Other',
 ];
 
@@ -56,17 +63,33 @@ const DEPT_COLORS: Record<string, string> = {
   'Customer Onboarding': '#1175CC',
   'Marketing': '#94a3b8',
   'Engineering': '#f97316',
+  'Engineering & Data': '#e11d48',
   'Product': '#ec4899',
   'People Ops': '#14b8a6',
+  'Leadership': '#6366f1',
   'Other': '#64748b',
 };
 
-function roleDept(roleId: string): string {
+function roleDept(roleId: string, rolesList?: Role[]): string {
+  // Prefer the role object's department field (custom roles have this set)
+  const roleObj = rolesList?.find(r => r.id === roleId);
+  if (roleObj?.department) return roleObj.department;
   return ROLE_DEPT[roleId] ?? 'Other';
 }
 
-function isLeaderRole(roleId: string): boolean {
-  return /MGR|DIR|L4|LEAD/.test(roleId);
+const DEPT_LEADER_IDS = new Set([
+  'melder-madison',            // Marketing
+  'melder-nicholas-nagel',     // Business Development
+  'melder-john-kearns',        // Business Solutions
+  'melder-aaron-seaholm',      // Customer Onboarding
+  'melder-anna-torvi',         // Customer Success
+  'melder-nathanael-hockley',  // Customer Support & Enablement
+  'melder-austin-wentz',       // Engineering
+  'melder-erin',               // Engineering & Data
+]);
+
+function isLeaderRole(roleId: string, melderId?: string): boolean {
+  return (melderId !== undefined && DEPT_LEADER_IDS.has(melderId)) || /MGR|DIR|L4|LEAD/.test(roleId);
 }
 
 // ── Inline "add new role" inside the Role dropdown ───────────────────────────
@@ -156,6 +179,7 @@ function RoleSelect({ roles, value, hasError, onChange, onRoleCreated }: RoleSel
 
 export function Melders({ storage, onSave }: Props) {
   const { melders, roles, reports } = storage;
+  const { salaryVisible } = useSalaryVisible();
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Melder | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
@@ -175,8 +199,8 @@ export function Melders({ storage, onSave }: Props) {
       name: melder.name,
       roleId: melder.roleId,
       email: melder.email ?? '',
-      marketRate: melder.marketRate > 0 ? String(melder.marketRate) : '',
-      targetCompensation: melder.targetCompensation > 0 ? String(melder.targetCompensation) : '',
+      marketRate: melder.marketRate > 0 ? String(Math.round(melder.marketRate * 12)) : '',
+      targetCompensation: melder.targetCompensation > 0 ? String(Math.round(melder.targetCompensation * 12)) : '',
     });
     setErrors({});
     setShowForm(true);
@@ -198,8 +222,8 @@ export function Melders({ storage, onSave }: Props) {
       name: form.name.trim(),
       roleId: form.roleId,
       email: form.email.trim() || undefined,
-      marketRate: parseFloat(form.marketRate) || 0,
-      targetCompensation: parseFloat(form.targetCompensation) || 0,
+      marketRate: (parseFloat(form.marketRate) || 0) / 12,
+      targetCompensation: (parseFloat(form.targetCompensation) || 0) / 12,
       createdAt: editing?.createdAt ?? now,
       updatedAt: now,
     };
@@ -226,7 +250,7 @@ export function Melders({ storage, onSave }: Props) {
   for (const dept of DEPT_ORDER) grouped.set(dept, []);
 
   for (const m of melders) {
-    const dept = roleDept(m.roleId);
+    const dept = roleDept(m.roleId, roles);
     if (!grouped.has(dept)) grouped.set(dept, []);
     grouped.get(dept)!.push(m);
   }
@@ -234,8 +258,8 @@ export function Melders({ storage, onSave }: Props) {
   // Sort within each group: leaders first, then alphabetically by name
   for (const [, group] of grouped) {
     group.sort((a, b) => {
-      const aLeader = isLeaderRole(a.roleId) ? 0 : 1;
-      const bLeader = isLeaderRole(b.roleId) ? 0 : 1;
+      const aLeader = isLeaderRole(a.roleId, a.id) ? 0 : 1;
+      const bLeader = isLeaderRole(b.roleId, b.id) ? 0 : 1;
       if (aLeader !== bLeader) return aLeader - bLeader;
       return a.name.localeCompare(b.name);
     });
@@ -301,22 +325,22 @@ export function Melders({ storage, onSave }: Props) {
               </Field>
 
               <div className="grid grid-cols-2 gap-4">
-                <Field label="Target Comp ($/mo)">
+                <Field label="Target Comp ($/yr)">
                   <input
                     type="number"
                     value={form.targetCompensation}
                     onChange={(e) => setForm({ ...form, targetCompensation: e.target.value })}
                     className={inputCls(false)}
-                    placeholder="e.g. 9000"
+                    placeholder="e.g. 108000"
                   />
                 </Field>
-                <Field label="Market Rate ($/mo)">
+                <Field label="Market Rate ($/yr)">
                   <input
                     type="number"
                     value={form.marketRate}
                     onChange={(e) => setForm({ ...form, marketRate: e.target.value })}
                     className={inputCls(false)}
-                    placeholder="e.g. 9500"
+                    placeholder="e.g. 114000"
                   />
                 </Field>
               </div>
@@ -406,7 +430,7 @@ export function Melders({ storage, onSave }: Props) {
                   <tbody>
                     {group.map((m, idx) => {
                       const role = roles.find((r) => r.id === m.roleId);
-                      const leader = isLeaderRole(m.roleId);
+                      const leader = isLeaderRole(m.roleId, m.id);
                       return (
                         <tr
                           key={m.id}
@@ -433,10 +457,10 @@ export function Melders({ storage, onSave }: Props) {
                             {role && <p className="text-xs text-slate-400 mt-0.5">{role.fullName}</p>}
                           </td>
                           <td className="px-5 py-3.5 text-slate-700">
-                            {m.targetCompensation > 0 ? `$${m.targetCompensation.toLocaleString()}` : '—'}
+                            {m.targetCompensation > 0 ? (salaryVisible ? `$${Math.round(m.targetCompensation * 12).toLocaleString()}/yr` : '$••••') : '—'}
                           </td>
                           <td className="px-5 py-3.5 text-slate-700">
-                            {m.marketRate > 0 ? `$${m.marketRate.toLocaleString()}` : '—'}
+                            {m.marketRate > 0 ? (salaryVisible ? `$${Math.round(m.marketRate * 12).toLocaleString()}/yr` : '$••••') : '—'}
                           </td>
                           <td className="px-5 py-3.5 text-slate-500">{reportCount(m.id)}</td>
                           <td className="px-5 py-3.5">
