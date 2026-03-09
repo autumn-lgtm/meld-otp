@@ -30,6 +30,7 @@ import { AlertBanner } from '../components/shared/AlertBanner';
 import { MetricCard } from '../components/shared/MetricCard';
 import { Header } from '../components/layout/Header';
 import type { AppStorage, Melder } from '../types';
+import { useSalaryVisible } from '../hooks/useSalaryVisible';
 import { MONTHS } from '../types';
 import {
   buildReport,
@@ -54,6 +55,7 @@ const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
 export function Calculator({ storage, onSave }: Props) {
   const [searchParams] = useSearchParams();
   const preselectedMelder = searchParams.get('melder') ?? '';
+  const { salaryVisible } = useSalaryVisible();
 
   const { melders, roles } = storage;
 
@@ -105,8 +107,8 @@ export function Calculator({ storage, onSave }: Props) {
       if (melder) {
         const factor = getProratedFactor(melder.startDate, month, year);
         if (factor != null) {
-          const proTarget = Math.round((melder.targetCompensation / 12) * factor);
-          const proMarket = Math.round((melder.marketRate / 12) * factor);
+          const proTarget = Math.round(melder.targetCompensation * factor);
+          const proMarket = Math.round(melder.marketRate * factor);
           setTargetComp(proTarget > 0 ? String(proTarget) : '');
           setMarketRate(proMarket > 0 ? String(proMarket) : '');
         } else {
@@ -118,9 +120,10 @@ export function Calculator({ storage, onSave }: Props) {
       if (role) {
         const initial: Record<string, { actual: string; target: string }> = {};
         role.metrics.forEach((m) => {
+          const override = melder?.metricTargetOverrides?.[m.abbreviation];
           initial[m.id] = {
             actual: '',
-            target: m.defaultTarget != null ? String(m.defaultTarget) : '',
+            target: override != null ? String(override) : (m.defaultTarget != null ? String(m.defaultTarget) : ''),
           };
         });
         setMetricInputs(initial);
@@ -459,20 +462,72 @@ export function Calculator({ storage, onSave }: Props) {
                   <div className="flex justify-between text-sm">
                     <div>
                       <p className="text-slate-400 text-xs">Actual</p>
-                      <p className="font-semibold text-slate-700">{fmtCurrency(capResult.actualCompensation)}</p>
+                      <p className="font-semibold text-slate-700">{salaryVisible ? fmtCurrency(capResult.actualCompensation) : '$••••'}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-slate-400 text-xs">Target</p>
-                      <p className="font-semibold text-slate-700">{fmtCurrency(capResult.targetCompensation)}</p>
+                      <p className="font-semibold text-slate-700">{salaryVisible ? fmtCurrency(capResult.targetCompensation) : '$••••'}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-slate-400 text-xs">Gap</p>
                       <p className={`font-semibold ${capResult.actualCompensation >= capResult.targetCompensation ? 'text-green-600' : 'text-red-600'}`}>
-                        {fmtCurrency(capResult.actualCompensation - capResult.targetCompensation)}
+                        {salaryVisible ? fmtCurrency(capResult.actualCompensation - capResult.targetCompensation) : '$••••'}
                       </p>
                     </div>
                   </div>
                 </MetricCard>
+              )}
+
+              {/* Realized Reward — OAP × Target vs. Actual Paid */}
+              {oapResult && hasCompData && hasTargetData && (
+                <div className="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
+                  <div className="px-5 py-4 border-b border-slate-100" style={{ background: 'linear-gradient(135deg, #022935 0%, #0d4a6b 100%)' }}>
+                    <p className="text-xs font-bold uppercase tracking-widest text-[#B0E3FF] mb-0.5">Realized Reward</p>
+                    <p className="text-[11px] text-white/60">What they performance-earned vs. what was paid</p>
+                  </div>
+                  <div className="px-5 py-4">
+                    {(() => {
+                      const earned = (oapResult.oap / 100) * capResult.targetCompensation;
+                      const realized = capResult.actualCompensation;
+                      const delta = realized - earned;
+                      const annualEarned = Math.round(earned * 12);
+                      const annualRealized = Math.round(realized * 12);
+                      return (
+                        <>
+                          <div className="flex justify-between text-sm mb-3">
+                            <div>
+                              <p className="text-slate-400 text-xs">Performance-Earned</p>
+                              <p className="font-bold text-slate-800">{salaryVisible ? fmtCurrency(earned) : '$••••'}</p>
+                              <p className="text-[10px] text-slate-400 mt-0.5">{oapResult.oap.toFixed(1)}% × target/mo</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-slate-400 text-xs">Realized (Paid)</p>
+                              <p className="font-bold text-slate-800">{salaryVisible ? fmtCurrency(realized) : '$••••'}</p>
+                              <p className="text-[10px] text-slate-400 mt-0.5">actual received/mo</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-slate-400 text-xs">Delta</p>
+                              <p className={`font-bold ${delta >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                                {salaryVisible ? `${delta >= 0 ? '+' : ''}${fmtCurrency(delta)}` : '$••••'}
+                              </p>
+                              <p className="text-[10px] text-slate-400 mt-0.5">{delta >= 0 ? 'above earned' : 'below earned'}</p>
+                            </div>
+                          </div>
+                          <div className="pt-3 border-t border-slate-100 flex justify-between text-xs text-slate-400">
+                            <span>Annualized at this pace</span>
+                            {salaryVisible ? (
+                              <span className="font-medium text-slate-600">
+                                ${annualRealized.toLocaleString()}/yr paid &nbsp;·&nbsp; ${annualEarned.toLocaleString()}/yr earned
+                              </span>
+                            ) : (
+                              <span className="font-medium text-slate-400">$••••/yr paid · $••••/yr earned</span>
+                            )}
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
               )}
 
               {/* Ratio card — only when actual comp + market rate entered */}
@@ -487,16 +542,16 @@ export function Calculator({ storage, onSave }: Props) {
                   <div className="flex justify-between text-sm">
                     <div>
                       <p className="text-slate-400 text-xs">Actual</p>
-                      <p className="font-semibold text-slate-700">{fmtCurrency(ratioResult.actualCompensation)}</p>
+                      <p className="font-semibold text-slate-700">{salaryVisible ? fmtCurrency(ratioResult.actualCompensation) : '$••••'}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-slate-400 text-xs">Market Rate</p>
-                      <p className="font-semibold text-slate-700">{fmtCurrency(ratioResult.marketRate)}</p>
+                      <p className="font-semibold text-slate-700">{salaryVisible ? fmtCurrency(ratioResult.marketRate) : '$••••'}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-slate-400 text-xs">vs Market</p>
                       <p className={`font-semibold ${ratioResult.actualCompensation >= ratioResult.marketRate ? 'text-green-600' : 'text-red-600'}`}>
-                        {fmtCurrency(ratioResult.actualCompensation - ratioResult.marketRate)}
+                        {salaryVisible ? fmtCurrency(ratioResult.actualCompensation - ratioResult.marketRate) : '$••••'}
                       </p>
                     </div>
                   </div>

@@ -3,6 +3,7 @@ import { Sidebar } from './components/layout/Sidebar';
 import { useStorage } from './hooks/useStorage';
 import { Analytics } from './pages/Analytics';
 import { Calculator } from './pages/Calculator';
+import { CompPlans } from './pages/CompPlans';
 import { Dashboard } from './pages/Dashboard';
 import { Export } from './pages/Export';
 import { History } from './pages/History';
@@ -35,6 +36,7 @@ export default function App() {
             <Route path="/review-2025" element={<Review2025 />} />
             <Route path="/import" element={<Import storage={storage} onSave={update} />} />
             <Route path="/export" element={<Export storage={storage} />} />
+            <Route path="/comp-plans" element={<CompPlans storage={storage} onSave={update} />} />
             <Route path="/settings" element={<Settings storage={storage} onSave={update} />} />
           </Routes>
         </main>

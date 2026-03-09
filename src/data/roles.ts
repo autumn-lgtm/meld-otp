@@ -456,6 +456,59 @@ export const DEFAULT_ROLES: Role[] = [
     metrics: [],
   },
 
+  // ── Associate Customer Success ────────────────────────────────────────────
+  {
+    id: 'ASSOC-CSM',
+    name: 'ASSOC-CSM',
+    fullName: 'Associate Customer Success Manager',
+    level: 'IC1',
+    cadence: 'monthly',
+    metrics: [],
+  },
+
+  // ── UI/UX Design ──────────────────────────────────────────────────────────
+  {
+    id: 'UXUI-IC',
+    name: 'UXUI-IC',
+    fullName: 'UI/UX Designer',
+    cadence: 'monthly',
+    metrics: [],
+  },
+
+  // ── Sales Leadership ──────────────────────────────────────────────────────
+  {
+    id: 'SALES-DIR',
+    name: 'SALES-DIR',
+    fullName: 'Director of Sales',
+    cadence: 'monthly',
+    metrics: [],
+  },
+
+  // ── Intern ────────────────────────────────────────────────────────────────
+  {
+    id: 'INTERN',
+    name: 'INTERN',
+    fullName: 'Intern',
+    cadence: 'monthly',
+    metrics: [],
+  },
+
+  // ── Administrative ────────────────────────────────────────────────────────
+  {
+    id: 'ADMIN-IC',
+    name: 'ADMIN-IC',
+    fullName: 'Administrative Staff',
+    cadence: 'monthly',
+    metrics: [],
+  },
+  {
+    id: 'EXEC',
+    name: 'EXEC',
+    fullName: 'Executive / CEO',
+    cadence: 'monthly',
+    metrics: [],
+  },
+
   // ── Onboarding Track ────────────────────────────────────────────────────────
   {
     id: 'COM',

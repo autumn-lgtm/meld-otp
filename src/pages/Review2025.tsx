@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, AlertTriangle, TrendingUp, Star, Eye, EyeOff } from 'lucide-react';
+import { useSalaryVisible } from '../hooks/useSalaryVisible';
 
 const MELD_BLUE = '#1175CC';
 const MELD_DARK = '#022935';
@@ -404,7 +405,8 @@ function ExcludedSection({ team, masked }: { team: ExcludedTeam; masked: boolean
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export function Review2025() {
-  const [masked, setMasked] = useState(true);
+  const { salaryVisible, toggleSalary } = useSalaryVisible();
+  const masked = !salaryVisible;
   return (
     <div className="min-h-screen" style={{ background: '#F1F1F1' }}>
 
@@ -419,7 +421,7 @@ export function Review2025() {
               2025 Year in Review
             </h1>
             <button
-              onClick={() => setMasked((m) => !m)}
+              onClick={toggleSalary}
               className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:bg-white/25 mt-1"
               style={{ background: 'rgba(255,255,255,0.12)', color: 'white', border: '1px solid rgba(255,255,255,0.3)' }}
               title={masked ? 'Show salary data' : 'Hide salary data'}
@@ -447,6 +449,50 @@ export function Review2025() {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Scrolling stat ticker */}
+      <div className="overflow-hidden" style={{ background: MELD_DARK, borderTop: `3px solid ${MELD_ACCENT}` }}>
+        <style>{`
+          @keyframes otp-ticker {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+        `}</style>
+        <div
+          className="flex whitespace-nowrap py-2.5"
+          style={{ animation: 'otp-ticker 48s linear infinite' }}
+        >
+          {[
+            { label: 'Company OAP Trajectory', value: '72.6% → ~99%+', color: '#22c55e' },
+            { label: 'Support Team Annual OAP', value: '100%+ all year', color: '#22c55e' },
+            { label: 'BD Q1 → Q4 Swing', value: '+47 pts', color: MELD_ACCENT },
+            { label: 'Business Solutions Q4 OAP', value: '104%', color: '#22c55e' },
+            { label: 'CSM Team OAP', value: '110.6%', color: '#22c55e' },
+            { label: 'People Ops OAP', value: '100%', color: '#22c55e' },
+            { label: 'Customer Onboarding OAP', value: '92%', color: '#f59e0b' },
+            { label: 'OTP Teams Tracked', value: '5 teams · 2025', color: MELD_LIGHT },
+            { label: 'BD OAP Q4', value: '125%+', color: '#22c55e' },
+            { label: 'Marketing OAP', value: '97.5%', color: '#f59e0b' },
+          ].concat([
+            { label: 'Company OAP Trajectory', value: '72.6% → ~99%+', color: '#22c55e' },
+            { label: 'Support Team Annual OAP', value: '100%+ all year', color: '#22c55e' },
+            { label: 'BD Q1 → Q4 Swing', value: '+47 pts', color: MELD_ACCENT },
+            { label: 'Business Solutions Q4 OAP', value: '104%', color: '#22c55e' },
+            { label: 'CSM Team OAP', value: '110.6%', color: '#22c55e' },
+            { label: 'People Ops OAP', value: '100%', color: '#22c55e' },
+            { label: 'Customer Onboarding OAP', value: '92%', color: '#f59e0b' },
+            { label: 'OTP Teams Tracked', value: '5 teams · 2025', color: MELD_LIGHT },
+            { label: 'BD OAP Q4', value: '125%+', color: '#22c55e' },
+            { label: 'Marketing OAP', value: '97.5%', color: '#f59e0b' },
+          ]).map((s, i) => (
+            <span key={i} className="inline-flex items-center gap-2 mr-10 text-xs font-medium">
+              <span style={{ color: MELD_ACCENT, fontSize: 8 }}>◆</span>
+              <span style={{ color: 'rgba(176,227,255,0.55)' }}>{s.label}</span>
+              <strong style={{ color: s.color, fontFamily: 'Poppins, sans-serif' }}>{s.value}</strong>
+            </span>
+          ))}
         </div>
       </div>
 

@@ -1,10 +1,14 @@
-import type { AnnualSnapshot, AppStorage, Melder, MonthlyReport, Role } from '../types';
+import type { AnnualSnapshot, AppStorage, CompPlan, Melder, MonthlyReport, Role } from '../types';
 import { DEFAULT_MELDERS } from '../data/melders';
 import { DEFAULT_ROLES } from '../data/roles';
 import { SEED_2025_ANNUAL } from '../data/seed2025annual';
 
 const STORAGE_KEY = 'meld-otp-v1';
-const CURRENT_VERSION = 1;
+const CURRENT_VERSION = 2;
+
+// Annual threshold: seed data had annual values (min $16,800). Form-saved monthly
+// values are always ≤ $16,000 (max annual in dataset ÷ 12). Safe migration cutoff.
+const ANNUAL_MIGRATION_THRESHOLD = 16500;
 
 function getDefaultStorage(): AppStorage {
   return {
@@ -12,6 +16,7 @@ function getDefaultStorage(): AppStorage {
     reports: [],
     roles: DEFAULT_ROLES,
     annualSnapshots: SEED_2025_ANNUAL,
+    compPlans: [],
     version: CURRENT_VERSION,
   };
 }
@@ -37,7 +42,21 @@ export function loadStorage(): AppStorage {
         }),
       };
     });
-    const melders = parsed.melders.length === 0 ? DEFAULT_MELDERS : parsed.melders;
+    // v1 → v2: targetCompensation and marketRate were seeded as annual values;
+    // convert any stored value above the threshold to monthly (÷ 12).
+    let rawMelders = parsed.melders.length === 0 ? DEFAULT_MELDERS : parsed.melders;
+    if ((parsed.version ?? 1) < 2) {
+      rawMelders = rawMelders.map((m) => ({
+        ...m,
+        targetCompensation: m.targetCompensation > ANNUAL_MIGRATION_THRESHOLD
+          ? Math.round(m.targetCompensation / 12)
+          : m.targetCompensation,
+        marketRate: m.marketRate > ANNUAL_MIGRATION_THRESHOLD
+          ? Math.round(m.marketRate / 12)
+          : m.marketRate,
+      }));
+    }
+    const melders = rawMelders;
     // Seed is authoritative base; stored edits override matching IDs; user-added entries preserved.
     // Always take oaPct from seed (it may be computed from quarters) — never let a stored null override it.
     const storedMap = new Map((parsed.annualSnapshots ?? []).map((s) => [s.id, s]));
@@ -58,7 +77,13 @@ export function loadStorage(): AppStorage {
       }),
       ...userAdded,
     ];
-    return { ...parsed, melders, roles: [...missingDefaults, ...mergedRoles], annualSnapshots };
+    return {
+      ...parsed,
+      melders,
+      roles: [...missingDefaults, ...mergedRoles],
+      annualSnapshots,
+      compPlans: parsed.compPlans ?? [],
+    };
   } catch {
     return getDefaultStorage();
   }
@@ -119,6 +144,21 @@ export function saveRole(storage: AppStorage, role: Role): AppStorage {
 
 export function deleteRole(storage: AppStorage, roleId: string): AppStorage {
   return { ...storage, roles: storage.roles.filter((r) => r.id !== roleId) };
+}
+
+// ─── CompPlan CRUD ──────────────────────────────────────────────────────────
+
+export function saveCompPlan(storage: AppStorage, plan: CompPlan): AppStorage {
+  const existing = storage.compPlans.findIndex((p) => p.id === plan.id);
+  const compPlans =
+    existing >= 0
+      ? storage.compPlans.map((p) => (p.id === plan.id ? plan : p))
+      : [...storage.compPlans, plan];
+  return { ...storage, compPlans };
+}
+
+export function deleteCompPlan(storage: AppStorage, planId: string): AppStorage {
+  return { ...storage, compPlans: storage.compPlans.filter((p) => p.id !== planId) };
 }
 
 // ─── Annual Snapshot CRUD ────────────────────────────────────────────────────

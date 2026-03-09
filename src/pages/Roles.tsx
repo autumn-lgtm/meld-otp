@@ -50,6 +50,7 @@ const ROLE_DEPT: Record<string, string> = {
 };
 
 function getDept(role: Role): string {
+  if (role.department) return role.department;
   if (role.isCustom) return 'Custom';
   return ROLE_DEPT[role.id] ?? 'Custom';
 }
@@ -196,10 +197,13 @@ function RoleCard({
   const [editing, setEditing] = useState(false);
   const [em, setEm] = useState<EditMetric[]>([]);
   const [editName, setEditName] = useState('');
+  const [editDept, setEditDept] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const SEG_OPACITIES = [1, 0.55, 0.3, 0.18];
 
   function enterEdit() {
     setEditName(role.fullName || role.name);
+    setEditDept(getDept(role));
     setEm(
       role.metrics.length > 0
         ? toEditMetrics(role)
@@ -208,13 +212,14 @@ function RoleCard({
     setEditing(true);
   }
 
-  function cancel() { setEditing(false); setEm([]); }
+  function cancel() { setEditing(false); setEm([]); setConfirmDelete(false); }
 
   function save() {
     onSaveRole({
       ...role,
       fullName: editName.trim() || role.fullName,
       name: editName.trim() || role.name,
+      department: editDept || undefined,
       metrics: fromEditMetrics(em, role.metrics),
     });
     setEditing(false);
@@ -267,12 +272,26 @@ function RoleCard({
           >
             <Edit2 className="w-3.5 h-3.5" />
           </button>
-          {role.isCustom && (
+          {confirmDelete ? (
+            <div className="flex items-center gap-1 opacity-100">
+              <span className="text-[10px] text-white/70">Delete?</span>
+              <button
+                onClick={() => onDeleteRole(role.id)}
+                className="text-[10px] font-bold px-1.5 py-0.5 rounded"
+                style={{ background: 'rgba(239,68,68,0.35)', color: '#fca5a5' }}
+              >Yes</button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="text-[10px] px-1.5 py-0.5 rounded"
+                style={{ background: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.7)' }}
+              >No</button>
+            </div>
+          ) : (
             <button
-              onClick={() => onDeleteRole(role.id)}
+              onClick={() => setConfirmDelete(true)}
               className="p-1.5 rounded-lg opacity-25 group-hover:opacity-100 transition-all hover:scale-110 hover:bg-white/20"
               style={{ color: 'rgba(255,255,255,0.7)' }}
-              title="Delete custom role"
+              title="Delete role"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
@@ -324,7 +343,15 @@ function RoleCard({
           style={{ fontFamily: 'Poppins, sans-serif' }}
           placeholder="Role title…"
         />
-        <span className="ml-1 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-white/20 text-white/80">
+        <select
+          value={editDept}
+          onChange={e => setEditDept(e.target.value)}
+          className="text-[11px] font-semibold rounded-lg px-2 py-1 focus:outline-none"
+          style={{ background: 'rgba(255,255,255,0.15)', color: 'white', border: '1px solid rgba(255,255,255,0.25)', maxWidth: 130 }}
+        >
+          {DEPT_ORDER.map(d => <option key={d} value={d} style={{ background: '#022935' }}>{d}</option>)}
+        </select>
+        <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-white/20 text-white/80 flex-shrink-0">
           editing
         </span>
       </div>
@@ -412,6 +439,7 @@ function RoleCard({
 function NewRoleModal({ onSave, onClose }: { onSave: (r: Role) => void; onClose: () => void }) {
   const [title, setTitle] = useState('');
   const [cadence, setCadence] = useState<'monthly' | 'quarterly'>('monthly');
+  const [dept, setDept] = useState('Custom');
 
   function handleSave() {
     if (!title.trim()) return;
@@ -423,6 +451,7 @@ function NewRoleModal({ onSave, onClose }: { onSave: (r: Role) => void; onClose:
       cadence,
       metrics: [],
       isCustom: true,
+      department: dept,
     });
     onClose();
   }
@@ -445,6 +474,16 @@ function NewRoleModal({ onSave, onClose }: { onSave: (r: Role) => void; onClose:
               className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1175CC]"
               placeholder="e.g. Senior Account Executive"
             />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Department</label>
+            <select
+              value={dept}
+              onChange={e => setDept(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1175CC]"
+            >
+              {DEPT_ORDER.map(d => <option key={d} value={d}>{d}</option>)}
+            </select>
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Cadence</label>

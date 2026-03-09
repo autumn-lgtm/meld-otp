@@ -21,6 +21,7 @@ export interface Role {
   cadence: 'monthly' | 'quarterly';
   metrics: MetricDefinition[];
   isCustom?: boolean;
+  department?: string; // explicit dept override; falls back to ROLE_DEPT map if unset
 }
 
 // ─── Melder ────────────────────────────────────────────────────────────────────
@@ -31,8 +32,10 @@ export interface Melder {
   roleId: RoleId;
   email?: string;
   startDate?: string; // ISO date
+  department?: string; // explicit dept label (e.g. from Paylocity); falls back to role-dept map
   marketRate: number; // annual market rate for Ratio calculation
   targetCompensation: number; // annual OTE / target comp
+  metricTargetOverrides?: Record<string, number>; // abbreviation → target value (same units as metric)
   createdAt: string;
   updatedAt: string;
 }
@@ -141,6 +144,45 @@ export interface AnnualSnapshot {
   q4Oa: number | null;
 }
 
+// ─── Comp Plans ────────────────────────────────────────────────────────────────
+
+export interface CompPlanComponent {
+  id: string;
+  name: string;
+  type: 'commission' | 'bonus' | 'spiff' | 'other';
+  frequency: 'monthly' | 'quarterly' | 'annual';
+  annualTarget: number;
+  description?: string;
+}
+
+export interface CompPlan {
+  id: string;
+  department: string;
+  roleId?: string;          // links to Role.id if known
+  roleName: string;         // display name (from import or manual entry)
+  // Pay mix — what % of total cash is base vs variable
+  basePct: number;          // e.g., 66
+  variablePct: number;      // e.g., 34
+  // Annual targets
+  annualOTE: number;        // on-target total cash (base + variable)
+  annualBase: number;       // base salary target
+  annualVariable: number;   // variable comp target
+  // Variable comp breakdown
+  components: CompPlanComponent[];
+  melderName?: string;      // specific Melder this plan is for (e.g. "Bailey")
+  planTierLabel?: string;   // tier label, e.g. "Year 2+ SMB (300-600 Doors)"
+  metricTargets?: Array<{   // OAP metric targets from variable comp structure
+    abbreviation: string;   // e.g. 'GRR', 'UCR'
+    monthlyTarget: number;  // monthly value (GRR as %, UCR as $)
+    label?: string;         // human-readable description
+  }>;
+  source?: string;          // "Excel Import", "Manual", etc.
+  effectiveDate?: string;   // ISO date — when this plan took effect
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ─── Storage Shape ─────────────────────────────────────────────────────────────
 
 export interface AppStorage {
@@ -148,6 +190,7 @@ export interface AppStorage {
   reports: MonthlyReport[];
   roles: Role[];
   annualSnapshots: AnnualSnapshot[];
+  compPlans: CompPlan[];
   version: number;
 }
 

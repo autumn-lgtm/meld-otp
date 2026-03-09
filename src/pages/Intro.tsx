@@ -1,4 +1,4 @@
-import { ArrowRight, BarChart2, Calculator, CheckCircle } from 'lucide-react';
+import { ArrowRight, Award, BarChart2, BarChart3, Calculator, CheckCircle, Target, DollarSign, TrendingUp, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const MELD_BLUE = '#1175CC';
@@ -6,76 +6,166 @@ const MELD_DARK = '#022935';
 const MELD_LIGHT = '#B0E3FF';
 const MELD_GOLD = '#FFB41B';
 function FlywheelDiagram() {
-  const CX = 200, CY = 200, ORBIT = 118, NODE_R = 40;
-  const nodes = [
-    { angle: -90, label: 'OAP', sub: 'Performance', color: MELD_BLUE },
-    { angle: 30,  label: 'CAP', sub: 'Pay Promise',  color: '#0d4a6b' },
-    { angle: 150, label: 'Ratio', sub: 'Market',     color: MELD_GOLD },
-  ];
-  const pts = nodes.map(n => ({
-    ...n,
-    x: CX + ORBIT * Math.cos(n.angle * Math.PI / 180),
-    y: CY + ORBIT * Math.sin(n.angle * Math.PI / 180),
-  }));
-  const arrows = pts.map((src, i) => {
-    const tgt = pts[(i + 1) % pts.length];
-    const dx = tgt.x - src.x, dy = tgt.y - src.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    const ux = dx / dist, uy = dy / dist;
-    const ax = src.x + (NODE_R + 6) * ux, ay = src.y + (NODE_R + 6) * uy;
-    const bx = tgt.x - (NODE_R + 10) * ux, by = tgt.y - (NODE_R + 10) * uy;
-    const mx = (ax + bx) / 2, my = (ay + by) / 2;
-    const cmx = mx - CX, cmy = my - CY;
-    const clen = Math.sqrt(cmx * cmx + cmy * cmy);
-    const cpx = mx + 22 * cmx / clen, cpy = my + 22 * cmy / clen;
-    return { ax, ay, bx, by, cpx, cpy, color: src.color };
-  });
-  const arcLabels = [
-    { label: 'earns', i: 0 },
-    { label: 'validated by', i: 1 },
-    { label: 'sustains', i: 2 },
-  ];
+  // Globe geometry
+  const CX = 215, CY = 192, R = 107;
+  const GREEN = '#22c55e';
+  const ey = R * 0.27; // equatorial ellipse squish
+
+  // Node positions: equilateral triangle on sphere surface
+  const deg = (d: number) => d * Math.PI / 180;
+  const oap   = { x: CX,                       y: CY - R };                            // top    –90°
+  const cap   = { x: CX + R * Math.cos(deg(30)), y: CY + R * Math.sin(deg(30)) };      // right   30°
+  const ratio = { x: CX + R * Math.cos(deg(150)), y: CY + R * Math.sin(deg(150)) };    // left   150°
+
   return (
-    <svg viewBox="0 0 400 400" className="w-full max-w-xs mx-auto select-none">
-      <circle cx={CX} cy={CY} r={ORBIT} fill="none" stroke="#e2e8f0" strokeWidth="1.5" strokeDasharray="5 5" />
+    <svg viewBox="0 0 460 375" className="w-full select-none" style={{ filter: 'drop-shadow(0 4px 32px rgba(17,117,204,0.22))' }}>
       <defs>
-        {arrows.map((a, i) => (
-          <marker key={i} id={`ah-${i}`} markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
-            <path d="M0,0 L0,7 L9,3.5 z" fill={a.color} />
-          </marker>
-        ))}
+        <style>{`
+          @keyframes fw-orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        `}</style>
+        <filter id="fw-fog" x="-100%" y="-100%" width="300%" height="300%">
+          <feGaussianBlur stdDeviation="22" />
+        </filter>
+        <filter id="fw-glow" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="8" result="b" />
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <marker id="fw-ab" markerWidth="7" markerHeight="7" refX="5.5" refY="2.5" orient="auto">
+          <path d="M0,0 L0,5 L7,2.5 z" fill={MELD_BLUE} />
+        </marker>
+        <marker id="fw-ad" markerWidth="7" markerHeight="7" refX="5.5" refY="2.5" orient="auto">
+          <path d="M0,0 L0,5 L7,2.5 z" fill="#0d4a6b" />
+        </marker>
+        <marker id="fw-ag" markerWidth="7" markerHeight="7" refX="5.5" refY="2.5" orient="auto">
+          <path d="M0,0 L0,5 L7,2.5 z" fill={MELD_GOLD} />
+        </marker>
       </defs>
-      {arrows.map((a, i) => (
-        <path key={i} d={`M ${a.ax} ${a.ay} Q ${a.cpx} ${a.cpy} ${a.bx} ${a.by}`}
-          fill="none" stroke={a.color} strokeWidth="2.5" strokeLinecap="round"
-          markerEnd={`url(#ah-${i})`} opacity="0.9" />
-      ))}
-      {arrows.map((a, lbl) => {
-        const mx = (a.ax + a.bx) / 2, my = (a.ay + a.by) / 2;
-        const cmx = mx - CX, cmy = my - CY;
-        const clen = Math.sqrt(cmx * cmx + cmy * cmy);
-        const lx = mx + 34 * cmx / clen, ly = my + 34 * cmy / clen;
-        return (
-          <text key={lbl} x={lx} y={ly} textAnchor="middle" dominantBaseline="middle"
-            fill={arrows[lbl].color} fontSize="9.5" fontWeight="600" fontFamily="Rubik, sans-serif" opacity="0.9">
-            {arcLabels[lbl].label}
-          </text>
-        );
-      })}
-      {pts.map((n, i) => (
-        <g key={i}>
-          <circle cx={n.x} cy={n.y} r={NODE_R} fill={n.color} />
-          <circle cx={n.x} cy={n.y} r={NODE_R} fill="none" stroke="white" strokeWidth="1.5" opacity="0.25" />
-          <text x={n.x} y={n.y - 5} textAnchor="middle" dominantBaseline="middle"
-            fill="white" fontSize="13.5" fontWeight="800" fontFamily="Poppins, sans-serif">{n.label}</text>
-          <text x={n.x} y={n.y + 10} textAnchor="middle" dominantBaseline="middle"
-            fill="rgba(255,255,255,0.75)" fontSize="8.5" fontFamily="Rubik, sans-serif">{n.sub}</text>
-        </g>
-      ))}
-      <text x={CX} y={CY - 9} textAnchor="middle" dominantBaseline="middle"
-        fill={MELD_DARK} fontSize="10.5" fontWeight="800" fontFamily="Rubik, sans-serif" letterSpacing="0.08em">TRUE</text>
+
+      {/* ── Atmosphere ── */}
+      <circle cx={CX} cy={CY} r={R + 48} fill="rgba(17,117,204,0.08)" filter="url(#fw-fog)" />
+      <circle cx={CX} cy={CY} r={R + 20} fill="none" stroke={MELD_BLUE} strokeWidth="0.5" opacity="0.14" />
+
+      {/* ── Node colour halos ── */}
+      <circle cx={oap.x}   cy={oap.y}   r={38} fill={MELD_BLUE}  opacity="0.18" filter="url(#fw-glow)" />
+      <circle cx={cap.x}   cy={cap.y}   r={38} fill="#0d4a6b"    opacity="0.18" filter="url(#fw-glow)" />
+      <circle cx={ratio.x} cy={ratio.y} r={38} fill={MELD_GOLD}  opacity="0.18" filter="url(#fw-glow)" />
+
+      {/* ── Globe back hemisphere (dashed) ── */}
+      {/* Back equatorial arc (upper half) */}
+      <path d={`M ${CX - R} ${CY} A ${R} ${ey} 0 0 0 ${CX + R} ${CY}`}
+        fill="none" stroke="rgba(176,227,255,0.28)" strokeWidth="1.1" strokeDasharray="5 4" />
+      {/* Back vertical meridian (left half) */}
+      <path d={`M ${CX} ${CY - R} A ${R * 0.27} ${R} 0 0 0 ${CX} ${CY + R}`}
+        fill="none" stroke="rgba(176,227,255,0.18)" strokeWidth="1" strokeDasharray="5 4" />
+
+      {/* ── Animated rotating great circle ── */}
+      <g style={{ transformOrigin: `${CX}px ${CY}px`, animation: 'fw-orbit 30s linear infinite' }}>
+        <ellipse cx={CX} cy={CY} rx={R} ry={R * 0.26}
+          fill="none" stroke="rgba(176,227,255,0.18)" strokeWidth="1"
+          strokeDasharray="6 5"
+          transform={`rotate(20, ${CX}, ${CY})`} />
+      </g>
+
+      {/* ── Main sphere outline ── */}
+      <circle cx={CX} cy={CY} r={R}
+        fill="none" stroke="rgba(176,227,255,0.58)" strokeWidth="1.8" />
+
+      {/* ── Globe front hemisphere (solid) ── */}
+      {/* Front equatorial arc (lower half) */}
+      <path d={`M ${CX - R} ${CY} A ${R} ${ey} 0 0 1 ${CX + R} ${CY}`}
+        fill="none" stroke="rgba(176,227,255,0.48)" strokeWidth="1.4" />
+      {/* Front vertical meridian (right half) */}
+      <path d={`M ${CX} ${CY - R} A ${R * 0.27} ${R} 0 0 1 ${CX} ${CY + R}`}
+        fill="none" stroke="rgba(176,227,255,0.28)" strokeWidth="1.1" />
+
+      {/* ── Flow arcs between nodes (on sphere surface, animated) ── */}
+      {/* OAP → CAP */}
+      <path d={`M ${oap.x} ${oap.y} A ${R} ${R} 0 0 1 ${cap.x} ${cap.y}`}
+        fill="none" stroke={MELD_BLUE} strokeWidth="2" strokeDasharray="7 5"
+        markerEnd="url(#fw-ab)" opacity="0.85">
+        <animate attributeName="stroke-dashoffset" from="0" to="-24" dur="1.5s" repeatCount="indefinite" />
+      </path>
+      {/* CAP → Ratio */}
+      <path d={`M ${cap.x} ${cap.y} A ${R} ${R} 0 0 1 ${ratio.x} ${ratio.y}`}
+        fill="none" stroke={MELD_GOLD} strokeWidth="2" strokeDasharray="7 5"
+        markerEnd="url(#fw-ag)" opacity="0.85">
+        <animate attributeName="stroke-dashoffset" from="0" to="-24" dur="1.5s" repeatCount="indefinite" begin="0.5s" />
+      </path>
+      {/* Ratio → OAP */}
+      <path d={`M ${ratio.x} ${ratio.y} A ${R} ${R} 0 0 1 ${oap.x} ${oap.y}`}
+        fill="none" stroke="#0d4a6b" strokeWidth="2" strokeDasharray="7 5"
+        markerEnd="url(#fw-ad)" opacity="0.85">
+        <animate attributeName="stroke-dashoffset" from="0" to="-24" dur="1.5s" repeatCount="indefinite" begin="1.0s" />
+      </path>
+
+      {/* ── Arc edge labels ── */}
+      {/* "earns" — right arc midpoint */}
+      <rect x={CX + R * 0.88 - 22} y={CY - R * 0.52 - 18} width="44" height="16" rx="4" fill="rgba(17,117,204,0.22)" />
+      <text x={CX + R * 0.88} y={CY - R * 0.52 - 7}
+        textAnchor="middle" fill={MELD_LIGHT} fontSize="10.5" fontWeight="700"
+        fontFamily="Rubik, sans-serif" letterSpacing="0.09em">earns</text>
+      {/* "market-tested" — bottom arc */}
+      <rect x={CX - 44} y={CY + R + 6} width="88" height="16" rx="4" fill="rgba(255,180,27,0.2)" />
+      <text x={CX} y={CY + R + 17}
+        textAnchor="middle" fill={MELD_GOLD} fontSize="10.5" fontWeight="700"
+        fontFamily="Rubik, sans-serif" letterSpacing="0.06em">market-tested</text>
+      {/* "sustains" — left arc midpoint */}
+      <rect x={CX - R * 0.88 - 28} y={CY - R * 0.52 - 18} width="56" height="16" rx="4" fill="rgba(176,227,255,0.15)" />
+      <text x={CX - R * 0.88} y={CY - R * 0.52 - 7}
+        textAnchor="middle" fill={MELD_LIGHT} fontSize="10.5" fontWeight="700"
+        fontFamily="Rubik, sans-serif" letterSpacing="0.09em">sustains</text>
+
+      {/* ── Center TRUE HEALTH (pulsing) ── */}
+      <circle cx={CX} cy={CY} r="20" fill={GREEN} opacity="0.10">
+        <animate attributeName="r" values="16;26;16" dur="2.8s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1" />
+        <animate attributeName="opacity" values="0.20;0.05;0.20" dur="2.8s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1" />
+      </circle>
+      <text x={CX} y={CY - 7} textAnchor="middle" dominantBaseline="middle"
+        fill={GREEN} fontSize="11" fontWeight="800" fontFamily="Rubik, sans-serif" letterSpacing="0.12em">TRUE</text>
       <text x={CX} y={CY + 7} textAnchor="middle" dominantBaseline="middle"
-        fill={MELD_DARK} fontSize="10.5" fontWeight="800" fontFamily="Rubik, sans-serif" letterSpacing="0.08em">HEALTH</text>
+        fill={GREEN} fontSize="11" fontWeight="800" fontFamily="Rubik, sans-serif" letterSpacing="0.12em">HEALTH</text>
+
+      {/* ══════════════════════════════════════════════
+          NODE LABELS — globe tag style (ref-image inspired):
+          bullet dot/square → short leader → pill/rect tag
+          ══════════════════════════════════════════════ */}
+
+      {/* ── OAP (top) — pill tag extending upward ── */}
+      <circle cx={oap.x} cy={oap.y} r={5} fill={MELD_BLUE} />
+      <circle cx={oap.x} cy={oap.y} r={5} fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="1.5" />
+      <line x1={oap.x} y1={oap.y - 6} x2={oap.x} y2={oap.y - 26} stroke={MELD_BLUE} strokeWidth="1.2" opacity="0.6" />
+      {/* Pill */}
+      <rect x={oap.x - 40} y={oap.y - 50} width="80" height="22" rx="11" fill={MELD_BLUE} />
+      {/* Square bullet inside pill */}
+      <rect x={oap.x - 30} y={oap.y - 43} width="7" height="7" fill="white" opacity="0.9" rx="1" />
+      <text x={oap.x - 17} y={oap.y - 39} dominantBaseline="middle"
+        fill="white" fontSize="9.5" fontWeight="700" fontFamily="Rubik, sans-serif" letterSpacing="0.12em">OAP</text>
+      <text x={oap.x} y={oap.y - 57} textAnchor="middle"
+        fill={MELD_LIGHT} fontSize="9" fontWeight="600" fontFamily="Rubik, sans-serif" letterSpacing="0.08em" opacity="0.9">PERFORMANCE</text>
+
+      {/* ── CAP (bottom-right) — rect tag extending right ── */}
+      <rect x={cap.x - 4} y={cap.y - 4} width="8" height="8" fill="#0d4a6b" rx="1" />
+      <rect x={cap.x - 4} y={cap.y - 4} width="8" height="8" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="1" rx="1" />
+      <line x1={cap.x + 5} y1={cap.y} x2={cap.x + 20} y2={cap.y} stroke="#0d4a6b" strokeWidth="1.2" opacity="0.6" />
+      {/* Rect tag */}
+      <rect x={cap.x + 20} y={cap.y - 12} width="84" height="24" rx="3" fill="#0d4a6b" />
+      <rect x={cap.x + 29} y={cap.y - 4} width="7" height="7" fill={MELD_BLUE} rx="1" />
+      <text x={cap.x + 43} y={cap.y} dominantBaseline="middle"
+        fill="white" fontSize="9.5" fontWeight="700" fontFamily="Rubik, sans-serif" letterSpacing="0.12em">CAP</text>
+      <text x={cap.x + 62} y={cap.y + 32} textAnchor="middle"
+        fill={MELD_LIGHT} fontSize="9" fontWeight="600" fontFamily="Rubik, sans-serif" letterSpacing="0.06em" opacity="0.9">PAY PROMISE</text>
+
+      {/* ── RATIO (bottom-left) — rect tag extending left ── */}
+      <rect x={ratio.x - 4} y={ratio.y - 4} width="8" height="8" fill={MELD_GOLD} rx="1" />
+      <rect x={ratio.x - 4} y={ratio.y - 4} width="8" height="8" fill="none" stroke="rgba(0,0,0,0.2)" strokeWidth="1" rx="1" />
+      <line x1={ratio.x - 5} y1={ratio.y} x2={ratio.x - 20} y2={ratio.y} stroke={MELD_GOLD} strokeWidth="1.2" opacity="0.6" />
+      {/* Rect tag (extends left) */}
+      <rect x={ratio.x - 104} y={ratio.y - 12} width="84" height="24" rx="3" fill={MELD_GOLD} />
+      <rect x={ratio.x - 96} y={ratio.y - 4} width="7" height="7" fill={MELD_DARK} rx="1" />
+      <text x={ratio.x - 82} y={ratio.y} dominantBaseline="middle"
+        fill={MELD_DARK} fontSize="9.5" fontWeight="700" fontFamily="Rubik, sans-serif" letterSpacing="0.12em">RATIO</text>
+      <text x={ratio.x - 62} y={ratio.y + 32} textAnchor="middle"
+        fill={MELD_DARK} fontSize="9" fontWeight="700" fontFamily="Rubik, sans-serif" letterSpacing="0.06em" opacity="0.85">MARKET</text>
     </svg>
   );
 }
@@ -111,40 +201,83 @@ function ThresholdRow({ color, label, range, meaning }: { color: string; label: 
 export function Intro() {
   return (
     <div className="min-h-screen" style={{ background: '#F1F1F1' }}>
-      {/* Hero */}
-      <div className="px-10 pt-12 pb-10" style={{ background: `linear-gradient(135deg, ${MELD_DARK} 0%, #0d4a6b 60%, ${MELD_BLUE} 100%)` }}>
-        <div className="max-w-6xl mx-auto">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: MELD_LIGHT, fontFamily: 'Rubik, sans-serif' }}>
-            Property Meld · Internal System
-          </p>
-          <h1 className="text-5xl font-black mb-4 text-white leading-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Outcome-to-Pay
-          </h1>
-          <p className="text-xl mb-8 max-w-3xl" style={{ color: MELD_LIGHT }}>
-            A self-reinforcing cycle: performance earns pay, pay gets honored, pay stays market-fair, and fair pay sustains performance. OTP makes that cycle visible — and keeps everyone accountable to their part of it.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Link
-              to="/calculator"
-              className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all hover:opacity-90"
-              style={{ background: MELD_BLUE, color: 'white', fontFamily: 'Rubik, sans-serif' }}
-            >
-              <Calculator className="w-4 h-4" /> Open Calculator
-            </Link>
-            <Link
-              to="/dashboard"
-              className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all hover:bg-white/20"
-              style={{ background: 'rgba(255,255,255,0.12)', color: 'white', fontFamily: 'Rubik, sans-serif' }}
-            >
-              <BarChart2 className="w-4 h-4" /> View Dashboard <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-            <Link
-              to="/roles"
-              className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all hover:bg-white/20"
-              style={{ background: 'rgba(255,255,255,0.12)', color: 'white', fontFamily: 'Rubik, sans-serif' }}
-            >
-              Roles &amp; Metrics <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
+      {/* Hero — video background */}
+      <div className="relative px-10 pt-14 pb-12 overflow-hidden" style={{ background: `linear-gradient(135deg, ${MELD_DARK} 0%, #0d4a6b 60%, ${MELD_BLUE} 100%)` }}>
+        {/* Aerial neighborhood video — silently hidden if CDN rejects */}
+        <video
+          autoPlay muted loop playsInline
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          style={{ opacity: 0.18, filter: 'saturate(0.3) brightness(0.6)' }}
+          onError={(e) => { (e.target as HTMLVideoElement).style.display = 'none'; }}
+        >
+          <source src="https://videos.pexels.com/video-files/5031099/5031099-hd_1280_720_25fps.mp4" type="video/mp4" />
+        </video>
+        {/* Gradient overlay keeps text readable over video */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(135deg, ${MELD_DARK}d0 0%, #0d4a6bc8 55%, ${MELD_BLUE}88 100%)` }} />
+        <div className="max-w-6xl mx-auto relative z-10">
+          {/* Two-column: text left, flywheel right */}
+          <div className="grid md:grid-cols-2 gap-10 items-center mb-10">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: MELD_LIGHT, fontFamily: 'Rubik, sans-serif' }}>
+                Property Meld · Internal System
+              </p>
+              <h1 className="text-5xl font-black mb-5 text-white leading-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                Outcome-to-Pay
+              </h1>
+              <p className="text-xl mb-8 leading-relaxed" style={{ color: MELD_LIGHT }}>
+                Performance, pay, and market positioning are always connected. OTP makes that visible — so you can diagnose drift before it becomes a problem.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  to="/calculator"
+                  className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all hover:opacity-90"
+                  style={{ background: MELD_BLUE, color: 'white', fontFamily: 'Rubik, sans-serif' }}
+                >
+                  <Calculator className="w-4 h-4" /> Open Calculator
+                </Link>
+                <Link
+                  to="/dashboard"
+                  className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all hover:bg-white/20"
+                  style={{ background: 'rgba(255,255,255,0.12)', color: 'white', fontFamily: 'Rubik, sans-serif' }}
+                >
+                  <BarChart2 className="w-4 h-4" /> View Dashboard <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+                <Link
+                  to="/roles"
+                  className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all hover:bg-white/20"
+                  style={{ background: 'rgba(255,255,255,0.12)', color: 'white', fontFamily: 'Rubik, sans-serif' }}
+                >
+                  Roles &amp; Metrics <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Flywheel — large, in the hero */}
+            <div className="flex items-center justify-center">
+              <div className="w-full">
+                <FlywheelDiagram />
+              </div>
+            </div>
+          </div>
+
+          {/* What OTP connects */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {[
+              { icon: Target,     title: 'Performance',     desc: "Who's delivering \u2014 and by how much",               color: MELD_LIGHT, to: '/dashboard' },
+              { icon: DollarSign, title: 'Comp Plans',      desc: 'Are we honoring what we promised?',                     color: MELD_GOLD,  to: '/comp-plans' },
+              { icon: Award,      title: 'Realized Reward', desc: 'Did earned performance translate to real pay?',          color: MELD_LIGHT, to: '/history' },
+              { icon: Users,      title: 'Role Design',     desc: 'What does good actually look like?',                    color: MELD_GOLD,  to: '/roles' },
+              { icon: TrendingUp, title: 'Market Position', desc: 'Are we losing people to better offers?',                color: MELD_LIGHT, to: '/melders' },
+              { icon: BarChart3,  title: 'Trend Visibility',desc: 'Is the flywheel accelerating or slowing down?',         color: MELD_GOLD,  to: '/trends' },
+            ].map(({ icon: Icon, title, desc, color, to }) => (
+              <Link key={title} to={to} className="rounded-xl px-4 py-3 block transition-all hover:scale-[1.02] hover:bg-white/15 active:scale-[0.98]" style={{ background: 'rgba(255,255,255,0.08)', borderTop: `2px solid ${color}40` }}>
+                <div className="flex items-center gap-2 mb-1">
+                  <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color }} />
+                  <span className="text-sm font-bold" style={{ color, fontFamily: 'Poppins, sans-serif' }}>{title}</span>
+                </div>
+                <p className="text-xs leading-snug" style={{ color: 'rgba(176,227,255,0.7)' }}>{desc}</p>
+              </Link>
+            ))}
           </div>
         </div>
       </div>
@@ -153,46 +286,43 @@ export function Intro() {
 
         {/* What is OTP — Flywheel */}
         <Section>
-          <SectionTitle>Three Questions. A Cycle That Compounds.</SectionTitle>
+          <SectionTitle>How it works</SectionTitle>
           <p className="text-slate-500 text-base mb-6">
-            OTP isn't a scorecard — it's a <strong className="text-slate-700">self-reinforcing cycle.</strong> Performance earns pay. The company honors it. The market validates it. And when all three are healthy, people stay, engage, and perform again. Break any one link and the flywheel slows. Keep all three strong and it compounds.
+            Three numbers. Each one answers a different question — and a different person owns the answer. When all three are healthy, people stay, perform, and grow. When one breaks, you know exactly where to look.
           </p>
 
-          <div className="grid md:grid-cols-2 gap-8 items-center mb-8">
-            <FlywheelDiagram />
-            <div className="space-y-5">
-              {[
-                {
-                  label: 'OAP', title: 'Did they earn it?',
-                  desc: 'A weighted composite of role-specific outcomes. No manager opinion — just what the Melder actually produced, resolved to a single number. This is where the cycle starts.',
-                  color: MELD_BLUE, owner: 'Owner: the Melder',
-                },
-                {
-                  label: 'CAP%', title: 'Did we pay it?',
-                  desc: 'Did the company honor the plan? If OAP is 100% and CAP is 85%, we underpaid. CAP is accountability — not for the Melder, but for the company.',
-                  color: '#0d4a6b', owner: 'Owner: the company',
-                },
-                {
-                  label: 'Ratio', title: 'Is it market-fair?',
-                  desc: 'Actual pay as a percentage of market rate. Ratio closes the loop — market-fair pay sustains the motivation that drives the next cycle of performance.',
-                  color: MELD_GOLD, owner: 'Owner: the market',
-                },
-              ].map((item) => (
-                <div key={item.label} className="flex gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-white text-xs font-black"
+          <div className="grid md:grid-cols-3 gap-5 mb-8">
+            {[
+              {
+                label: 'OAP', title: 'Did they earn it?',
+                desc: 'A weighted composite of role-specific outcomes. No manager opinion — just what the Melder actually produced, resolved to a single number.',
+                color: MELD_BLUE, owner: 'Owner: the Melder',
+              },
+              {
+                label: 'CAP', title: 'Did we pay it?',
+                desc: 'Did the company honor the plan? If OAP is 100% and CAP is 85%, we underpaid. CAP is accountability — not for the Melder, but for the company.',
+                color: '#0d4a6b', owner: 'Owner: the company',
+              },
+              {
+                label: 'Ratio', title: 'Is it market-fair?',
+                desc: 'Actual pay as a percentage of market rate. Ratio closes the loop — market-fair pay sustains the motivation that drives the next cycle of performance.',
+                color: MELD_GOLD, owner: 'Owner: the market',
+              },
+            ].map((item) => (
+              <div key={item.label} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-xs font-black flex-shrink-0"
                     style={{ background: item.color, fontFamily: 'Poppins, sans-serif' }}>
-                    {item.label.replace('%', '')}
+                    {item.label}
                   </div>
                   <div>
-                    <div className="flex items-baseline gap-2 mb-1">
-                      <span className="font-bold text-slate-800 text-sm">{item.title}</span>
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full text-white" style={{ background: item.color }}>{item.owner}</span>
-                    </div>
-                    <p className="text-slate-500 text-sm leading-relaxed">{item.desc}</p>
+                    <p className="font-bold text-slate-800 text-sm leading-tight">{item.title}</p>
+                    <span className="text-xs font-medium px-2 py-0.5 rounded-full text-white" style={{ background: item.color }}>{item.owner}</span>
                   </div>
                 </div>
-              ))}
-            </div>
+                <p className="text-slate-500 text-sm leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
           </div>
 
           {/* Definition cards */}
@@ -212,7 +342,7 @@ export function Intro() {
                 owner: 'Owner: the company',
                 color: '#0d4a6b',
                 formula: 'CAP = actual_pay ÷ target_comp × 100',
-                definition: "The percentage of target compensation actually paid. If a Melder's target comp is $8,000/mo and they received $7,200, CAP is 90%. This metric holds the company accountable — not the Melder. It answers: did we honor the plan we set?",
+                definition: "Measures execution against the plan — not whether the plan itself is right. If a Melder's target comp is $8,000/mo and they received $7,200, CAP is 90%. CAP holds the company accountable for honoring what was promised. Whether the plan was set correctly is Ratio's job to reveal.",
               },
               {
                 abbr: 'Ratio',
@@ -239,9 +369,30 @@ export function Intro() {
             ))}
           </div>
 
-          <div className="p-6 rounded-xl border-l-4 text-base" style={{ background: `${MELD_BLUE}0d`, borderColor: MELD_BLUE }}>
+          {/* Realized Reward callout */}
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div className="px-5 py-4 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, #022935 0%, #0d4a6b 100%)' }}>
+              <div>
+                <span className="text-xl font-black text-white block leading-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>Realized Reward</span>
+                <span className="text-xs text-white/80 font-medium">The dollar translation of OAP × CAP</span>
+              </div>
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-white/20 text-white">both parties</span>
+            </div>
+            <div className="px-5 py-4">
+              <div className="font-mono text-xs rounded-lg px-3 py-2 mb-3 text-slate-600" style={{ background: '#F1F1F1' }}>Realized Reward = OAP% × Target Comp → compare to Actual Paid</div>
+              <p className="text-sm text-slate-500 leading-relaxed">Converts the OAP percentage into the dollar amount a Melder <em>earned</em> through their delivery — then compares it to what they actually received. If OAP is 95% and target is $8,000/mo, the performance-earned amount is $7,600. If actual pay was $7,200, the Realized Reward gap is −$400/mo. This makes underpayment concrete and actionable, not just a percentage.</p>
+            </div>
+          </div>
+
+          <div className="p-6 rounded-xl border-l-4 text-base mb-5" style={{ background: `${MELD_BLUE}0d`, borderColor: MELD_BLUE }}>
             <strong style={{ color: MELD_DARK }}>The realization:</strong>
             <span className="text-slate-600"> Performance, pay, and market positioning were always connected inside compensation. Most systems treat them separately. OTP just makes the cycle visible — and keeps everyone accountable to their part of it.</span>
+          </div>
+
+          {/* When to redesign the plan */}
+          <div className="p-6 rounded-xl border-l-4 text-base" style={{ background: '#fefce8', borderColor: '#FFB41B' }}>
+            <strong style={{ color: '#92400e' }}>When to redesign the plan — not the people:</strong>
+            <span className="text-slate-600"> If CAP is consistently at or near 100% but Ratio stays below 80% for two or more quarters, execution is fine — the plan itself is underpaying. That's a signal to revisit target comp levels and market rate inputs, not to coach or manage differently. OTP can tell you which is which.</span>
           </div>
         </Section>
 

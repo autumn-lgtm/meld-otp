@@ -1,5 +1,6 @@
 import { Download, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { useSalaryVisible } from '../hooks/useSalaryVisible';
 import { useParams } from 'react-router-dom';
 import { AlertBanner } from '../components/shared/AlertBanner';
 import { HealthBadge } from '../components/shared/HealthBadge';
@@ -18,6 +19,7 @@ interface Props {
 export function History({ storage, onSave }: Props) {
   const { melderId } = useParams<{ melderId?: string }>();
   const { melders, reports, roles } = storage;
+  const { salaryVisible } = useSalaryVisible();
 
   const [selectedMelder, setSelectedMelder] = useState<string>(melderId ?? '');
   const [expandedReport, setExpandedReport] = useState<string | null>(null);
@@ -110,19 +112,19 @@ export function History({ storage, onSave }: Props) {
                         title="OAP"
                         value={report.oapResult.oap}
                         health={report.oapResult.health}
-                        sub={`Actual comp: ${fmtCurrency(report.actualCompensation)}`}
+                        sub={`Actual comp: ${salaryVisible ? fmtCurrency(report.actualCompensation) : '$••••'}`}
                       />
                       <ReportMetricBox
                         title="CAP"
                         value={report.capResult.cap}
                         health={report.capResult.health}
-                        sub={`${fmtCurrency(report.actualCompensation)} / ${fmtCurrency(report.targetCompensation)}`}
+                        sub={salaryVisible ? `${fmtCurrency(report.actualCompensation)} / ${fmtCurrency(report.targetCompensation)}` : '$•••• / $••••'}
                       />
                       <ReportMetricBox
                         title="Ratio"
                         value={report.ratioResult.ratio}
                         health={report.ratioResult.health}
-                        sub={`Market: ${fmtCurrency(report.marketRate)}`}
+                        sub={`Market: ${salaryVisible ? fmtCurrency(report.marketRate) : '$••••'}`}
                       />
                     </div>
 
