@@ -597,17 +597,17 @@ function MelderCard({
     ? 'bg-white border border-[#0d4a6b]'
     : isInt
       ? 'bg-[#fffbeb] border border-[#c98a00]'
-      : 'bg-[#f4faff] border border-[#B0E3FF]';
+      : 'bg-[#f4faff] border border-[#5badeb]/40';
   const headerBg = isLead
     ? 'border-white/10 bg-gradient-to-br from-[#1175CC] to-[#0a3a5c]'
     : isInt
       ? 'border-[#c98a00]/30 bg-gradient-to-br from-[#FFB41B] to-[#b87a00]'
-      : 'border-[#c8e8f8] bg-gradient-to-br from-[#dceefa] to-[#B0E3FF]';
-  const nameColor = isLead ? 'text-white' : isInt ? 'text-[#451a03]' : 'text-[#022935]';
-  const roleColor = isLead ? 'text-white/70' : isInt ? 'text-[#451a03]/70' : 'text-[#1175CC]/80';
-  const chipColor = isLead ? 'text-white/60 bg-white/10' : isInt ? 'text-[#451a03]/60 bg-black/10' : 'text-[#1175CC]/60 bg-white/50';
-  const editColor = isLead ? 'text-white/40 hover:text-white hover:bg-white/10' : isInt ? 'text-[#451a03]/40 hover:text-[#451a03] hover:bg-black/10' : 'text-[#1175CC]/40 hover:text-[#1175CC] hover:bg-white/60';
-  const deleteColor = isLead ? 'text-white/40 hover:text-red-300 hover:bg-white/10' : isInt ? 'text-[#451a03]/40 hover:text-red-700 hover:bg-black/10' : 'text-[#1175CC]/40 hover:text-red-500 hover:bg-red-50';
+      : 'border-white/10 bg-gradient-to-br from-[#5badeb] to-[#1175CC]';
+  const nameColor = isLead ? 'text-white' : isInt ? 'text-[#451a03]' : 'text-white';
+  const roleColor = isLead ? 'text-white/70' : isInt ? 'text-[#451a03]/70' : 'text-white/80';
+  const chipColor = isLead ? 'text-white/60 bg-white/10' : isInt ? 'text-[#451a03]/60 bg-black/10' : 'text-white/60 bg-white/15';
+  const editColor = isLead ? 'text-white/40 hover:text-white hover:bg-white/10' : isInt ? 'text-[#451a03]/40 hover:text-[#451a03] hover:bg-black/10' : 'text-white/40 hover:text-white hover:bg-white/15';
+  const deleteColor = isLead ? 'text-white/40 hover:text-red-300 hover:bg-white/10' : isInt ? 'text-[#451a03]/40 hover:text-red-700 hover:bg-black/10' : 'text-white/40 hover:text-red-300 hover:bg-white/15';
 
   return (
     <div className={`rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow ${cardWrap}`}>
