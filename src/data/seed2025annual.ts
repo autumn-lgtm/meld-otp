@@ -94,10 +94,10 @@ export const SEED_2025_ANNUAL: AnnualSnapshot[] = [
   snap('Marketing', 'Madison',            'MGR 7', '4y 10m',  73.0,  79.8, 112.7, 136000, 151000, 169000, 190400, 190400, 151903, 151903,  73.0,  80.0,  95.0,  80.0),
 
   // ── Customer Support & Enablement ────────────────────────────────────────────
-  snap('Customer Support & Enablement', 'Nathanael Hockley',    'MGR 5', '2y 9m',  null,  92.7, 112.5,  75000,  90000, 100000, 112500, 112500, 104312, 104312,  null, 101.0, 107.0, 102.0),
-  snap('Customer Support & Enablement', 'Jeffrey Monson',       'IC 3',  '5y 8m',  null, 101.2,  89.3,  67000,  82000,  90000,  80400,  80400,  81348,  81348,  null, 100.0, 100.0, 100.0),
-  snap('Customer Support & Enablement', 'Aaron Trimble',        'IC 2',  '2y 11m', null,  99.5,  98.4,  50000,  57000,  61000,  60000,  60000,  59700,  59700,  null, 100.0, 100.0, 100.0),
-  snap('Customer Support & Enablement', 'Deepika Yalla-Colomb', 'IC 1',  '1y 3m',  null,  94.8,  98.4,  50000,  57000,  61000,  60000,  60000,  56857,  56857,  null, 100.0, 100.0, 100.0),
+  snap('Customer Support & Enablement', 'Nathanael Hockley',    'MGR 5', '2y 9m',  null,  92.7, 112.5,  75000,  90000, 100000, 112500, 112500, 104312, 104312, 100.0, 101.0, 107.0, 102.0),
+  snap('Customer Support & Enablement', 'Jeffrey Monson',       'IC 3',  '5y 8m',  null, 101.2,  89.3,  67000,  82000,  90000,  80400,  80400,  81348,  81348, 100.0, 100.0, 100.0, 100.0),
+  snap('Customer Support & Enablement', 'Aaron Trimble',        'IC 2',  '2y 11m', null,  99.5,  98.4,  50000,  57000,  61000,  60000,  60000,  59700,  59700, 100.0, 100.0, 100.0, 100.0),
+  snap('Customer Support & Enablement', 'Deepika Yalla-Colomb', 'IC 1',  '1y 3m',  null,  94.8,  98.4,  50000,  57000,  61000,  60000,  60000,  56857,  56857, 100.0, 100.0, 100.0, 100.0),
   snap('Customer Support & Enablement', 'Michael Calabrese',    'IC 2',  '1m',     null, 105.7, 112.5,  72500,  75000,  86000,  96750,  48375,  51128,  51128,  null,  null, 107.0, 102.0),
   snap('Customer Support & Enablement', 'Megan Byrd',           null,    null,     null,  null,   null,   null,   null,   null,   null,   null,   null,   null,  null,  null,  null, 100.0),
 
