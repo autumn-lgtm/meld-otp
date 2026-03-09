@@ -119,10 +119,10 @@ const TEAMS: TeamData[] = [
   {
     id: 'pops',
     name: 'People Operations (PoPs)',
-    total: { oa: 100, cap: 95.1, ratio: 86.4, salary: 198600, market: 238000 },
+    total: { oa: 99.1, cap: 95.1, ratio: 86.4, salary: 198600, market: 238000 },
     melders: [
-      { name: 'Autumn Hughes',  oa: null, cap: 92.6,  ratio: 90.3, salary: 138600, market: 172000, q: [100, 98, 100, 100] },
-      { name: 'Amanda Green',   oa: null, cap: 102.9, ratio: 75.9, salary: 60000,  market: 66000,  q: [100, 95, 100, 100] },
+      { name: 'Autumn Hughes',  oa: 99.5, cap: 92.6,  ratio: 90.3, salary: 138600, market: 172000, q: [100, 98, 100, 100] },
+      { name: 'Amanda Green',   oa: 98.8, cap: 102.9, ratio: 75.9, salary: 60000,  market: 66000,  q: [100, 95, 100, 100] },
     ],
   },
 ];
@@ -199,8 +199,9 @@ function capColor(v: number): string {
 }
 
 function ratioColor(v: number): string {
-  if (v > 105) return MELD_BLUE;
-  if (v >= 85) return '#22c55e';
+  if (v >= 115) return '#ef4444';
+  if (v > 105)  return '#f59e0b';
+  if (v >= 85)  return '#22c55e';
   if (v >= 70) return '#f59e0b';
   return '#ef4444';
 }
