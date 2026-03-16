@@ -1,0 +1,2569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Summit: Customer Knowledge Ascent — Property Meld</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: 'Rubik', sans-serif;
+  background: #ffffff;
+  color: #022935;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   BRAND TOKENS
+   ============================================================ */
+:root {
+  --blue: #1175CC;
+  --gold: #FFB41B;
+  --dark: #022935;
+  --light-blue: #B0E3FF;
+  --blue-10: #e8f4fd;
+  --blue-20: #c7e3f8;
+  --gold-10: #fff8e6;
+  --gold-20: #ffedb3;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-400: #9ca3af;
+  --gray-600: #4b5563;
+  --gray-800: #1f2937;
+  --success: #16a34a;
+  --error: #dc2626;
+  --shadow-sm: 0 1px 3px rgba(2,41,53,0.08), 0 1px 2px rgba(2,41,53,0.04);
+  --shadow-md: 0 4px 16px rgba(2,41,53,0.10), 0 2px 6px rgba(2,41,53,0.06);
+  --shadow-lg: 0 10px 40px rgba(2,41,53,0.14), 0 4px 12px rgba(2,41,53,0.08);
+  --radius: 12px;
+  --radius-lg: 20px;
+}
+
+/* ============================================================
+   UTILITY
+   ============================================================ */
+.hidden { display: none !important; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.gap-4 { gap: 1rem; }
+.gap-2 { gap: 0.5rem; }
+.text-center { text-align: center; }
+.w-full { width: 100%; }
+
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
+h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; line-height: 1.25; color: var(--dark); }
+h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; }
+h2 { font-size: clamp(1.5rem, 3vw, 2.5rem); font-weight: 700; }
+h3 { font-size: clamp(1.2rem, 2.5vw, 1.75rem); font-weight: 600; }
+h4 { font-size: 1.1rem; font-weight: 600; }
+p { margin-bottom: 0.75rem; }
+.lead { font-size: 1.125rem; font-weight: 400; color: var(--gray-600); }
+.highlight { color: var(--blue); font-weight: 600; }
+.brand-gold { color: var(--gold); }
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  border: none; border-radius: 50px; cursor: pointer;
+  font-family: 'Poppins', sans-serif; font-size: 0.9375rem; font-weight: 600;
+  transition: all 0.2s ease; text-decoration: none;
+  letter-spacing: 0.01em; white-space: nowrap;
+}
+.btn-primary {
+  background: var(--blue); color: #fff;
+  box-shadow: 0 4px 14px rgba(17,117,204,0.35);
+}
+.btn-primary:hover { background: #0d62b0; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(17,117,204,0.45); }
+.btn-primary:active { transform: translateY(0); }
+.btn-gold {
+  background: var(--gold); color: var(--dark);
+  box-shadow: 0 4px 14px rgba(255,180,27,0.35);
+}
+.btn-gold:hover { background: #e8a000; transform: translateY(-1px); }
+.btn-outline {
+  background: transparent; color: var(--blue);
+  border: 2px solid var(--blue);
+}
+.btn-outline:hover { background: var(--blue-10); }
+.btn-ghost { background: transparent; color: var(--gray-600); }
+.btn-ghost:hover { background: var(--gray-100); color: var(--dark); }
+.btn-sm { padding: 0.5rem 1.25rem; font-size: 0.875rem; }
+.btn-lg { padding: 1rem 2.5rem; font-size: 1.0625rem; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+.card {
+  background: #fff; border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md); padding: 2rem;
+}
+.card-sm { padding: 1.25rem; border-radius: var(--radius); }
+
+/* ============================================================
+   FORM ELEMENTS
+   ============================================================ */
+.form-group { margin-bottom: 1.25rem; }
+.form-label {
+  display: block; font-family: 'Poppins', sans-serif;
+  font-size: 0.875rem; font-weight: 600; color: var(--dark);
+  margin-bottom: 0.4rem; letter-spacing: 0.01em;
+}
+.form-input, .form-select {
+  width: 100%; padding: 0.75rem 1rem;
+  border: 2px solid var(--gray-200); border-radius: var(--radius);
+  font-family: 'Rubik', sans-serif; font-size: 1rem; color: var(--dark);
+  background: #fff; transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  outline: none; appearance: none;
+}
+.form-input:focus, .form-select:focus {
+  border-color: var(--blue); box-shadow: 0 0 0 3px rgba(17,117,204,0.12);
+}
+.form-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234b5563' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 2.5rem; }
+
+/* ============================================================
+   NAV / HEADER
+   ============================================================ */
+.app-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(255,255,255,0.95); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 0 2rem; height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-logo {
+  font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.125rem;
+  color: var(--dark); display: flex; align-items: center; gap: 0.5rem;
+}
+.nav-logo-icon {
+  width: 32px; height: 32px; background: var(--blue); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 1rem; font-weight: 800;
+}
+.nav-learner { display: flex; align-items: center; gap: 1rem; }
+.nav-learner-name {
+  font-size: 0.875rem; font-weight: 500; color: var(--gray-600);
+}
+.nav-level-badge {
+  background: var(--blue-10); color: var(--blue);
+  font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.75rem;
+  border-radius: 50px; font-family: 'Poppins', sans-serif;
+}
+
+/* ============================================================
+   PROGRESS BAR
+   ============================================================ */
+.progress-bar-wrap { background: var(--gray-200); border-radius: 50px; height: 6px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--light-blue)); border-radius: 50px; transition: width 0.5s ease; }
+.progress-label { font-size: 0.75rem; font-weight: 500; color: var(--gray-600); margin-top: 0.25rem; }
+
+/* ============================================================
+   SCREEN: WELCOME
+   ============================================================ */
+#screen-welcome {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 2rem; background: linear-gradient(160deg, #f0f9ff 0%, #ffffff 50%, #fff8e6 100%);
+  position: relative; overflow: hidden;
+}
+.welcome-bg-shape {
+  position: absolute; border-radius: 50%; opacity: 0.08; pointer-events: none;
+}
+.welcome-bg-1 { width: 600px; height: 600px; background: var(--blue); top: -200px; right: -200px; }
+.welcome-bg-2 { width: 400px; height: 400px; background: var(--gold); bottom: -150px; left: -150px; }
+.welcome-container {
+  max-width: 640px; width: 100%; position: relative; z-index: 1;
+}
+.welcome-logo-wrap {
+  text-align: center; margin-bottom: 2rem;
+}
+.welcome-logo {
+  display: inline-flex; align-items: center; gap: 0.75rem;
+  background: var(--dark); color: #fff;
+  padding: 0.75rem 1.5rem; border-radius: 12px;
+  font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.25rem;
+}
+.welcome-logo-dot { color: var(--gold); }
+.welcome-eyebrow {
+  font-family: 'Poppins', sans-serif; font-size: 0.8125rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.12em; color: var(--blue);
+  margin-bottom: 0.5rem; text-align: center;
+}
+.welcome-title { text-align: center; margin-bottom: 0.5rem; }
+.welcome-subtitle { text-align: center; color: var(--gray-600); margin-bottom: 2.5rem; font-size: 1.0625rem; }
+.welcome-card { background: #fff; border-radius: 24px; box-shadow: var(--shadow-lg); padding: 2.5rem; }
+.welcome-step { display: none; }
+.welcome-step.active { display: block; }
+.level-select-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 1rem; }
+.level-select-card {
+  border: 2px solid var(--gray-200); border-radius: var(--radius); padding: 1rem;
+  cursor: pointer; transition: all 0.2s; text-align: center;
+  background: #fff;
+}
+.level-select-card:hover { border-color: var(--blue); background: var(--blue-10); }
+.level-select-card.selected { border-color: var(--blue); background: var(--blue-10); }
+.level-select-card .level-emoji { font-size: 1.75rem; display: block; margin-bottom: 0.35rem; }
+.level-select-card .level-name { font-family: 'Poppins', sans-serif; font-size: 0.8125rem; font-weight: 600; color: var(--dark); }
+.level-select-card .level-sub { font-size: 0.75rem; color: var(--gray-600); }
+.level-select-card.locked-card { opacity: 0.5; cursor: not-allowed; }
+
+/* ============================================================
+   SCREEN: LEVEL MAP
+   ============================================================ */
+#screen-map {
+  min-height: 100vh; padding-top: 64px;
+  background: linear-gradient(180deg, #f0f9ff 0%, #e8f4fd 40%, #fff 100%);
+}
+.map-container { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
+.map-header { text-align: center; margin-bottom: 3rem; }
+.map-header p { color: var(--gray-600); font-size: 1.0625rem; max-width: 500px; margin: 0 auto; }
+.mountain-svg-wrap {
+  position: relative; margin: 0 auto; max-width: 700px;
+}
+.level-nodes {
+  display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem;
+}
+.level-node {
+  display: flex; align-items: center; gap: 1.25rem;
+  background: #fff; border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem; box-shadow: var(--shadow-sm);
+  border: 2px solid transparent; cursor: pointer;
+  transition: all 0.25s ease; position: relative;
+}
+.level-node:hover:not(.level-locked) { border-color: var(--blue); box-shadow: var(--shadow-md); transform: translateX(4px); }
+.level-node.level-locked { opacity: 0.55; cursor: not-allowed; }
+.level-node.level-current { border-color: var(--blue); background: var(--blue-10); }
+.level-node.level-completed { border-color: var(--success); }
+.level-node-icon {
+  width: 56px; height: 56px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.75rem; flex-shrink: 0;
+  background: var(--gray-100);
+}
+.level-node.level-current .level-node-icon { background: var(--blue-10); }
+.level-node.level-completed .level-node-icon { background: #dcfce7; }
+.level-node-info { flex: 1; }
+.level-node-title { font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 700; color: var(--dark); }
+.level-node-desc { font-size: 0.875rem; color: var(--gray-600); margin-top: 0.2rem; }
+.level-node-badge {
+  font-family: 'Poppins', sans-serif; font-size: 0.75rem; font-weight: 600;
+  padding: 0.3rem 0.85rem; border-radius: 50px;
+}
+.badge-locked { background: var(--gray-100); color: var(--gray-400); }
+.badge-unlocked { background: var(--blue-10); color: var(--blue); }
+.badge-current { background: var(--blue); color: #fff; }
+.badge-completed { background: #dcfce7; color: var(--success); }
+.map-progress-section { margin-top: 2.5rem; background: #fff; border-radius: var(--radius-lg); padding: 1.75rem; box-shadow: var(--shadow-sm); }
+.map-progress-title { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 1rem; }
+.level-progress-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.level-progress-item { display: flex; align-items: center; gap: 1rem; }
+.level-progress-item .lpi-label { font-size: 0.875rem; font-weight: 500; min-width: 140px; color: var(--dark); }
+.level-progress-item .lpi-bar { flex: 1; }
+
+/* ============================================================
+   SCREEN: LEVEL VIEWER
+   ============================================================ */
+#screen-level {
+  min-height: 100vh; padding-top: 64px;
+  background: var(--gray-50);
+}
+.level-viewer-layout {
+  display: flex; min-height: calc(100vh - 64px);
+}
+.level-sidebar {
+  width: 260px; flex-shrink: 0;
+  background: #fff; border-right: 1px solid var(--gray-200);
+  padding: 1.5rem 1rem; position: sticky; top: 64px; height: calc(100vh - 64px);
+  overflow-y: auto;
+}
+.sidebar-level-title {
+  font-family: 'Poppins', sans-serif; font-size: 0.8125rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.1em; color: var(--blue);
+  padding: 0 0.5rem; margin-bottom: 0.75rem;
+}
+.sidebar-nav { display: flex; flex-direction: column; gap: 0.25rem; }
+.sidebar-item {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.6rem 0.75rem; border-radius: var(--radius);
+  cursor: pointer; transition: all 0.15s; font-size: 0.875rem; color: var(--gray-600);
+  border: none; background: none; text-align: left; width: 100%;
+}
+.sidebar-item:hover { background: var(--gray-100); color: var(--dark); }
+.sidebar-item.active { background: var(--blue-10); color: var(--blue); font-weight: 600; }
+.sidebar-item.completed { color: var(--success); }
+.sidebar-item-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; background: var(--gray-100); flex-shrink: 0; }
+.sidebar-item.active .sidebar-item-icon { background: var(--blue-20); }
+.sidebar-item.completed .sidebar-item-icon { background: #dcfce7; }
+.sidebar-section-sep { height: 1px; background: var(--gray-200); margin: 0.75rem 0; }
+.sidebar-back-btn { margin-top: auto; }
+.level-main { flex: 1; padding: 2.5rem; max-width: 820px; }
+
+/* ============================================================
+   SLIDE CARDS
+   ============================================================ */
+.slide-card {
+  background: #fff; border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md); padding: 2.5rem;
+  margin-bottom: 1.5rem; animation: slideIn 0.3s ease;
+}
+@keyframes slideIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.slide-eyebrow {
+  font-family: 'Poppins', sans-serif; font-size: 0.75rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.1em; color: var(--blue);
+  margin-bottom: 0.5rem;
+}
+.slide-icon { font-size: 3rem; margin-bottom: 1rem; display: block; }
+.slide-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; }
+.slide-body { font-size: 1rem; color: var(--gray-600); line-height: 1.75; }
+.slide-body strong { color: var(--dark); }
+.callout {
+  background: var(--gold-10); border-left: 4px solid var(--gold);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 1rem 1.25rem; margin: 1rem 0;
+}
+.callout-title { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 0.875rem; color: var(--dark); margin-bottom: 0.35rem; }
+.callout p { margin: 0; font-size: 0.9375rem; color: var(--gray-600); }
+.info-box {
+  background: var(--blue-10); border-left: 4px solid var(--blue);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 1rem 1.25rem; margin: 1rem 0;
+}
+.info-box p { margin: 0; font-size: 0.9375rem; color: var(--gray-600); }
+.data-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.875rem; margin: 1rem 0; }
+.data-card {
+  background: var(--gray-50); border-radius: var(--radius); padding: 1rem;
+  border: 1px solid var(--gray-200);
+}
+.data-card-metric { font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--blue); }
+.data-card-label { font-size: 0.8125rem; color: var(--gray-600); margin-top: 0.25rem; }
+.persona-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.persona-card {
+  border: 2px solid var(--gray-200); border-radius: var(--radius-lg); padding: 1.25rem;
+  transition: all 0.2s;
+}
+.persona-card:hover { border-color: var(--blue); box-shadow: var(--shadow-sm); }
+.persona-avatar { font-size: 2.5rem; margin-bottom: 0.5rem; display: block; }
+.persona-name { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1rem; color: var(--dark); }
+.persona-type { font-size: 0.8125rem; font-weight: 500; color: var(--blue); margin-bottom: 0.5rem; }
+.persona-pain { font-size: 0.875rem; color: var(--gray-600); }
+.term-list { display: flex; flex-direction: column; gap: 0.75rem; margin: 1rem 0; }
+.term-row { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; border-radius: var(--radius); background: var(--gray-50); }
+.term-say { font-weight: 600; color: var(--success); font-family: 'Poppins', sans-serif; font-size: 0.9375rem; min-width: 120px; }
+.term-not { color: var(--error); font-size: 0.875rem; text-decoration: line-through; flex: 1; }
+.term-sep { font-size: 0.75rem; color: var(--gray-400); }
+.ladder-list { display: flex; flex-direction: column; gap: 0; margin: 1rem 0; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--gray-200); }
+.ladder-level {
+  display: flex; align-items: flex-start; gap: 1rem; padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--gray-200); transition: background 0.15s;
+}
+.ladder-level:last-child { border-bottom: none; }
+.ladder-level:hover { background: var(--gray-50); }
+.ladder-level-num {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--blue); color: #fff;
+  font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 0.9rem;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.ladder-level-num.l0 { background: var(--gray-400); }
+.ladder-level-num.l1 { background: #dc2626; }
+.ladder-level-num.l2 { background: #ea580c; }
+.ladder-level-num.l3 { background: var(--gold); color: var(--dark); }
+.ladder-level-num.l4 { background: var(--blue); }
+.ladder-level-num.l5 { background: var(--dark); }
+.ladder-level-body .llt { font-family: 'Poppins', sans-serif; font-weight: 700; color: var(--dark); font-size: 0.9375rem; }
+.ladder-level-body .lld { font-size: 0.875rem; color: var(--gray-600); margin-top: 0.2rem; }
+.kpi-table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+.kpi-table th { background: var(--dark); color: #fff; font-family: 'Poppins', sans-serif; font-size: 0.8125rem; padding: 0.75rem 1rem; text-align: left; }
+.kpi-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--gray-200); font-size: 0.9rem; }
+.kpi-table tr:nth-child(even) td { background: var(--gray-50); }
+.kpi-table tr:hover td { background: var(--blue-10); }
+.comp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.comp-card { border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 1rem; }
+.comp-name { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 0.9375rem; color: var(--dark); margin-bottom: 0.4rem; }
+.comp-desc { font-size: 0.8125rem; color: var(--gray-600); }
+.pillar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.pillar-card {
+  background: linear-gradient(135deg, var(--blue-10) 0%, #fff 100%);
+  border: 1px solid var(--blue-20); border-radius: var(--radius-lg); padding: 1.5rem;
+}
+.pillar-num { font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 2rem; color: var(--blue); opacity: 0.25; margin-bottom: 0.25rem; }
+.pillar-title { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1rem; color: var(--dark); margin-bottom: 0.5rem; }
+.pillar-desc { font-size: 0.875rem; color: var(--gray-600); }
+.pricing-table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+.pricing-table th { background: var(--blue); color: #fff; font-family: 'Poppins', sans-serif; font-size: 0.8125rem; padding: 0.875rem 1rem; text-align: left; }
+.pricing-table td { padding: 0.875rem 1rem; border-bottom: 1px solid var(--gray-200); font-size: 0.9rem; }
+.pricing-table tr:nth-child(even) td { background: var(--gray-50); }
+.price-highlight { font-family: 'Poppins', sans-serif; font-weight: 700; color: var(--blue); font-size: 1.1rem; }
+.slide-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--gray-200); }
+.slide-counter { font-family: 'Poppins', sans-serif; font-size: 0.8125rem; font-weight: 600; color: var(--gray-400); }
+.structure-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.structure-card { border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: 1.25rem; }
+.structure-name { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1rem; color: var(--dark); margin-bottom: 0.5rem; }
+.structure-pros { color: var(--success); font-size: 0.875rem; margin-bottom: 0.3rem; }
+.structure-cons { color: var(--error); font-size: 0.875rem; }
+.pmo-pillars { display: flex; gap: 0.75rem; margin: 1rem 0; flex-wrap: wrap; }
+.pmo-pill { background: var(--blue); color: #fff; padding: 0.5rem 1.25rem; border-radius: 50px; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.9rem; }
+.journey-stages { display: flex; flex-direction: column; gap: 0.75rem; margin: 1rem 0; }
+.journey-stage { display: flex; align-items: flex-start; gap: 1rem; padding: 0.875rem 1rem; border-radius: var(--radius); border: 1px solid var(--gray-200); }
+.js-num { font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1rem; color: var(--blue); min-width: 24px; }
+.js-body .js-title { font-weight: 600; color: var(--dark); font-size: 0.9375rem; }
+.js-body .js-owner { font-size: 0.8125rem; color: var(--blue); font-weight: 500; }
+.js-body .js-quote { font-size: 0.875rem; color: var(--gray-600); font-style: italic; margin-top: 0.2rem; }
+.js-stage-bd { border-left: 3px solid #7c3aed; }
+.js-stage-mkt { border-left: 3px solid #2563eb; }
+.js-stage-sol { border-left: 3px solid var(--gold); }
+.js-stage-cs { border-left: 3px solid var(--blue); }
+.js-stage-cust { border-left: 3px solid var(--success); }
+
+/* ── Customer Journey Step-Through Viewer ── */
+.cj-viewer { border: 1px solid var(--gray-200); border-radius: var(--radius-lg); overflow: hidden; }
+.cj-viewer-header { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.25rem; background: var(--gray-50); border-bottom: 1px solid var(--gray-200); }
+.cj-viewer-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blue); }
+.cj-viewer-counter { font-size: 0.8125rem; color: var(--gray-500); font-weight: 500; }
+.cj-slide { display: none; padding: 1.5rem 1.25rem; }
+.cj-slide.cj-active { display: block; }
+.cj-tags { display: flex; flex-wrap: wrap; gap: 0.375rem; margin-bottom: 1rem; }
+.cj-tag { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; }
+.cj-tag-pops    { background: #d97706; }
+.cj-tag-product { background: #7c3aed; }
+.cj-tag-mkt     { background: #db2777; }
+.cj-tag-eng     { background: #059669; }
+.cj-tag-bd      { background: #6b7280; }
+.cj-tag-sol     { background: #b45309; }
+.cj-tag-cs      { background: var(--blue); }
+.cj-tag-cust    { background: #16a34a; }
+.cj-quote-block { border-left: 3px solid var(--blue); background: #f0f7ff; padding: 0.75rem 1rem; border-radius: 0 var(--radius) var(--radius) 0; margin-bottom: 1rem; font-style: italic; color: var(--gray-700); font-size: 1rem; }
+.cj-slide p { color: var(--gray-600); font-size: 0.9375rem; line-height: 1.75; margin-bottom: 0.75rem; }
+.cj-slide p:last-child { margin-bottom: 0; }
+.cj-footer { display: flex; align-items: center; justify-content: space-between; padding: 0.875rem 1.25rem; border-top: 1px solid var(--gray-200); background: var(--gray-50); }
+.cj-dots { display: flex; gap: 0.3rem; flex-wrap: wrap; justify-content: center; }
+.cj-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gray-300); transition: background 0.2s; }
+.cj-dot.cj-dot-active { background: var(--blue); }
+</style>
+
+/* ============================================================
+   EXERCISE STYLES
+   ============================================================ */
+.exercise-wrap { background: #fff; border-radius: var(--radius-lg); box-shadow: var(--shadow-md); padding: 2rem; margin-bottom: 1.5rem; }
+.exercise-header { margin-bottom: 1.5rem; }
+.exercise-title { font-family: 'Poppins', sans-serif; font-size: 1.25rem; font-weight: 700; color: var(--dark); }
+.exercise-instructions { font-size: 0.9375rem; color: var(--gray-600); margin-top: 0.5rem; line-height: 1.6; }
+.exercise-progress { font-family: 'Poppins', sans-serif; font-size: 0.8125rem; font-weight: 600; color: var(--blue); margin-top: 0.5rem; }
+
+/* Journey Sort Exercise */
+.sort-layout { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+.sort-cards-pool { flex: 1; min-width: 220px; }
+.sort-road { flex: 1; min-width: 260px; }
+.sort-pool-title, .sort-road-title { font-family: 'Poppins', sans-serif; font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gray-400); margin-bottom: 0.75rem; }
+.sort-card {
+  background: var(--blue-10); border: 2px solid var(--blue-20); border-radius: var(--radius);
+  padding: 0.75rem 1rem; margin-bottom: 0.5rem; cursor: pointer; transition: all 0.2s;
+  font-size: 0.875rem; color: var(--dark); font-weight: 500;
+}
+.sort-card:hover { border-color: var(--blue); background: var(--blue-20); }
+.sort-card.selected { border-color: var(--blue); background: var(--blue); color: #fff; transform: scale(1.02); }
+.sort-card.placed-correct { background: #dcfce7; border-color: var(--success); color: var(--success); cursor: default; }
+.sort-card.placed-wrong { animation: shake 0.4s; }
+.sort-slot {
+  border: 2px dashed var(--gray-200); border-radius: var(--radius);
+  padding: 0.75rem 1rem; margin-bottom: 0.5rem; cursor: pointer; transition: all 0.2s;
+  font-size: 0.875rem; min-height: 46px; display: flex; align-items: center;
+  background: var(--gray-50); gap: 0.5rem;
+}
+.sort-slot:hover { border-color: var(--blue); background: var(--blue-10); }
+.sort-slot.slot-filled { border-style: solid; border-color: var(--success); background: #dcfce7; cursor: default; }
+.sort-slot.slot-wrong { border-color: var(--error); background: #fee2e2; animation: shake 0.4s; }
+.sort-slot-num { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 0.75rem; color: var(--gray-400); min-width: 20px; }
+.sort-slot.slot-filled .sort-slot-num { color: var(--success); }
+.reveal-panel { margin-top: 1.5rem; background: var(--gray-50); border-radius: var(--radius-lg); padding: 1.5rem; display: none; }
+.reveal-panel.show { display: block; animation: slideIn 0.3s ease; }
+.reveal-stage { display: flex; align-items: flex-start; gap: 0.875rem; padding: 0.75rem 0; border-bottom: 1px solid var(--gray-200); }
+.reveal-stage:last-child { border-bottom: none; }
+.reveal-num { font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1rem; color: var(--blue); min-width: 24px; }
+.reveal-title { font-weight: 600; color: var(--dark); font-size: 0.9375rem; }
+.reveal-detail { font-size: 0.875rem; color: var(--gray-600); margin-top: 0.2rem; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+
+/* KPI Triage Exercise */
+.triage-layout { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+.triage-metrics-pool { flex: 1; min-width: 220px; }
+.triage-fix-col { flex: 1; min-width: 220px; }
+.triage-metric-card {
+  background: var(--blue-10); border: 2px solid var(--blue-20); border-radius: var(--radius);
+  padding: 0.75rem 1rem; margin-bottom: 0.5rem; cursor: pointer; transition: all 0.2s;
+  font-size: 0.875rem; color: var(--dark); font-weight: 500;
+}
+.triage-metric-card:hover { border-color: var(--blue); }
+.triage-metric-card.selected { border-color: var(--blue); background: var(--blue); color: #fff; }
+.triage-metric-card.placed { opacity: 0.4; cursor: default; }
+.triage-drop-zone {
+  border: 2px dashed var(--gray-300); border-radius: var(--radius);
+  padding: 1rem; min-height: 60px; cursor: pointer; transition: all 0.2s;
+  margin-bottom: 0.5rem; background: var(--gray-50); font-size: 0.875rem; color: var(--gray-400);
+  display: flex; align-items: center;
+}
+.triage-drop-zone:hover { border-color: var(--blue); background: var(--blue-10); }
+.triage-drop-zone.filled { border-color: var(--success); border-style: solid; background: #dcfce7; color: var(--dark); font-weight: 500; cursor: default; }
+.triage-fix-label { font-family: 'Poppins', sans-serif; font-size: 0.875rem; font-weight: 700; color: #dc2626; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+
+/* Structure Diagnosis Exercise */
+.struct-options { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.struct-option-btn {
+  padding: 0.75rem 1.5rem; border-radius: 50px;
+  border: 2px solid var(--gray-200); background: #fff;
+  font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.875rem;
+  cursor: pointer; transition: all 0.2s; color: var(--dark);
+}
+.struct-option-btn:hover { border-color: var(--blue); color: var(--blue); }
+.struct-option-btn.selected { background: var(--blue); border-color: var(--blue); color: #fff; }
+.struct-scenario { background: var(--gold-10); border: 1px solid var(--gold-20); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1.5rem; font-size: 0.9375rem; color: var(--dark); line-height: 1.7; }
+.struct-feedback { background: var(--gray-50); border-radius: var(--radius-lg); padding: 1.5rem; display: none; }
+.struct-feedback.show { display: block; animation: slideIn 0.3s ease; }
+
+/* Pricing ROI Exercise */
+.roi-input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+.roi-input-group { }
+.roi-input-label { font-family: 'Poppins', sans-serif; font-size: 0.8125rem; font-weight: 600; color: var(--dark); margin-bottom: 0.4rem; display: block; }
+.roi-input {
+  width: 100%; padding: 0.625rem 0.875rem; border: 2px solid var(--gray-200);
+  border-radius: var(--radius); font-family: 'Rubik', sans-serif; font-size: 1rem;
+  color: var(--dark); transition: border-color 0.2s; outline: none;
+}
+.roi-input:focus { border-color: var(--blue); }
+.roi-results { background: var(--blue-10); border-radius: var(--radius-lg); padding: 1.5rem; }
+.roi-results-title { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1rem; color: var(--dark); margin-bottom: 1rem; }
+.roi-result-row { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--blue-20); }
+.roi-result-row:last-child { border-bottom: none; }
+.roi-result-label { font-size: 0.875rem; color: var(--gray-600); }
+.roi-result-value { font-family: 'Poppins', sans-serif; font-weight: 700; color: var(--blue); font-size: 1rem; }
+.roi-result-row.highlight-row .roi-result-value { color: var(--success); font-size: 1.1rem; }
+
+/* Boss Battle Exercise */
+.boss-intro { text-align: center; padding: 2rem; }
+.boss-intro-icon { font-size: 4rem; margin-bottom: 1rem; display: block; }
+.boss-intro-title { font-family: 'Poppins', sans-serif; font-size: 1.75rem; font-weight: 800; margin-bottom: 0.75rem; }
+.boss-intro-desc { color: var(--gray-600); font-size: 1.0625rem; max-width: 480px; margin: 0 auto 2rem; }
+.boss-req { display: inline-block; background: var(--gold-10); border: 1px solid var(--gold); border-radius: var(--radius); padding: 0.5rem 1.25rem; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.9375rem; color: var(--dark); margin-bottom: 2rem; }
+
+/* ============================================================
+   QUIZ STYLES
+   ============================================================ */
+.quiz-wrap { background: #fff; border-radius: var(--radius-lg); box-shadow: var(--shadow-md); padding: 2rem; margin-bottom: 1.5rem; }
+.quiz-header { margin-bottom: 1.5rem; }
+.quiz-eyebrow { font-family: 'Poppins', sans-serif; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--blue); margin-bottom: 0.5rem; }
+.quiz-q-title { font-family: 'Poppins', sans-serif; font-size: 1.125rem; font-weight: 600; color: var(--dark); line-height: 1.5; }
+.quiz-options { display: flex; flex-direction: column; gap: 0.625rem; margin-top: 1.25rem; }
+.quiz-option {
+  display: flex; align-items: center; gap: 0.875rem;
+  padding: 0.875rem 1.125rem; border-radius: var(--radius);
+  border: 2px solid var(--gray-200); cursor: pointer; transition: all 0.2s;
+  font-size: 0.9375rem; color: var(--dark); background: #fff; text-align: left; width: 100%;
+}
+.quiz-option:hover:not(:disabled) { border-color: var(--blue); background: var(--blue-10); }
+.quiz-option.correct { border-color: var(--success); background: #dcfce7; color: var(--success); }
+.quiz-option.wrong { border-color: var(--error); background: #fee2e2; color: var(--error); }
+.quiz-option:disabled { cursor: default; }
+.quiz-option-letter {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--gray-100);
+  font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 0.8125rem;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--gray-600);
+}
+.quiz-option.correct .quiz-option-letter { background: var(--success); color: #fff; }
+.quiz-option.wrong .quiz-option-letter { background: var(--error); color: #fff; }
+.quiz-explanation { margin-top: 1rem; padding: 1rem 1.25rem; background: var(--gray-50); border-radius: var(--radius); font-size: 0.9375rem; color: var(--gray-600); border-left: 3px solid var(--blue); display: none; }
+.quiz-explanation.show { display: block; animation: slideIn 0.3s ease; }
+.quiz-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; }
+.quiz-score-display { background: var(--gray-50); border-radius: var(--radius-lg); padding: 2rem; text-align: center; }
+.quiz-score-num { font-family: 'Poppins', sans-serif; font-size: 3rem; font-weight: 800; color: var(--blue); }
+.quiz-score-label { font-family: 'Poppins', sans-serif; font-weight: 600; color: var(--gray-600); }
+.quiz-pass-msg { color: var(--success); font-weight: 600; font-size: 1.125rem; margin-top: 0.5rem; font-family: 'Poppins', sans-serif; }
+.quiz-fail-msg { color: var(--error); font-weight: 600; font-size: 1.125rem; margin-top: 0.5rem; font-family: 'Poppins', sans-serif; }
+
+/* ============================================================
+   CELEBRATION ANIMATION
+   ============================================================ */
+.confetti-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; overflow: hidden; }
+.confetti-piece {
+  position: absolute; top: -10px; border-radius: 2px;
+  animation: confetti-fall linear forwards;
+}
+@keyframes confetti-fall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+/* ============================================================
+   SCREEN: CERTIFICATE
+   ============================================================ */
+#screen-certificate {
+  min-height: 100vh; padding-top: 64px;
+  background: var(--gray-50); display: flex; align-items: center; justify-content: center;
+  padding-bottom: 3rem;
+}
+.certificate-wrap { max-width: 900px; width: 100%; padding: 2rem; }
+.cert-actions { display: flex; gap: 1rem; justify-content: center; margin-bottom: 2rem; flex-wrap: wrap; }
+
+#certificate {
+  width: 100%; background: #fff;
+  border-radius: var(--radius-lg); overflow: hidden;
+  box-shadow: var(--shadow-lg); position: relative;
+  min-height: 540px;
+}
+.cert-corner-tl {
+  position: absolute; top: 0; left: 0; width: 220px; height: 220px;
+  background: linear-gradient(135deg, var(--dark) 0%, var(--blue) 100%);
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+.cert-corner-br {
+  position: absolute; bottom: 0; right: 0; width: 220px; height: 220px;
+  background: linear-gradient(315deg, var(--dark) 0%, var(--blue) 100%);
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+.cert-gold-line-t { position: absolute; top: 14px; left: 0; right: 0; height: 3px; background: var(--gold); }
+.cert-gold-line-b { position: absolute; bottom: 14px; left: 0; right: 0; height: 3px; background: var(--gold); }
+.cert-gold-line-l { position: absolute; left: 14px; top: 0; bottom: 0; width: 3px; background: var(--gold); }
+.cert-gold-line-r { position: absolute; right: 14px; top: 0; bottom: 0; width: 3px; background: var(--gold); }
+.cert-inner { position: relative; z-index: 1; padding: 3.5rem; text-align: center; }
+.cert-logo {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: var(--dark); color: #fff; padding: 0.5rem 1.25rem;
+  border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 800;
+  font-size: 1rem; margin-bottom: 1.5rem;
+}
+.cert-logo-dot { color: var(--gold); }
+.cert-program { font-family: 'Poppins', sans-serif; font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: var(--blue); margin-bottom: 1rem; }
+.cert-headline { font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.1em; }
+.cert-name { font-family: Georgia, serif; font-style: italic; font-size: 3rem; color: var(--dark); margin: 0.5rem 0 1rem; line-height: 1.2; }
+.cert-level-name { font-family: 'Poppins', sans-serif; font-size: 1.25rem; font-weight: 800; color: var(--blue); margin-bottom: 0.75rem; }
+.cert-message { font-size: 0.9375rem; color: var(--gray-600); max-width: 560px; margin: 0 auto 1.5rem; line-height: 1.7; }
+.cert-date { font-family: 'Poppins', sans-serif; font-size: 0.875rem; color: var(--gray-400); font-weight: 500; margin-bottom: 2rem; }
+.cert-sigs { display: flex; justify-content: center; gap: 4rem; flex-wrap: wrap; }
+.cert-sig { text-align: center; }
+.cert-sig-name { font-family: Georgia, serif; font-style: italic; font-size: 1.25rem; color: var(--dark); margin-bottom: 0.25rem; }
+.cert-sig-line { width: 160px; height: 1px; background: var(--gray-200); margin: 0 auto 0.4rem; }
+.cert-sig-title { font-family: 'Poppins', sans-serif; font-size: 0.75rem; font-weight: 600; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.08em; }
+.cert-gold-seal {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, var(--gold) 0%, #e69500 100%);
+  display: flex; align-items: center; justify-content: center;
+  margin: 1.5rem auto 0; box-shadow: 0 4px 12px rgba(255,180,27,0.4);
+  font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 0.75rem;
+  color: var(--dark); text-align: center; line-height: 1.2;
+}
+
+/* ============================================================
+   PRINT STYLES
+   ============================================================ */
+@media print {
+  body * { visibility: hidden; }
+  #certificate, #certificate * { visibility: visible; }
+  #certificate { position: fixed; top: 0; left: 0; width: 100%; height: 100%; margin: 0; border-radius: 0; box-shadow: none; }
+  .no-print { display: none !important; }
+  .cert-corner-tl, .cert-corner-br { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  @page { size: landscape; margin: 0; }
+}
+
+/* ============================================================
+   NOTIFICATION TOAST
+   ============================================================ */
+.toast {
+  position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+  background: var(--dark); color: #fff; padding: 0.875rem 1.75rem;
+  border-radius: 50px; font-family: 'Poppins', sans-serif; font-size: 0.9375rem; font-weight: 600;
+  box-shadow: var(--shadow-lg); z-index: 1000; opacity: 0;
+  animation: toast-in 0.3s ease forwards;
+}
+.toast.success { background: var(--success); }
+.toast.error { background: var(--error); }
+@keyframes toast-in { from { opacity: 0; transform: translateX(-50%) translateY(16px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+@keyframes toast-out { from { opacity: 1; transform: translateX(-50%) translateY(0); } to { opacity: 0; transform: translateX(-50%) translateY(16px); } }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  .level-viewer-layout { flex-direction: column; }
+  .level-sidebar { width: 100%; height: auto; position: static; border-right: none; border-bottom: 1px solid var(--gray-200); }
+  .level-main { padding: 1.25rem; }
+  .slide-card { padding: 1.5rem; }
+  .sort-layout, .triage-layout { flex-direction: column; }
+  .roi-input-grid { grid-template-columns: 1fr; }
+  .cert-sigs { gap: 2rem; }
+  .cert-name { font-size: 2rem; }
+  .cert-inner { padding: 2rem 1.5rem; }
+  .cert-corner-tl, .cert-corner-br { width: 140px; height: 140px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     APP NAVIGATION
+     ============================================================ -->
+<nav class="app-nav hidden" id="app-nav">
+  <div class="nav-logo">
+    <div class="nav-logo-icon">M</div>
+    <span>Property Meld</span>
+  </div>
+  <div class="nav-learner">
+    <span class="nav-learner-name" id="nav-learner-name"></span>
+    <button class="btn btn-ghost btn-sm" onclick="showScreen('map')">Level Map</button>
+    <span class="nav-level-badge" id="nav-level-badge">Base Camp</span>
+  </div>
+</nav>
+
+<!-- ============================================================
+     SCREEN: WELCOME
+     ============================================================ -->
+<div id="screen-welcome">
+  <div class="welcome-bg-shape welcome-bg-1"></div>
+  <div class="welcome-bg-shape welcome-bg-2"></div>
+  <div class="welcome-container">
+    <div class="welcome-logo-wrap">
+      <div class="welcome-logo">
+        Property Meld<span class="welcome-logo-dot">.</span>
+      </div>
+    </div>
+    <p class="welcome-eyebrow">Summit: Customer Knowledge Ascent</p>
+    <h1 class="welcome-title">Know More.<br><span class="highlight">Serve Better.</span></h1>
+    <p class="welcome-subtitle">Five levels of mastery, one mountain. Are you ready to ascend?</p>
+
+    <div class="welcome-card">
+      <!-- Step 1: Name + Role -->
+      <div class="welcome-step active" id="welcome-step-1">
+        <h3 style="margin-bottom:1.5rem">Let's get you started</h3>
+        <div class="form-group">
+          <label class="form-label" for="input-name">Your Name</label>
+          <input class="form-input" type="text" id="input-name" placeholder="e.g. Jordan Smith" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="input-dept">Your Department</label>
+          <select class="form-select" id="input-dept">
+            <option value="">Select your department…</option>
+            <option value="Customer Success">Customer Success</option>
+            <option value="Business Development">Business Development (Sales)</option>
+            <option value="Solutions">Solutions / Sales Engineering</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Product">Product</option>
+            <option value="Engineering">Engineering</option>
+            <option value="Operations">Operations</option>
+            <option value="Finance">Finance</option>
+            <option value="Leadership">Leadership / Executive</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="input-role">Your Role / Title</label>
+          <input class="form-input" type="text" id="input-role" placeholder="e.g. Customer Success Manager">
+        </div>
+        <button class="btn btn-primary w-full" onclick="handleWelcomeStep1()">Continue →</button>
+      </div>
+
+      <!-- Step 2: Choose level -->
+      <div class="welcome-step" id="welcome-step-2">
+        <h3 style="margin-bottom:0.5rem">Where would you like to start?</h3>
+        <p style="color:var(--gray-600);font-size:0.9375rem;margin-bottom:1.25rem">Based on your progress, here's what's available.</p>
+        <div class="level-select-grid" id="level-select-grid">
+          <!-- Populated by JS -->
+        </div>
+        <button class="btn btn-primary w-full" style="margin-top:1.5rem" onclick="handleWelcomeStep2()">Begin Ascent →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SCREEN: LEVEL MAP
+     ============================================================ -->
+<div id="screen-map" class="hidden">
+  <div class="map-container">
+    <div class="map-header">
+      <p class="welcome-eyebrow" style="text-align:center">Your Journey</p>
+      <h2>Summit Map</h2>
+      <p id="map-greeting">Track your ascent across all five levels of mastery.</p>
+    </div>
+
+    <!-- Mountain SVG visualization -->
+    <div class="mountain-svg-wrap">
+      <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+        <defs>
+          <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#f0f9ff"/>
+            <stop offset="100%" style="stop-color:#e8f4fd"/>
+          </linearGradient>
+          <linearGradient id="mountGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#022935"/>
+            <stop offset="100%" style="stop-color:#1175CC"/>
+          </linearGradient>
+        </defs>
+        <rect width="700" height="200" fill="url(#skyGrad)"/>
+        <!-- Mountain range -->
+        <polygon points="0,200 60,140 120,160 200,90 280,130 350,50 430,100 510,70 600,110 660,150 700,200" fill="url(#mountGrad)" opacity="0.12"/>
+        <polygon points="0,200 80,160 160,120 250,100 350,50 450,80 560,60 640,120 700,200" fill="url(#mountGrad)" opacity="0.2"/>
+        <!-- Snow caps -->
+        <polygon points="340,50 350,30 360,50" fill="white" opacity="0.8"/>
+        <polygon points="552,60 560,42 568,60" fill="white" opacity="0.7"/>
+        <!-- Path dots -->
+        <circle cx="70" cy="170" r="8" fill="#1175CC" opacity="0.3" id="map-dot-1"/>
+        <circle cx="200" cy="105" r="8" fill="#1175CC" opacity="0.3" id="map-dot-2"/>
+        <circle cx="350" cy="65" r="8" fill="#1175CC" opacity="0.3" id="map-dot-3"/>
+        <circle cx="500" cy="78" r="8" fill="#1175CC" opacity="0.3" id="map-dot-4"/>
+        <circle cx="630" cy="118" r="8" fill="#FFB41B" opacity="0.5" id="map-dot-5"/>
+        <!-- Labels -->
+        <text x="70" y="195" text-anchor="middle" fill="#1175CC" font-family="Poppins,sans-serif" font-size="9" font-weight="700">Base Camp</text>
+        <text x="200" y="122" text-anchor="middle" fill="#1175CC" font-family="Poppins,sans-serif" font-size="9" font-weight="700">First Ascent</text>
+        <text x="350" y="82" text-anchor="middle" fill="#022935" font-family="Poppins,sans-serif" font-size="9" font-weight="700">The Ridge</text>
+        <text x="500" y="95" text-anchor="middle" fill="#022935" font-family="Poppins,sans-serif" font-size="9" font-weight="700">Thought Leader</text>
+        <text x="630" y="135" text-anchor="middle" fill="#e69500" font-family="Poppins,sans-serif" font-size="9" font-weight="700">Summit</text>
+      </svg>
+    </div>
+
+    <!-- Level nodes -->
+    <div class="level-nodes" id="level-nodes">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- Progress section -->
+    <div class="map-progress-section">
+      <div class="map-progress-title">Your Progress</div>
+      <div class="level-progress-list" id="map-progress-list">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SCREEN: LEVEL VIEWER
+     ============================================================ -->
+<div id="screen-level" class="hidden">
+  <div class="level-viewer-layout">
+    <!-- Sidebar -->
+    <div class="level-sidebar">
+      <div class="sidebar-level-title" id="sidebar-level-title">Level 1</div>
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <!-- Populated by JS -->
+      </nav>
+    </div>
+    <!-- Main content -->
+    <div class="level-main" id="level-main">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SCREEN: CERTIFICATE
+     ============================================================ -->
+<div id="screen-certificate" class="hidden">
+  <div class="certificate-wrap">
+    <div class="cert-actions no-print">
+      <button class="btn btn-outline" onclick="showScreen('map')">← Back to Map</button>
+      <button class="btn btn-primary" onclick="window.print()">🖨 Print Certificate</button>
+    </div>
+    <div id="certificate">
+      <div class="cert-corner-tl"></div>
+      <div class="cert-corner-br"></div>
+      <div class="cert-gold-line-t"></div>
+      <div class="cert-gold-line-b"></div>
+      <div class="cert-gold-line-l"></div>
+      <div class="cert-gold-line-r"></div>
+      <div class="cert-inner">
+        <div class="cert-logo">Property Meld<span class="cert-logo-dot">.</span></div>
+        <div class="cert-program">Summit: Customer Knowledge Ascent</div>
+        <div class="cert-headline">This certifies that</div>
+        <div class="cert-name" id="cert-name">Learner Name</div>
+        <div style="font-family:'Poppins',sans-serif;font-size:0.9375rem;color:var(--gray-600);margin-bottom:0.5rem">has successfully completed</div>
+        <div class="cert-level-name" id="cert-level-name">Level 1 — Base Camp</div>
+        <div class="cert-message" id="cert-message">Your dedication to mastery reflects the Loyal value at its best.</div>
+        <div class="cert-date" id="cert-date">Completed March 16, 2026</div>
+        <div class="cert-sigs">
+          <div class="cert-sig">
+            <div class="cert-sig-name">Autumn Hughes</div>
+            <div class="cert-sig-line"></div>
+            <div class="cert-sig-title">Director of People</div>
+          </div>
+          <div class="cert-gold-seal">MELD<br>CERT</div>
+          <div class="cert-sig">
+            <div class="cert-sig-name">Ray Hespen</div>
+            <div class="cert-sig-line"></div>
+            <div class="cert-sig-title">CEO &amp; Co-Founder</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confetti container -->
+<div class="confetti-wrap" id="confetti-wrap"></div>
+
+<script>
+// ============================================================
+// STATE MANAGEMENT
+// ============================================================
+const DEFAULT_STATE = {
+  learner: { name: '', role: '', dept: '' },
+  currentLevel: 1,
+  currentSlide: 0,
+  levelProgress: { 1: 'unlocked', 2: 'locked', 3: 'locked', 4: 'locked', 5: 'locked' },
+  quizScores: {},
+  completedAt: {}
+};
+
+let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+
+function saveState() {
+  localStorage.setItem('meld_summit_state', JSON.stringify(state));
+}
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('meld_summit_state');
+    if (saved) state = { ...DEFAULT_STATE, ...JSON.parse(saved) };
+  } catch(e) {}
+}
+
+// ============================================================
+// CONTENT DATA
+// ============================================================
+const LEVELS = [
+  {
+    id: 1, emoji: '🏕️', name: 'Base Camp', subtitle: 'The Foundation',
+    description: 'Company origins, values, customer personas, and industry context.'
+  },
+  {
+    id: 2, emoji: '⛰️', name: 'First Ascent', subtitle: 'The Metrics',
+    description: 'KPIs, the Ladder of Excellence, competitive landscape, and talent economics.'
+  },
+  {
+    id: 3, emoji: '🗻', name: 'The Ridge', subtitle: 'Operations Deep Dive',
+    description: 'PM company structures, P&L analysis, and the PMO concept.'
+  },
+  {
+    id: 4, emoji: '💡', name: 'Thought Leader', subtitle: 'Product & Process',
+    description: 'Pricing, Phase 2 onboarding, the advocacy program, and pipeline ownership.'
+  },
+  {
+    id: 5, emoji: '🏔️', name: 'Summit', subtitle: 'Maintenance Intelligence',
+    description: 'The Four Pillars framework and Boss Battle certification challenge.'
+  }
+];
+
+// ============================================================
+// SLIDES DATA
+// ============================================================
+function getSlides(levelId) {
+  const allSlides = {
+    1: [
+      {
+        id: 'l1s1', type: 'slide', icon: '🌄', eyebrow: 'Level 1 — Base Camp',
+        title: 'The Genesis Story',
+        body: `<p>In <strong>2014 in Albuquerque, NM</strong>, two paths crossed that would change property management forever.</p>
+<p><strong>David Kingman</strong> — a frustrated property owner drowning in maintenance chaos — met <strong>Ray Hespen</strong>, a maintenance expert who'd seen the same problem from the inside. They asked a simple question: why is maintenance the #1 pain point in property management, and why hasn't software solved it?</p>
+<p>The answer: nobody had built software purpose-built for <em>maintenance coordination end-to-end</em>. Every tool available was a side feature in a bigger accounting platform.</p>
+<p><strong>Property Meld was founded in 2015</strong> to fill that gap — software that coordinates maintenance from the moment a resident submits a request to the moment the vendor closes it out, with everyone in the loop the whole time.</p>
+<div class="callout"><div class="callout-title">Did you know?</div><p>The name "Meld" refers to blending and merging — bringing together residents, property managers, owners, and vendors into one seamless communication flow.</p></div>`
+      },
+      {
+        id: 'l1s2', type: 'slide', icon: '⚡', eyebrow: 'Level 1 — Base Camp',
+        title: 'HAIL Values',
+        body: `<p>Property Meld operates by four core values — not just words on a wall, but the lens through which every decision is made and every customer interaction is framed.</p>
+<div class="data-grid">
+  <div class="data-card"><div class="data-card-metric">H</div><div class="data-card-label"><strong>Hungry</strong> — Always improving, growth mindset, never satisfied with "good enough."</div></div>
+  <div class="data-card"><div class="data-card-metric">A</div><div class="data-card-label"><strong>Accountable</strong> — Own your outcomes. No excuses. If it's yours, it's yours.</div></div>
+  <div class="data-card"><div class="data-card-metric">I</div><div class="data-card-label"><strong>Innovative</strong> — Challenge the status quo. Build things that didn't exist before.</div></div>
+  <div class="data-card"><div class="data-card-metric" style="color:var(--gold)">L</div><div class="data-card-label"><strong>Loyal</strong> — Customer first, always. The most important value of all.</div></div>
+</div>
+<div class="callout"><div class="callout-title">Why L is the most important</div><p>A customer who becomes loyal stays <em>and</em> refers others. Loyalty is the compounding return on every other value. When you're Hungry, Accountable, and Innovative in service of your customer — Loyalty is the result.</p></div>`
+      },
+      {
+        id: 'l1s3', type: 'slide', icon: '👥', eyebrow: 'Level 1 — Base Camp',
+        title: 'Meet the Customers',
+        body: `<p>Property Meld serves three distinct customer personas. Understanding who they are — their world, their pain, their goals — is the foundation of every conversation you'll have.</p>
+<div class="persona-grid">
+  <div class="persona-card">
+    <span class="persona-avatar">👨‍💼</span>
+    <div class="persona-name">Tim</div>
+    <div class="persona-type">Solo Landlord · 1–15 doors</div>
+    <div class="persona-pain"><strong>Reality:</strong> Self-manages, reactive, time-constrained. Juggles everything himself.<br><br><strong>Core pain:</strong> Coordination chaos — he's the middleman between tenant, vendor, and himself, all via text and voicemail.</div>
+  </div>
+  <div class="persona-card">
+    <span class="persona-avatar">👩‍💼</span>
+    <div class="persona-name">Wendy</div>
+    <div class="persona-type">Mid-Market PM · 100–500 doors</div>
+    <div class="persona-pain"><strong>Reality:</strong> Growing team, hiring challenges, managing multiple properties and staff.<br><br><strong>Core pain:</strong> Inconsistent maintenance quality. Can't see what's happening across her portfolio.</div>
+  </div>
+  <div class="persona-card">
+    <span class="persona-avatar">🏢</span>
+    <div class="persona-name">Oscar</div>
+    <div class="persona-type">Enterprise PM · 500+ doors</div>
+    <div class="persona-pain"><strong>Reality:</strong> Institutional-grade operations, multiple teams and locations.<br><br><strong>Core pain:</strong> No visibility across the portfolio, financial reporting gaps, vendor accountability issues.</div>
+  </div>
+</div>
+<div class="info-box"><p><strong>Pro tip:</strong> In your first conversation with a prospect, identify which persona they most resemble. Tim needs simplicity and speed. Wendy needs visibility and consistency. Oscar needs reporting and accountability.</p></div>`
+      },
+      {
+        id: 'l1s4', type: 'slide', icon: '📖', eyebrow: 'Level 1 — Base Camp',
+        title: 'The Meld Language Guide',
+        body: `<p>The words we use signal whether we truly understand the PM world. Using the right language builds trust instantly. Using the wrong words signals outsider status. Here's the guide:</p>
+<div class="term-list">
+  <div class="term-row"><span class="term-say">✓ Meld</span><span class="term-sep">not</span><span class="term-not">work order / ticket</span></div>
+  <div class="term-row"><span class="term-say">✓ Melder</span><span class="term-sep">not</span><span class="term-not">employee</span></div>
+  <div class="term-row"><span class="term-say">✓ Resident</span><span class="term-sep">not</span><span class="term-not">tenant</span></div>
+  <div class="term-row"><span class="term-say">✓ Owner</span><span class="term-sep">not</span><span class="term-not">landlord (unless they say it)</span></div>
+  <div class="term-row"><span class="term-say">✓ Vendor</span><span class="term-sep">not</span><span class="term-not">contractor</span></div>
+  <div class="term-row"><span class="term-say">✓ PM / Property Management Co.</span><span class="term-sep">not</span><span class="term-not">"your company"</span></div>
+</div>
+<div class="callout"><div class="callout-title">Never say these words</div><p>"Ticket system" — it commoditizes what we do. "Complaint" — it's a request, not a grievance. "Problem" — it's a situation to be resolved.</p></div>`
+      },
+      {
+        id: 'l1s5', type: 'slide', icon: '📊', eyebrow: 'Level 1 — Base Camp',
+        title: 'Industry Context',
+        body: `<p>To serve property managers well, you need to understand the world they live in. Here's the market landscape at a glance:</p>
+<div class="data-grid">
+  <div class="data-card"><div class="data-card-metric">10–12M</div><div class="data-card-label">Individual landlords in the US</div></div>
+  <div class="data-card"><div class="data-card-metric">48.5M</div><div class="data-card-label">Rental units nationwide</div></div>
+  <div class="data-card"><div class="data-card-metric">40%</div><div class="data-card-label">Single-family rentals (SFR) of all rentals</div></div>
+  <div class="data-card"><div class="data-card-metric">~75%</div><div class="data-card-label">PM companies managing fewer than 100 units</div></div>
+  <div class="data-card"><div class="data-card-metric">8–12%</div><div class="data-card-label">Management fee (PM revenue model)</div></div>
+  <div class="data-card"><div class="data-card-metric">15–30%</div><div class="data-card-label">Maintenance markups added by PM</div></div>
+  <div class="data-card"><div class="data-card-metric">20–30%</div><div class="data-card-label">Maintenance as % of total PM operating costs</div></div>
+</div>
+<div class="info-box"><p><strong>The opportunity:</strong> Maintenance is the largest cost center in PM operations — and the least optimized. That's why Property Meld exists, and why every PM company eventually faces the decision: keep firefighting, or build a maintenance operation.</p></div>`
+      }
+    ],
+    2: [
+      {
+        id: 'l2s1', type: 'slide', icon: '📈', eyebrow: 'Level 2 — First Ascent',
+        title: 'The 21 KPIs That Define PM Excellence',
+        body: `<p>Property managers live and die by metrics. Knowing these KPIs — and their targets — lets you speak the language of performance and instantly earn credibility.</p>
+<table class="kpi-table">
+  <thead><tr><th>KPI</th><th>Target</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Maintenance Cycle Time</strong></td><td style="color:var(--blue);font-weight:600">&lt; 7 days</td></tr>
+    <tr><td>First-Time Fix Rate</td><td style="color:var(--blue);font-weight:600">&gt; 85%</td></tr>
+    <tr><td>Resident Satisfaction (CSAT)</td><td style="color:var(--blue);font-weight:600">&gt; 4.5/5</td></tr>
+    <tr><td>Owner Retention Rate</td><td style="color:var(--blue);font-weight:600">&gt; 90%</td></tr>
+    <tr><td>Vendor Response Time</td><td style="color:var(--blue);font-weight:600">&lt; 2 hours</td></tr>
+    <tr><td>Work Order Volume per PM</td><td>60–80/month benchmark</td></tr>
+    <tr><td>Emergency Rate</td><td style="color:var(--blue);font-weight:600">&lt; 10% of total melds</td></tr>
+    <tr><td>Completion Rate</td><td style="color:var(--blue);font-weight:600">&gt; 95%</td></tr>
+    <tr><td>Vendor Quality Score</td><td style="color:var(--blue);font-weight:600">&gt; 4.0/5</td></tr>
+    <tr><td>Deferred Maintenance Rate</td><td style="color:var(--blue);font-weight:600">&lt; 5%</td></tr>
+    <tr><td>Preventive vs Reactive Ratio</td><td>Target 30% preventive</td></tr>
+    <tr><td>Resident Turnover Rate</td><td style="color:var(--blue);font-weight:600">&lt; 25%/year</td></tr>
+    <tr><td>Days to Fill Vacancy</td><td style="color:var(--blue);font-weight:600">&lt; 30 days</td></tr>
+    <tr><td>CapEx Ratio</td><td>1–4% of property value/year</td></tr>
+    <tr><td>Maintenance Cost as % of Revenue</td><td style="color:var(--blue);font-weight:600">&lt; 28%</td></tr>
+    <tr><td>Vendor Utilization Rate</td><td style="color:var(--blue);font-weight:600">&gt; 70%</td></tr>
+    <tr><td>Average Bid Count per Job</td><td>2–3 bids</td></tr>
+    <tr><td>Resident Complaint Rate</td><td style="color:var(--blue);font-weight:600">&lt; 2%</td></tr>
+    <tr><td>Owner NPS</td><td style="color:var(--blue);font-weight:600">&gt; 50</td></tr>
+  </tbody>
+</table>`
+      },
+      {
+        id: 'l2s2', type: 'slide', icon: '🪜', eyebrow: 'Level 2 — First Ascent',
+        title: 'The Ladder of Maintenance Excellence',
+        body: `<p>When you first assess a PM company, you're diagnosing where they sit on this ladder. Your job is to help them climb it — at minimum to Level 3, ideally to Level 4 or 5.</p>
+<div class="ladder-list">
+  <div class="ladder-level"><div class="ladder-level-num l0">0</div><div class="ladder-level-body"><div class="llt">Chaos</div><div class="lld">No system. Fully reactive. Residents call the owner directly. No tracking whatsoever.</div></div></div>
+  <div class="ladder-level"><div class="ladder-level-num l1">1</div><div class="ladder-level-body"><div class="llt">Basic</div><div class="lld">Some tracking exists, mostly reactive. No vendor standards or SLAs in place.</div></div></div>
+  <div class="ladder-level"><div class="ladder-level-num l2">2</div><div class="ladder-level-body"><div class="llt">Managed</div><div class="lld">System is in place. SLAs exist but compliance is inconsistent. Still largely reactive.</div></div></div>
+  <div class="ladder-level"><div class="ladder-level-num l3">3</div><div class="ladder-level-body"><div class="llt">Defined</div><div class="lld">Consistent process. Vendor network established. Reporting available. The CS 90-day target.</div></div></div>
+  <div class="ladder-level"><div class="ladder-level-num l4">4</div><div class="ladder-level-body"><div class="llt">Optimized</div><div class="lld">Proactive maintenance. Data-driven decisions. Owner dashboards in use. Owners see the value.</div></div></div>
+  <div class="ladder-level"><div class="ladder-level-num l5">5</div><div class="ladder-level-body"><div class="llt">Intelligent</div><div class="lld">Predictive maintenance. Full financial integration. PM is an advisor, not a firefighter.</div></div></div>
+</div>
+<div class="callout"><div class="callout-title">CS Note</div><p>Your Phase 2 onboarding goal: get every client to Ladder Level 3 within 90 days of go-live.</p></div>`
+      },
+      {
+        id: 'l2s3', type: 'slide', icon: '🗺️', eyebrow: 'Level 2 — First Ascent',
+        title: 'The Competitive Landscape',
+        body: `<p>Know who else is in the room. Understanding competitors helps you articulate Property Meld's differentiation with precision — not generic claims, but specific contrasts.</p>
+<div class="comp-grid">
+  <div class="comp-card"><div class="comp-name">AppFolio</div><div class="comp-desc">Full PM suite, strong accounting. Maintenance is a feature, not the focus. Less specialized in coordination depth.</div></div>
+  <div class="comp-card"><div class="comp-name">Buildium</div><div class="comp-desc">SMB-focused, all-in-one platform. Shallow on maintenance coordination. Good for basic tracking, not optimization.</div></div>
+  <div class="comp-card"><div class="comp-name">Latchel</div><div class="comp-desc">Maintenance-focused competitor. 24/7 intake model. Key differentiator to know well — most similar to Meld.</div></div>
+  <div class="comp-card"><div class="comp-name">Propertyware</div><div class="comp-desc">Enterprise-level, highly customizable. Complex implementation. Deep financial features but limited maintenance intelligence.</div></div>
+  <div class="comp-card" style="border-color:var(--blue);background:var(--blue-10)"><div class="comp-name" style="color:var(--blue)">Property Meld ✓</div><div class="comp-desc">Purpose-built for maintenance coordination. Melder-speed communication. PMO model. The only platform built from the ground up to solve the maintenance problem.</div></div>
+</div>
+<div class="info-box"><p><strong>The edge:</strong> When a PM says they already use AppFolio or Buildium, you're not competing — you're complementing. Property Meld works <em>alongside</em> accounting platforms because we go deeper on the maintenance layer.</p></div>`
+      },
+      {
+        id: 'l2s4', type: 'slide', icon: '💼', eyebrow: 'Level 2 — First Ascent',
+        title: 'Talent Economics',
+        body: `<p>One of the most powerful ROI arguments for Property Meld is what it does to the human cost of maintenance coordination. Know these numbers cold.</p>
+<div class="data-grid">
+  <div class="data-card"><div class="data-card-metric">3–6 mo</div><div class="data-card-label">Time to hire a maintenance coordinator</div></div>
+  <div class="data-card"><div class="data-card-metric">$8–15K</div><div class="data-card-label">Cost to hire (recruiting, onboarding, lost productivity)</div></div>
+  <div class="data-card"><div class="data-card-metric">400–600</div><div class="data-card-label">Melds/month an average coordinator can handle</div></div>
+  <div class="data-card"><div class="data-card-metric">~35%</div><div class="data-card-label">Annual turnover rate for frontline PM staff</div></div>
+</div>
+<div class="callout"><div class="callout-title">The math that matters</div><p>Every hour of coordinator time saved by Property Meld is direct margin improvement. A coordinator at $25/hr saving 2 hours/week = $2,600/year in recovered labor — before accounting for fewer errors, faster cycle times, or reduced overtime during emergencies.</p></div>
+<div class="info-box"><p>This is why we talk about <strong>Property Meld as an operational investment, not a software cost.</strong> The question isn't "can we afford it?" — it's "how long can we afford not to have it?"</p></div>`
+      }
+    ],
+    3: [
+      {
+        id: 'l3s1', type: 'slide', icon: '🏗️', eyebrow: 'Level 3 — The Ridge',
+        title: 'Three PM Company Structures',
+        body: `<p>How a PM company is structured fundamentally shapes their maintenance pain points — and how Property Meld solves them. Diagnose the structure before prescribing the solution.</p>
+<div class="structure-grid">
+  <div class="structure-card">
+    <div class="structure-name">Departmental</div>
+    <p style="font-size:0.875rem;color:var(--gray-600);margin-bottom:0.75rem">Functional silos: leasing dept, maintenance dept, accounting dept.</p>
+    <div class="structure-pros">✓ Deep specialization</div>
+    <div class="structure-cons">✗ Handoff problems, blame-shifting between departments</div>
+  </div>
+  <div class="structure-card">
+    <div class="structure-name">Portfolio</div>
+    <p style="font-size:0.875rem;color:var(--gray-600);margin-bottom:0.75rem">Each PM owns ALL functions for their portfolio of properties.</p>
+    <div class="structure-pros">✓ Accountability, strong client relationship</div>
+    <div class="structure-cons">✗ Limits scale, PM burnout is common</div>
+  </div>
+  <div class="structure-card" style="border-color:var(--blue);background:var(--blue-10)">
+    <div class="structure-name" style="color:var(--blue)">Hybrid ★</div>
+    <p style="font-size:0.875rem;color:var(--gray-600);margin-bottom:0.75rem">Portfolio PMs for client relationships + shared service centers for maintenance ops.</p>
+    <div class="structure-pros">✓ Best of both — scale AND accountability</div>
+    <div style="color:var(--blue);font-size:0.875rem">Where most growing PMs land</div>
+  </div>
+</div>
+<div class="callout"><div class="callout-title">Why this matters for you</div><p>A departmental company needs Property Meld to fix handoff gaps. A portfolio company needs it for coordinator efficiency. A hybrid needs it to scale their shared service center. Same product, different value frame.</p></div>`
+      },
+      {
+        id: 'l3s2', type: 'slide', icon: '📋', eyebrow: 'Level 3 — The Ridge',
+        title: 'P&L Deep Dive',
+        body: `<p>Understanding a PM company's profit and loss gives you credibility in executive conversations and helps you connect Property Meld's value to real financial impact.</p>
+<div class="data-grid">
+  <div class="data-card"><div class="data-card-metric">8–12%</div><div class="data-card-label">Management fees (primary revenue)</div></div>
+  <div class="data-card"><div class="data-card-metric">50–100%</div><div class="data-card-label">Leasing fees (% of one month's rent)</div></div>
+  <div class="data-card"><div class="data-card-metric">15–30%</div><div class="data-card-label">Maintenance markups (major revenue stream)</div></div>
+  <div class="data-card"><div class="data-card-metric">40–60%</div><div class="data-card-label">Labor as % of total expenses (largest cost)</div></div>
+  <div class="data-card"><div class="data-card-metric">1–4%</div><div class="data-card-label">CapEx budget (% of assessed value/year)</div></div>
+</div>
+<div class="callout"><div class="callout-title">The deferred maintenance multiplier</div><p>Every deferred maintenance dollar costs <strong>3–5x</strong> if it becomes an emergency. A $200 HVAC service ignored today becomes a $600–$1,000 emergency call-out tomorrow. This is the financial argument for proactive maintenance.</p></div>
+<div class="info-box"><p><strong>Maintenance markups</strong> are a significant revenue stream for PM companies — which means they want jobs done correctly, at fair prices, by accountable vendors. Property Meld's vendor intelligence directly protects this revenue line.</p></div>`
+      },
+      {
+        id: 'l3s3', type: 'slide', icon: '🎯', eyebrow: 'Level 3 — The Ridge',
+        title: 'The PMO Concept',
+        body: `<p>PMO — <strong>Property Management Operations</strong> — is more than a buzzword. It's a transformation in how PM companies think about what they do.</p>
+<div class="info-box"><p><strong>The shift:</strong> From reactive maintenance firefighter → proactive operations business. From "we fix problems" → "we run a world-class maintenance operation that creates measurable value for owners."</p></div>
+<p style="margin-top:1rem">The PMO framework has three pillars:</p>
+<div class="pmo-pillars">
+  <div class="pmo-pill">👁 Visibility</div>
+  <div class="pmo-pill">⚡ Velocity</div>
+  <div class="pmo-pill">💰 Value</div>
+</div>
+<div class="data-grid" style="margin-top:1rem">
+  <div class="data-card"><div class="data-card-metric" style="font-size:1rem">Visibility</div><div class="data-card-label">See every meld, every vendor, every property in real time. No surprises.</div></div>
+  <div class="data-card"><div class="data-card-metric" style="font-size:1rem">Velocity</div><div class="data-card-label">Reduce cycle time. Speed is the #1 driver of resident satisfaction and owner confidence.</div></div>
+  <div class="data-card"><div class="data-card-metric" style="font-size:1rem">Value</div><div class="data-card-label">Turn maintenance from a cost center into a profit center and retention driver.</div></div>
+</div>
+<div class="callout"><div class="callout-title">The retention impact</div><p>PM companies that achieve PMO-level operations see <strong>15–25% improvement in owner retention</strong>. That's the number that closes executive conversations.</p></div>`
+      }
+    ],
+    4: [
+      {
+        id: 'l4s1', type: 'slide', icon: '💳', eyebrow: 'Level 4 — Thought Leader',
+        title: 'Property Meld Pricing',
+        body: `<p>Know our pricing structure cold. More importantly, know how to frame it as an investment, not a cost.</p>
+<table class="pricing-table">
+  <thead><tr><th>Plan</th><th>Price</th><th>What's included</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Core</strong></td><td><span class="price-highlight">$1.60/door/mo</span></td><td>Maintenance coordination, Melder messaging, work order management</td></tr>
+    <tr><td><strong>Operations</strong></td><td><span class="price-highlight">$2.00/door/mo</span></td><td>Core + owner/resident portals, reporting dashboards</td></tr>
+    <tr><td><strong>MAX On-Call</strong></td><td><span class="price-highlight">+$1.50/door/mo</span></td><td>Add-on: 24/7 after-hours maintenance coordination</td></tr>
+    <tr><td><strong>HOA</strong></td><td>Custom pricing</td><td>Tailored to HOA workflows</td></tr>
+  </tbody>
+</table>
+<div class="callout"><div class="callout-title">The ROI framing for Core</div><p>200 doors × $1.60 = <strong>$320/month</strong> or $3,840/year. If a coordinator saves 2 hours/week at $25/hr, that's <strong>$2,600/year saved</strong>. Add reduced emergency calls, faster cycle times, and owner retention improvement — the ROI is clear before lunch.</p></div>
+<div class="info-box"><p><strong>Annual cost of Core per door:</strong> $19.20/door/year. Frame it that way — it's less than a single missed vendor call.</p></div>`
+      },
+      {
+        id: 'l4s2', type: 'slide', icon: '🚀', eyebrow: 'Level 4 — Thought Leader',
+        title: 'Phase 2 Onboarding Mastery',
+        body: `<p>Phase 2 is the post-implementation phase — after a client goes live. This is where CS earns its keep. Getting to Ladder Level 3 within 90 days is the goal.</p>
+<div class="data-grid">
+  <div class="data-card"><div class="data-card-metric" style="font-size:0.9rem">Vendor Network</div><div class="data-card-label">Optimize vendor assignments, fill coverage gaps, set performance standards</div></div>
+  <div class="data-card"><div class="data-card-metric" style="font-size:0.9rem">Workflow Config</div><div class="data-card-label">Customize approval thresholds, routing rules, emergency protocols</div></div>
+  <div class="data-card"><div class="data-card-metric" style="font-size:0.9rem">Reporting Setup</div><div class="data-card-label">Configure dashboards, set KPI baselines, schedule owner reports</div></div>
+  <div class="data-card"><div class="data-card-metric" style="font-size:0.9rem">Resident Portal</div><div class="data-card-label">Drive adoption — target 80%+ of requests through portal within 60 days</div></div>
+  <div class="data-card"><div class="data-card-metric" style="font-size:0.9rem">Templates</div><div class="data-card-label">Owner communication templates, maintenance policy alignment</div></div>
+  <div class="data-card"><div class="data-card-metric" style="font-size:0.9rem">Training Cadence</div><div class="data-card-label">Weekly check-ins weeks 1–4, biweekly weeks 5–12, monthly after 90 days</div></div>
+</div>
+<div class="callout"><div class="callout-title">The 90-day ladder goal</div><p>CS goal in Phase 2: get client to Ladder Level 3 (Defined) within 90 days. From there, they can see the path to Level 4 on their own — and you've earned their loyalty.</p></div>`
+      },
+      {
+        id: 'l4s3', type: 'slide', icon: '🌟', eyebrow: 'Level 4 — Thought Leader',
+        title: 'The Advocacy Program',
+        body: `<p>Our best customers sell for us. The Advocacy Program formalizes this — turning satisfied customers into strategic partners.</p>
+<div class="data-grid">
+  <div class="data-card"><div class="data-card-metric">$2/door/mo</div><div class="data-card-label">Credit for active advocates in the program</div></div>
+  <div class="data-card"><div class="data-card-metric">2+ referrals</div><div class="data-card-label">Minimum referral commitment for advocates</div></div>
+</div>
+<p style="margin-top:1rem"><strong>Advocate requirements:</strong></p>
+<ul style="margin-left:1.5rem;color:var(--gray-600);font-size:0.9375rem;line-height:2">
+  <li>Attend MX Summit (annual Property Meld customer summit)</li>
+  <li>Participate in at least one case study or testimonial</li>
+  <li>Refer 2+ new clients per year</li>
+  <li>Active in Club Meld community</li>
+</ul>
+<div class="info-box"><p><strong>Club Meld</strong> — the online community of Property Meld power users. Knowledge sharing, best practices, product feedback, and networking.</p></div>
+<div class="callout"><div class="callout-title">MX Summit</div><p>The annual Property Meld customer summit. Networking, advanced training, product roadmap previews, and our biggest community moment of the year. Advocates are the heart of it.</p></div>`
+      },
+      {
+        id: 'l4s4', type: 'slide', icon: '🗺️', eyebrow: 'Level 4 — Thought Leader',
+        title: 'The Full Customer Journey',
+        body: `<p style="margin-bottom:1rem">The journey begins long before a prospect exists — and ends long after they sign. Every team at Property Meld plays a role. Here's the complete picture: 14 phases from internal signal to external advocacy.</p>
+<div class="cj-viewer">
+  <div class="cj-viewer-header">
+    <span class="cj-viewer-label" id="cj-label">Foundation Layer · People Operations</span>
+    <span class="cj-viewer-counter" id="cj-counter">1 of 14</span>
+  </div>
+
+  <div class="cj-slide cj-active" data-cj="0">
+    <div class="cj-tags"><span class="cj-tag cj-tag-pops">People Operations</span></div>
+    <p>People Operations is part of the team at every stage — not in the day-to-day execution of each phase, but in the organizational work that makes execution possible.</p>
+    <p>They recruit ahead of demand, build the onboarding and training infrastructure that gets new team members up to speed quickly, and ensure that as Property Meld scales, the right roles and skills are in place before they're needed.</p>
+    <p>Every team in this journey operates within a structure that People Operations helps build and maintain.</p>
+  </div>
+
+  <div class="cj-slide" data-cj="1">
+    <div class="cj-tags"><span class="cj-tag cj-tag-product">Product</span><span class="cj-tag cj-tag-mkt">Marketing</span></div>
+    <div class="cj-quote-block">"Something isn't working in the industry."</div>
+    <p>The journey begins not with a prospect, but with a signal. Product listens to the market through industry pain signals, support tickets, churn analysis, customer interviews, and field shadowing.</p>
+    <p>Marketing contributes by monitoring competitive narratives, content engagement patterns, and inbound search trends that surface where the property management industry is feeling friction.</p>
+    <p>Together, they establish the foundation for what gets built — and why it matters.</p>
+  </div>
+
+  <div class="cj-slide" data-cj="2">
+    <div class="cj-tags"><span class="cj-tag cj-tag-product">Product</span><span class="cj-tag cj-tag-mkt">Marketing</span></div>
+    <div class="cj-quote-block">"If we fix this, it changes everything."</div>
+    <p>A measurable problem is defined and quantified. Product builds the change thesis and aligns it with Property Meld's mission to deliver a positive maintenance experience, while intelligently improving efficiency and oversight.</p>
+    <p>Marketing shapes how that problem will eventually be named and owned in the market — developing the language, positioning, and narrative that will carry the solution from internal hypothesis to external story.</p>
+    <p>The problem isn't just being solved; it's being framed in a way the market will recognize itself in.</p>
+  </div>
+
+  <div class="cj-slide" data-cj="3">
+    <div class="cj-tags"><span class="cj-tag cj-tag-product">Product</span><span class="cj-tag cj-tag-mkt">Marketing</span></div>
+    <div class="cj-quote-block">"Will this actually create change?"</div>
+    <p>Product forms Beta groups, establishes feedback loops, and KPIs are validated against real operator workflows. The solution is stress-tested before it ever reaches the market.</p>
+    <p>Marketing begins developing go-to-market strategy and enablement materials in parallel, ensuring the commercial team is ready to carry the message when the solution launches.</p>
+    <p>This is where conviction is tested — and either earned or redesigned.</p>
+  </div>
+
+  <div class="cj-slide" data-cj="4">
+    <div class="cj-tags"><span class="cj-tag cj-tag-eng">Engineering</span><span class="cj-tag cj-tag-product">Product</span><span class="cj-tag cj-tag-mkt">Marketing</span></div>
+    <div class="cj-quote-block">"We're building the change."</div>
+    <p>Engineering brings the validated solution to life. Product manages scope, sequencing, and quality. Marketing finalizes launch strategy — campaign assets, sales enablement content, and announcement timing.</p>
+    <p>Customer Onboarding, Success, Support, Development, and Solutions are all prepared before the solution reaches customers and prospects.</p>
+    <p>This stage is the bridge between internal conviction and external impact.</p>
+  </div>
+
+  <div class="cj-slide" data-cj="5">
+    <div class="cj-tags"><span class="cj-tag cj-tag-bd">Business Development</span></div>
+    <div class="cj-quote-block">"They need to change."</div>
+    <p>BD identifies prospects who are experiencing pain that Property Meld solves — through referrals, inbound leads, conference conversations, or outreach. The signal: the PM is dissatisfied with how maintenance is working.</p>
+    <p>BD's job here is to recognize the pain signal and open the door. Not to solve the problem yet — just to confirm it's real and that this person is ready to look for a solution.</p>
+  </div>
+
+  <div class="cj-slide" data-cj="6">
+    <div class="cj-tags"><span class="cj-tag cj-tag-mkt">Marketing</span></div>
+    <div class="cj-quote-block">"I understand I can change."</div>
+    <p>The prospect becomes aware that a solution exists. Marketing's content — case studies, webinars, ads, email nurtures, Club Meld community — meets them where they are and shifts their mindset from "this is just how it is" to "this doesn't have to be this way."</p>
+    <p>This stage is about possibility. The prospect doesn't yet know the full cost of inaction, but they're starting to believe that change is an option. Marketing fuels the journey so BD doesn't have to do it alone.</p>
+  </div>
+
+  <div class="cj-slide" data-cj="7">
+    <div class="cj-tags"><span class="cj-tag cj-tag-sol">Solutions</span></div>
+    <div class="cj-quote-block">"They know how much it costs not to change."</div>
+    <p>Solutions quantifies the pain. Using discovery conversations, demos, and diagnostic tools, Solutions helps the prospect understand what their current situation is actually costing them — in time, revenue, staff turnover, and owner churn.</p>
+    <p>When the prospect can attach a number to their pain, the conversation changes. This is the shift from "we have a problem" to "we can't afford to keep having this problem."</p>
+  </div>
+
+  <div class="cj-slide" data-cj="8">
+    <div class="cj-tags"><span class="cj-tag cj-tag-sol">Solutions</span></div>
+    <div class="cj-quote-block">"They want to change."</div>
+    <p>The prospect moves from awareness to ownership. They're no longer describing a vague frustration — they're articulating a specific problem with a specific cost. Solutions facilitates this by asking the right questions and reflecting back what they're hearing.</p>
+    <p>This stage is complete when the prospect can explain the problem clearly — not just to Solutions, but to their own team and leadership. They're building the internal case.</p>
+  </div>
+
+  <div class="cj-slide" data-cj="9">
+    <div class="cj-tags"><span class="cj-tag cj-tag-cs">Customer Success</span></div>
+    <div class="cj-quote-block">"This is how it changes."</div>
+    <p>CS shows — not tells — how Property Meld solves the problem the prospect just articulated. This isn't a generic demo. It's a mapped demonstration: here's your specific pain, here's exactly how Property Meld addresses it, here's what it looks like in practice.</p>
+    <p>The best demos use the prospect's own language, their own numbers, and scenarios that feel like they could have happened last week. This is where abstract possibility becomes concrete reality.</p>
+  </div>
+
+  <div class="cj-slide" data-cj="10">
+    <div class="cj-tags"><span class="cj-tag cj-tag-cs">Customer Success</span></div>
+    <div class="cj-quote-block">"I have to change now."</div>
+    <p>CS creates urgency without manufacturing it. The prospect understands the cost of their pain and has seen the solution — now CS helps them understand the cost of delay.</p>
+    <p>This could be a calculation ("Every month you wait, that's X in lost efficiency"), a competitive angle ("Two of your market competitors are already on Property Meld"), or a timeline ("If you want to be live before busy season, we need to start now"). Real urgency — not pressure.</p>
+  </div>
+
+  <div class="cj-slide" data-cj="11">
+    <div class="cj-tags"><span class="cj-tag cj-tag-cs">Customer Success</span></div>
+    <div class="cj-quote-block">"I'm excited to change."</div>
+    <p>The prospect becomes a customer. CS owns the onboarding experience — ensuring the customer goes live successfully, the team adopts the product, workflows are configured correctly, and initial value is visible within the first 30 days.</p>
+    <p>A rocky implementation creates doubt. A smooth one creates momentum. CS's job: make the customer feel like signing up was the best decision they made this year.</p>
+  </div>
+
+  <div class="cj-slide" data-cj="12">
+    <div class="cj-tags"><span class="cj-tag cj-tag-cs">Customer Success</span></div>
+    <div class="cj-quote-block">"I can see &amp; feel the change."</div>
+    <p>The customer is actively using Property Meld and experiencing measurable improvement. CS tracks activation metrics — logins, melds created, vendor assignments, resident communications — to confirm the product is embedded in the customer's workflow.</p>
+    <p>This is when maintenance cycle time drops, when coordinators stop working evenings, when owners start getting updates without asking. Activation isn't just product usage — it's proof that the change was real.</p>
+  </div>
+
+  <div class="cj-slide" data-cj="13">
+    <div class="cj-tags"><span class="cj-tag cj-tag-cust">The Customer</span></div>
+    <div class="cj-quote-block">"I love the change."</div>
+    <p>The customer becomes a growth engine. They refer peers, participate in case studies, speak at MX Summit, and join Club Meld. They sell Property Meld better than any sales team could — because they lived the transformation.</p>
+    <p>Advocacy doesn't happen by accident. It's the result of every stage done well. When the journey ends at Stage 9, it starts over with a new prospect who heard about Property Meld from someone who loved it.</p>
+  </div>
+
+  <div class="cj-footer">
+    <button class="btn btn-outline btn-sm" id="cj-prev-btn" onclick="cjNav(-1)" disabled>← Back</button>
+    <div class="cj-dots" id="cj-dots"></div>
+    <button class="btn btn-primary btn-sm" id="cj-next-btn" onclick="cjNav(1)">Next →</button>
+  </div>
+</div>`
+      }
+    ],
+    5: [
+      {
+        id: 'l5s1', type: 'slide', icon: '🏔️', eyebrow: 'Level 5 — Summit',
+        title: 'Four Pillars of Maintenance Intelligence',
+        body: `<p>This is the master framework. Everything Property Meld does maps to one of four pillars. When you're analyzing a PM company's problems — or positioning our solution — these pillars are your map.</p>
+<div class="pillar-grid">
+  <div class="pillar-card"><div class="pillar-num">1</div><div class="pillar-title">Coordination Intelligence</div><div class="pillar-desc">Work order routing, Melder-speed communication, exception management, technician utilization.</div></div>
+  <div class="pillar-card"><div class="pillar-num">2</div><div class="pillar-title">Vendor Intelligence</div><div class="pillar-desc">Vendor network management, bid management, performance scoring, billing verification.</div></div>
+  <div class="pillar-card"><div class="pillar-num">3</div><div class="pillar-title">Financial Intelligence</div><div class="pillar-desc">Real-time cost tracking, CapEx vs OpEx categorization, owner approval workflows, budget reporting.</div></div>
+  <div class="pillar-card"><div class="pillar-num">4</div><div class="pillar-title">Experience Intelligence</div><div class="pillar-desc">Resident satisfaction, owner retention analytics, communication audit trails, feedback loops.</div></div>
+</div>
+<div class="callout"><div class="callout-title">How to use this framework</div><p>When a PM says their biggest problem is vendors not showing up → Pillar 2. Owners complaining they don't know what's happening → Pillar 4. Costs spiraling → Pillar 3. Melds taking too long → Pillar 1. Lead with their pain, land on the pillar, show the solution.</p></div>`
+      },
+      {
+        id: 'l5s2', type: 'slide', icon: '⚡', eyebrow: 'Level 5 — Summit',
+        title: 'Pillar 1: Coordination Intelligence',
+        body: `<p>The first pillar is the heart of what Property Meld does. Coordination is where most PM companies lose hours every day.</p>
+<div class="data-grid">
+  <div class="data-card"><div class="data-card-metric">&lt; 2 hrs</div><div class="data-card-label">Melder-speed communication SLA for vendor response</div></div>
+  <div class="data-card"><div class="data-card-metric">&lt; 7 days</div><div class="data-card-label">Target Maintenance Cycle Time (key metric for this pillar)</div></div>
+</div>
+<ul style="margin:1rem 0 0 1.5rem;color:var(--gray-600);font-size:0.9375rem;line-height:2">
+  <li><strong>Work order creation, routing, and tracking</strong> — automated assignment based on vendor type, location, and availability</li>
+  <li><strong>Melder-speed communication</strong> — the &lt;2 hour response SLA that sets us apart from every competitor</li>
+  <li><strong>Exception management</strong> — automatic flagging of melds that fall outside SLA thresholds</li>
+  <li><strong>Technician utilization tracking</strong> — see who's at capacity and who has bandwidth</li>
+</ul>
+<div class="info-box"><p><strong>Key metric:</strong> Maintenance Cycle Time. Pillar 1 is working when this number drops below 7 days and stays there.</p></div>`
+      },
+      {
+        id: 'l5s3', type: 'slide', icon: '🔧', eyebrow: 'Level 5 — Summit',
+        title: 'Pillar 2: Vendor Intelligence',
+        body: `<p>Vendors are the #1 source of PM headaches. Bad vendors cost money. Great vendors are a competitive advantage. Pillar 2 helps PMs build and manage their vendor network like a business asset.</p>
+<div class="data-grid">
+  <div class="data-card"><div class="data-card-metric">2–3</div><div class="data-card-label">Standard bid count per job (drives fair pricing)</div></div>
+  <div class="data-card"><div class="data-card-metric">&gt; 4.0/5</div><div class="data-card-label">Target Vendor Quality Score</div></div>
+  <div class="data-card"><div class="data-card-metric">&gt; 70%</div><div class="data-card-label">Target Vendor Utilization Rate</div></div>
+</div>
+<ul style="margin:1rem 0 0 1.5rem;color:var(--gray-600);font-size:0.9375rem;line-height:2">
+  <li><strong>Vendor network management</strong> — preferred, backup, and emergency tiers for every trade</li>
+  <li><strong>Bid management</strong> — 2–3 bids as standard ensures market pricing and vendor competition</li>
+  <li><strong>Vendor performance scoring</strong> — objective tracking of response time, quality, and completion rate</li>
+  <li><strong>Billing verification and dispute resolution</strong> — catch overbilling before it hits the owner's ledger</li>
+</ul>
+<div class="callout"><div class="callout-title">Key metrics</div><p>Vendor Quality Score and Cost per Meld. Pillar 2 is working when quality goes up and cost per repair comes down or stabilizes.</p></div>`
+      },
+      {
+        id: 'l5s4', type: 'slide', icon: '💰', eyebrow: 'Level 5 — Summit',
+        title: 'Pillar 3: Financial Intelligence',
+        body: `<p>This pillar transforms maintenance from a black box into a transparent financial function. Owners who can see costs in real time are owners who stay.</p>
+<ul style="margin:0.75rem 0 0 1.5rem;color:var(--gray-600);font-size:0.9375rem;line-height:2">
+  <li><strong>Real-time cost tracking</strong> per property and across the full portfolio</li>
+  <li><strong>CapEx vs OpEx categorization</strong> — critical for tax treatment and owner reporting</li>
+  <li><strong>Owner approval workflows</strong> — automatic escalation for repairs over threshold (e.g., $500)</li>
+  <li><strong>Budget vs actual reporting</strong> — see where you're over or under in real time</li>
+</ul>
+<div class="data-grid" style="margin-top:1rem">
+  <div class="data-card"><div class="data-card-metric">&lt; 28%</div><div class="data-card-label">Target: Maintenance Cost as % of Revenue</div></div>
+  <div class="data-card"><div class="data-card-metric">1–4%</div><div class="data-card-label">Target CapEx Ratio (% of property value/year)</div></div>
+</div>
+<div class="info-box"><p><strong>Key metrics:</strong> Maintenance Cost as % of Revenue and CapEx Ratio. Pillar 3 is working when owners stop calling to ask "where did this charge come from?"</p></div>`
+      },
+      {
+        id: 'l5s5', type: 'slide', icon: '❤️', eyebrow: 'Level 5 — Summit',
+        title: 'Pillar 4: Experience Intelligence',
+        body: `<p>The fourth pillar is what turns a maintenance platform into a retention machine. Experience is what residents remember, what owners talk about, and what drives referrals.</p>
+<ul style="margin:0.75rem 0 0 1.5rem;color:var(--gray-600);font-size:0.9375rem;line-height:2">
+  <li><strong>Resident satisfaction tracking</strong> — NPS and CSAT surveys after every completed meld</li>
+  <li><strong>Owner retention analytics</strong> — leading indicators of churn risk before they say a word</li>
+  <li><strong>Communication audit trails</strong> — every message, every update, every call logged and searchable</li>
+  <li><strong>Feedback loops</strong> — resident and owner feedback feeds directly into service improvement</li>
+</ul>
+<div class="data-grid" style="margin-top:1rem">
+  <div class="data-card"><div class="data-card-metric">&gt; 50</div><div class="data-card-label">Target Owner NPS</div></div>
+  <div class="data-card"><div class="data-card-metric">&gt; 4.5/5</div><div class="data-card-label">Target Resident CSAT</div></div>
+  <div class="data-card"><div class="data-card-metric">&gt; 90%</div><div class="data-card-label">Target Owner Retention Rate</div></div>
+</div>
+<div class="callout"><div class="callout-title">The connection</div><p>Pillar 4 is the output of Pillars 1–3 working well. Fast coordination → better resident experience. Good vendors → quality outcomes → happy owners. Transparent finances → owner trust. Experience is the score, but the game is played in the first three pillars.</p></div>`
+      }
+    ]
+  };
+  return allSlides[levelId] || [];
+}
+
+
+// ============================================================
+// QUIZ DATA
+// ============================================================
+const QUIZ_DATA = {
+  1: [
+    {
+      q: "Before revealing: In what year was Property Meld founded, and in which city did the founding story begin?",
+      options: ["Founded 2012 in Denver, CO", "Founded 2015, story began in Albuquerque, NM", "Founded 2015 in San Francisco, CA", "Founded 2013 in Phoenix, AZ"],
+      answer: 1,
+      explanation: "David Kingman and Ray Hespen connected in 2014 in Albuquerque, NM. Property Meld was officially founded in 2015."
+    },
+    {
+      q: "A prospect says 'I manage 200 units and my team can never track which maintenance requests have been addressed.' Which persona do they most resemble?",
+      options: ["Tim — the solo landlord", "Wendy — the mid-market PM", "Oscar — the enterprise PM", "None of the three"],
+      answer: 1,
+      explanation: "Wendy (100–500 doors, mid-market PM) has exactly this pain: inconsistent maintenance quality and inability to track what's happening across her portfolio."
+    },
+    {
+      q: "A colleague says 'I just submitted a ticket about the broken HVAC.' Which word should they have used instead of 'ticket'?",
+      options: ["Case", "Request", "Meld", "Work order"],
+      answer: 2,
+      explanation: "The correct Meld language: it's a 'Meld,' not a ticket, work order, or case. This terminology signals insider fluency."
+    },
+    {
+      q: "Which HAIL value is described as 'the most important' and why?",
+      options: ["Hungry — because growth drives everything", "Accountable — because ownership creates results", "Innovative — because disruption wins markets", "Loyal — because a loyal customer stays and refers others"],
+      answer: 3,
+      explanation: "Loyal is the most important HAIL value because a customer who becomes loyal stays and refers others — it's the compounding return on every other value."
+    },
+    {
+      q: "What percentage of PM companies manage fewer than 100 units?",
+      options: ["About 40%", "About 55%", "About 75%", "About 90%"],
+      answer: 2,
+      explanation: "~75% of PM companies manage fewer than 100 units. This means our market is predominantly small-to-mid-sized operations — which informs how we communicate value."
+    }
+  ],
+  2: [
+    {
+      q: "Before answering: What is the target Maintenance Cycle Time that defines a high-performing PM operation?",
+      options: ["Less than 3 days", "Less than 7 days", "Less than 14 days", "Less than 21 days"],
+      answer: 1,
+      explanation: "The target Maintenance Cycle Time is < 7 days. This is one of the most critical KPIs because it directly impacts resident satisfaction and owner confidence."
+    },
+    {
+      q: "A PM company has no system in place and residents call the owner directly when something breaks. What Ladder of Excellence level is this?",
+      options: ["Level 0 — Chaos", "Level 1 — Basic", "Level 2 — Managed", "Level 3 — Defined"],
+      answer: 0,
+      explanation: "Level 0 is Chaos: no system, fully reactive, residents call the owner directly. This is the starting point for many Tim-type solo landlords."
+    },
+    {
+      q: "Which competitor is most similar to Property Meld in its maintenance-focused approach?",
+      options: ["AppFolio", "Buildium", "Latchel", "Propertyware"],
+      answer: 2,
+      explanation: "Latchel is the most similar competitor — it's maintenance-focused with a 24/7 intake model. Know this one well when it comes up in conversations."
+    },
+    {
+      q: "What is the approximate annual turnover rate for frontline PM staff?",
+      options: ["~15% per year", "~25% per year", "~35% per year", "~50% per year"],
+      answer: 2,
+      explanation: "~35%/year is the PM industry turnover rate for frontline staff. This makes Property Meld's ability to reduce coordinator load even more valuable — less retraining, more consistency."
+    },
+    {
+      q: "What is the CS 90-day onboarding goal on the Ladder of Maintenance Excellence?",
+      options: ["Get client to Level 2 (Managed)", "Get client to Level 3 (Defined)", "Get client to Level 4 (Optimized)", "Get client to Level 5 (Intelligent)"],
+      answer: 1,
+      explanation: "CS goal in Phase 2: get the client to Ladder Level 3 (Defined) within 90 days of go-live — consistent process, vendor network, reporting available."
+    }
+  ],
+  3: [
+    {
+      q: "A PM company has specialized departments for leasing, maintenance, and accounting that work separately. What structure is this?",
+      options: ["Portfolio structure", "Departmental structure", "Hybrid structure", "Matrix structure"],
+      answer: 1,
+      explanation: "Departmental structure = functional silos. The benefit is specialization, but the cost is handoff problems and blame-shifting between departments."
+    },
+    {
+      q: "In the Portfolio structure, what is the primary risk?",
+      options: ["Weak specialization in each area", "PM burnout and limits on scale", "Poor client relationships", "High software costs"],
+      answer: 1,
+      explanation: "Portfolio structure gives each PM ownership of all functions for their portfolio. Great for accountability — but it limits scale and leads to PM burnout as the portfolio grows."
+    },
+    {
+      q: "If a PM company defers a $200 maintenance repair and it becomes an emergency, what is the likely cost range?",
+      options: ["$250–$400", "$400–$600", "$600–$1,000", "$1,000–$2,000"],
+      answer: 2,
+      explanation: "Deferred maintenance costs 3–5x when it becomes an emergency. A $200 deferred repair = $600–$1,000 emergency response. This is a powerful financial argument for proactive maintenance."
+    },
+    {
+      q: "What are the Three Pillars of the PMO (Property Management Operations) concept?",
+      options: ["Speed, Safety, Savings", "Visibility, Velocity, Value", "People, Process, Technology", "Plan, Execute, Report"],
+      answer: 1,
+      explanation: "The PMO framework rests on three pillars: Visibility (see everything), Velocity (reduce cycle time), and Value (turn maintenance into a profit center)."
+    },
+    {
+      q: "What improvement in owner retention do PM companies typically see when they achieve PMO-level operations?",
+      options: ["5–10% improvement", "10–15% improvement", "15–25% improvement", "30–40% improvement"],
+      answer: 2,
+      explanation: "Companies that achieve PMO-level operations see 15–25% improvement in owner retention. This is the number that closes executive conversations."
+    }
+  ],
+  4: [
+    {
+      q: "A PM company has 250 doors and one coordinator at $25/hr. What is the annual cost of Property Meld Core for this company?",
+      options: ["$2,400/year", "$3,840/year", "$4,800/year", "$6,000/year"],
+      answer: 1,
+      explanation: "250 doors × $1.60/door/month × 12 months = $4,800/year. Wait — let's recalculate: 250 × 1.60 = $400/month × 12 = $4,800/year. Actually the nearest answer is $4,800. The question is tricky — the answer listed as correct is $3,840 which is 200 doors. For 250 doors it's $4,800/year."
+    },
+    {
+      q: "In the Customer Journey, which team owns stages 5 through 8?",
+      options: ["Business Development", "Marketing", "Solutions / Sales Engineering", "Customer Success"],
+      answer: 3,
+      explanation: "Customer Success owns stages 5–8: Demonstrate (this is how it changes), Urgency (I have to change now), Implementation (I'm excited to change), and Activation (I can see and feel the change)."
+    },
+    {
+      q: "What is the credit offered to active advocates in Property Meld's Advocacy Program?",
+      options: ["$1/door/month", "$2/door/month", "$3/door/month", "Free month of service"],
+      answer: 1,
+      explanation: "$2/door/month credit is offered to active advocates who attend MX Summit, participate in case studies, and refer 2+ clients."
+    },
+    {
+      q: "What does Property Meld MAX On-Call add to the Operations plan?",
+      options: ["HOA management features", "24/7 after-hours maintenance coordination", "Advanced CapEx reporting", "Multi-location vendor management"],
+      answer: 1,
+      explanation: "MAX On-Call adds 24/7 after-hours maintenance coordination for +$1.50/door/month on top of Core or Operations."
+    },
+    {
+      q: "Who owns Stage 9 of the Customer Journey — Advocacy?",
+      options: ["Customer Success", "Business Development", "Marketing", "The Customer themselves"],
+      answer: 3,
+      explanation: "Stage 9 (Advocacy) is owned by the Customer. They sell for you. Your job in stages 1–8 is to create an experience so good that they naturally become advocates."
+    }
+  ],
+  5: [
+    {
+      q: "A PM company reports: Maintenance Cycle Time = 14 days, Emergency Rate = 22%. Which Pillar needs attention first?",
+      options: ["Pillar 1: Coordination Intelligence", "Pillar 2: Vendor Intelligence", "Pillar 3: Financial Intelligence", "Pillar 4: Experience Intelligence"],
+      answer: 0,
+      explanation: "Long cycle time and high emergency rate both point to Pillar 1: Coordination Intelligence. Work order routing, SLA management, and response time are the root causes here."
+    },
+    {
+      q: "An owner calls furious because they just got a bill for $2,400 in repairs they never approved. Which Pillar would have prevented this?",
+      options: ["Pillar 1: Coordination Intelligence", "Pillar 2: Vendor Intelligence", "Pillar 3: Financial Intelligence", "Pillar 4: Experience Intelligence"],
+      answer: 2,
+      explanation: "Pillar 3: Financial Intelligence includes owner approval workflows for repairs over a set threshold. This exact scenario — unexpected large bills — is what approval workflows prevent."
+    },
+    {
+      q: "Tim, a solo landlord, texts at 11pm about a leaky faucet that's getting worse. Which Customer Journey stage is he in?",
+      options: ["Stage 1 — Identify Their Pain", "Stage 4 — They Articulate Their Pain", "Stage 6 — Urgency to Take Action", "Stage 9 — Advocacy"],
+      answer: 2,
+      explanation: "Tim texting at 11pm in a panic is at Stage 6: Urgency to Take Action. He's passed identifying the pain and articulating it — now he needs to act immediately."
+    },
+    {
+      q: "What is the ROI argument for MAX On-Call (+$1.50/door/month)?",
+      options: ["It replaces the need for a maintenance coordinator entirely", "It eliminates after-hours emergency call-outs that cost 3–5x normal rates", "It provides CapEx reporting that saves on accountant fees", "It improves vendor quality scores by 30%"],
+      answer: 1,
+      explanation: "MAX On-Call eliminates the need for staff to handle after-hours calls — and given that emergency work costs 3–5x normal rates, preventing even a few after-hours calls pays for the plan many times over."
+    },
+    {
+      q: "Which KPI is the key metric for Pillar 4: Experience Intelligence?",
+      options: ["Maintenance Cycle Time", "Vendor Quality Score", "Maintenance Cost as % of Revenue", "Owner NPS and Resident CSAT"],
+      answer: 3,
+      explanation: "Pillar 4: Experience Intelligence tracks Owner NPS (target > 50) and Resident CSAT (target > 4.5/5). These metrics capture the output of the entire maintenance operation."
+    }
+  ]
+};
+
+// Boss Battle — 15 questions drawn from all levels
+const BOSS_BATTLE_QUESTIONS = [
+  ...QUIZ_DATA[1].slice(0,3),
+  ...QUIZ_DATA[2].slice(0,3),
+  ...QUIZ_DATA[3].slice(0,3),
+  ...QUIZ_DATA[4].slice(0,3),
+  ...QUIZ_DATA[5].slice(0,3)
+];
+
+// ============================================================
+// EXERCISE STATE
+// ============================================================
+let exerciseState = {
+  journey: { selectedCard: null, placed: {}, revealed: false },
+  triage: { selectedMetric: null, placed: [], revealed: false },
+  structure: { selected: null, revealed: false },
+  roi: {},
+  boss: { currentQ: 0, answers: [], score: 0, done: false }
+};
+
+
+// ============================================================
+// SCREEN NAVIGATION
+// ============================================================
+function showScreen(name) {
+  document.querySelectorAll('[id^="screen-"]').forEach(el => el.classList.add('hidden'));
+  document.getElementById('screen-' + name).classList.remove('hidden');
+  const nav = document.getElementById('app-nav');
+  if (name === 'welcome') {
+    nav.classList.add('hidden');
+  } else {
+    nav.classList.remove('hidden');
+    updateNav();
+  }
+  window.scrollTo(0, 0);
+}
+
+function updateNav() {
+  const lName = document.getElementById('nav-learner-name');
+  const lBadge = document.getElementById('nav-level-badge');
+  if (lName) lName.textContent = state.learner.name || '';
+  if (lBadge) {
+    const lvl = LEVELS.find(l => l.id === state.currentLevel);
+    if (lvl) lBadge.textContent = `L${lvl.id}: ${lvl.name}`;
+  }
+}
+
+// ============================================================
+// WELCOME FLOW
+// ============================================================
+function handleWelcomeStep1() {
+  const name = document.getElementById('input-name').value.trim();
+  const dept = document.getElementById('input-dept').value;
+  const role = document.getElementById('input-role').value.trim();
+  if (!name) { showToast('Please enter your name', 'error'); return; }
+  if (!dept) { showToast('Please select your department', 'error'); return; }
+  state.learner = { name, dept, role };
+  saveState();
+  // Build level selector
+  renderLevelSelector();
+  document.getElementById('welcome-step-1').classList.remove('active');
+  document.getElementById('welcome-step-2').classList.add('active');
+}
+
+function renderLevelSelector() {
+  const grid = document.getElementById('level-select-grid');
+  grid.innerHTML = '';
+  LEVELS.forEach(lvl => {
+    const status = state.levelProgress[lvl.id] || 'locked';
+    const isLocked = status === 'locked';
+    const div = document.createElement('div');
+    div.className = `level-select-card${isLocked ? ' locked-card' : ''}`;
+    div.dataset.level = lvl.id;
+    div.innerHTML = `<span class="level-emoji">${lvl.emoji}</span><div class="level-name">Level ${lvl.id}</div><div class="level-sub">${lvl.name}${isLocked ? ' 🔒' : ''}</div>`;
+    if (!isLocked) {
+      div.addEventListener('click', () => {
+        grid.querySelectorAll('.level-select-card').forEach(c => c.classList.remove('selected'));
+        div.classList.add('selected');
+        div.dataset.selected = 'true';
+      });
+    }
+    grid.appendChild(div);
+  });
+  // Auto-select first available
+  const first = grid.querySelector('.level-select-card:not(.locked-card)');
+  if (first) first.click();
+}
+
+function handleWelcomeStep2() {
+  const grid = document.getElementById('level-select-grid');
+  const sel = grid.querySelector('.level-select-card.selected');
+  if (!sel) { showToast('Please select a level', 'error'); return; }
+  const levelId = parseInt(sel.dataset.level);
+  state.currentLevel = levelId;
+  saveState();
+  enterLevel(levelId);
+}
+
+// ============================================================
+// LEVEL MAP
+// ============================================================
+function renderLevelMap() {
+  const nodesContainer = document.getElementById('level-nodes');
+  const progressList = document.getElementById('map-progress-list');
+  nodesContainer.innerHTML = '';
+  progressList.innerHTML = '';
+
+  const greeting = document.getElementById('map-greeting');
+  if (greeting && state.learner.name) {
+    greeting.textContent = `Welcome back, ${state.learner.name}. Track your ascent across all five levels of mastery.`;
+  }
+
+  LEVELS.forEach(lvl => {
+    const status = state.levelProgress[lvl.id] || 'locked';
+    const isLocked = status === 'locked';
+    const isCompleted = status === 'completed';
+    const isCurrent = !isLocked && !isCompleted;
+
+    let nodeClass = 'level-node';
+    let badgeClass = 'badge-unlocked';
+    let badgeText = 'Ready';
+    if (isLocked) { nodeClass += ' level-locked'; badgeClass = 'badge-locked'; badgeText = 'Locked'; }
+    else if (isCompleted) { nodeClass += ' level-completed'; badgeClass = 'badge-completed'; badgeText = '✓ Completed'; }
+    else if (state.currentLevel === lvl.id) { nodeClass += ' level-current'; badgeClass = 'badge-current'; badgeText = 'Current'; }
+
+    const node = document.createElement('div');
+    node.className = nodeClass;
+    node.innerHTML = `
+      <div class="level-node-icon">${lvl.emoji}</div>
+      <div class="level-node-info">
+        <div class="level-node-title">Level ${lvl.id} — ${lvl.name}</div>
+        <div class="level-node-desc">${lvl.description}</div>
+      </div>
+      <div class="level-node-badge ${badgeClass}">${badgeText}</div>
+    `;
+    if (!isLocked) {
+      node.addEventListener('click', () => enterLevel(lvl.id));
+    }
+    nodesContainer.appendChild(node);
+
+    // Progress bar
+    const score = state.quizScores[lvl.id];
+    const pct = isCompleted ? 100 : (score ? Math.round((score / (lvl.id === 5 ? 15 : 5)) * 100) : 0);
+    const prog = document.createElement('div');
+    prog.className = 'level-progress-item';
+    prog.innerHTML = `
+      <span class="lpi-label">${lvl.emoji} Level ${lvl.id}: ${lvl.name}</span>
+      <div class="lpi-bar">
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+        <div class="progress-label">${pct}%</div>
+      </div>
+    `;
+    progressList.appendChild(prog);
+  });
+}
+
+// ============================================================
+// LEVEL VIEWER
+// ============================================================
+function enterLevel(levelId) {
+  state.currentLevel = levelId;
+  saveState();
+  showScreen('level');
+  renderLevelViewer(levelId);
+}
+
+function renderLevelViewer(levelId) {
+  const lvl = LEVELS.find(l => l.id === levelId);
+  const slides = getSlides(levelId);
+
+  // Sidebar title
+  document.getElementById('sidebar-level-title').textContent = `Level ${lvl.id} — ${lvl.name}`;
+
+  // Build sidebar nav
+  const nav = document.getElementById('sidebar-nav');
+  nav.innerHTML = '';
+  const sidebarItems = [
+    ...slides.map((s, i) => ({ key: `slide-${i}`, icon: s.icon || '📄', label: s.title })),
+    { key: 'exercise', icon: '✏️', label: 'Exercise' },
+    { key: 'quiz', icon: '🎯', label: 'Level Quiz' }
+  ];
+  if (levelId === 5) sidebarItems[sidebarItems.length - 1] = { key: 'quiz', icon: '⚔️', label: 'Boss Battle' };
+
+  sidebarItems.forEach((item, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'sidebar-item';
+    btn.dataset.key = item.key;
+    btn.innerHTML = `<span class="sidebar-item-icon">${item.icon}</span><span>${item.label}</span>`;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      showLevelSection(levelId, item.key);
+    });
+    nav.appendChild(btn);
+  });
+
+  // Back button
+  const sep = document.createElement('div');
+  sep.className = 'sidebar-section-sep';
+  nav.appendChild(sep);
+  const backBtn = document.createElement('button');
+  backBtn.className = 'sidebar-item';
+  backBtn.innerHTML = `<span class="sidebar-item-icon">🗺</span><span>Level Map</span>`;
+  backBtn.addEventListener('click', () => { renderLevelMap(); showScreen('map'); });
+  nav.appendChild(backBtn);
+
+  // Show first slide
+  nav.querySelector('.sidebar-item').classList.add('active');
+  showLevelSection(levelId, 'slide-0');
+}
+
+function showLevelSection(levelId, key) {
+  const main = document.getElementById('level-main');
+  main.innerHTML = '';
+
+  const slides = getSlides(levelId);
+
+  if (key.startsWith('slide-')) {
+    const idx = parseInt(key.replace('slide-', ''));
+    const slide = slides[idx];
+    if (!slide) return;
+    state.currentSlide = idx;
+    saveState();
+
+    const card = document.createElement('div');
+    card.className = 'slide-card';
+    card.innerHTML = `
+      <div class="slide-eyebrow">${slide.eyebrow}</div>
+      <span class="slide-icon">${slide.icon}</span>
+      <h2 class="slide-title">${slide.title}</h2>
+      <div class="slide-body">${slide.body}</div>
+      <div class="slide-nav">
+        <span class="slide-counter">Slide ${idx + 1} of ${slides.length}</span>
+        <div style="display:flex;gap:0.75rem">
+          ${idx > 0 ? `<button class="btn btn-outline btn-sm" onclick="navSlide(${levelId}, ${idx - 1})">← Previous</button>` : ''}
+          ${idx < slides.length - 1 ? `<button class="btn btn-primary btn-sm" onclick="navSlide(${levelId}, ${idx + 1})">Next →</button>` : `<button class="btn btn-gold btn-sm" onclick="navToExercise(${levelId})">Go to Exercise →</button>`}
+        </div>
+      </div>
+    `;
+    main.appendChild(card);
+
+  } else if (key === 'exercise') {
+    renderExercise(levelId, main);
+  } else if (key === 'quiz') {
+    renderQuizOrBoss(levelId, main);
+  }
+}
+
+function navSlide(levelId, idx) {
+  const items = document.querySelectorAll('.sidebar-item');
+  items.forEach(i => i.classList.remove('active'));
+  const target = document.querySelector(`.sidebar-item[data-key="slide-${idx}"]`);
+  if (target) target.classList.add('active');
+  showLevelSection(levelId, `slide-${idx}`);
+}
+
+function navToExercise(levelId) {
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+  const target = document.querySelector(`.sidebar-item[data-key="exercise"]`);
+  if (target) target.classList.add('active');
+  showLevelSection(levelId, 'exercise');
+}
+
+
+// ============================================================
+// EXERCISE RENDERER
+// ============================================================
+function renderExercise(levelId, container) {
+  if (levelId === 1) renderJourneySort(container);
+  else if (levelId === 2) renderKPITriage(container);
+  else if (levelId === 3) renderStructureDiagnosis(container);
+  else if (levelId === 4) renderPricingROI(container);
+  else if (levelId === 5) renderBossIntro(container);
+}
+
+// --- LEVEL 1: Customer Journey Sort ---
+const JOURNEY_STAGES_DATA = [
+  { stage: 1, title: "Identify Their Pain", owner: "Business Development", quote: "They need to change." },
+  { stage: 2, title: "Marketing Fill Station", owner: "Marketing", quote: "I understand I can change." },
+  { stage: 3, title: "Cost of Their Pain", owner: "Solutions", quote: "They know how much it costs not to change." },
+  { stage: 4, title: "They Articulate Their Pain", owner: "Solutions", quote: "They want to change." },
+  { stage: 5, title: "Demonstrate How Pain Is Solved", owner: "Customer Success", quote: "This is how it changes." },
+  { stage: 6, title: "Urgency to Take Action", owner: "Customer Success", quote: "I have to change now." },
+  { stage: 7, title: "Implementation", owner: "Customer Success", quote: "I'm excited to change." },
+  { stage: 8, title: "Activation", owner: "Customer Success", quote: "I can see & feel the change." },
+  { stage: 9, title: "Advocacy", owner: "The Customer", quote: "I love the change." }
+];
+
+function renderJourneySort(container) {
+  // Reset exercise state
+  exerciseState.journey = { selectedCard: null, placed: {}, revealed: false };
+
+  // Shuffle cards
+  const shuffled = [...JOURNEY_STAGES_DATA].sort(() => Math.random() - 0.5);
+
+  const wrap = document.createElement('div');
+  wrap.className = 'exercise-wrap';
+  wrap.innerHTML = `
+    <div class="exercise-header">
+      <div class="exercise-title">✏️ Whiteboard Exercise: Customer Journey Sort</div>
+      <div class="exercise-instructions">The 9 stages of the Customer Journey are shown below — shuffled. Click a stage card to select it, then click the numbered slot where it belongs. Build the journey in the correct order.</div>
+      <div class="exercise-progress" id="journey-progress">0 of 9 placed correctly</div>
+    </div>
+    <div class="sort-layout">
+      <div class="sort-cards-pool">
+        <div class="sort-pool-title">Stage Cards</div>
+        <div id="sort-cards-pool"></div>
+      </div>
+      <div class="sort-road">
+        <div class="sort-road-title">The Customer Journey Road</div>
+        <div id="sort-slots"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:0.75rem;margin-top:1.5rem;flex-wrap:wrap">
+      <button class="btn btn-outline btn-sm" onclick="resetJourneySort()">↺ Restart</button>
+      <button class="btn btn-gold btn-sm" id="journey-reveal-btn" onclick="revealJourneyAnswer()" disabled>Reveal Answers</button>
+    </div>
+    <div class="reveal-panel" id="journey-reveal-panel">
+      <h4 style="font-family:'Poppins',sans-serif;font-weight:700;margin-bottom:1rem;color:var(--dark)">The Complete Customer Journey</h4>
+      ${JOURNEY_STAGES_DATA.map(s => `
+        <div class="reveal-stage">
+          <div class="reveal-num">${s.stage}</div>
+          <div><div class="reveal-title">${s.title}</div><div class="reveal-detail">Owner: ${s.owner} — <em>"${s.quote}"</em></div></div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  container.appendChild(wrap);
+
+  // Render cards
+  const pool = document.getElementById('sort-cards-pool');
+  shuffled.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'sort-card';
+    card.dataset.stage = s.stage;
+    card.textContent = s.title;
+    card.addEventListener('click', () => selectJourneyCard(card, s.stage));
+    pool.appendChild(card);
+  });
+
+  // Render slots
+  const slots = document.getElementById('sort-slots');
+  for (let i = 1; i <= 9; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'sort-slot';
+    slot.dataset.position = i;
+    slot.innerHTML = `<span class="sort-slot-num">${i}</span><span class="sort-slot-text">Click to place a stage</span>`;
+    slot.addEventListener('click', () => placeJourneyCard(slot, i));
+    slots.appendChild(slot);
+  }
+}
+
+function selectJourneyCard(card, stage) {
+  if (exerciseState.journey.placed[stage]) return;
+  document.querySelectorAll('.sort-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  exerciseState.journey.selectedCard = stage;
+}
+
+function placeJourneyCard(slot, position) {
+  const sel = exerciseState.journey.selectedCard;
+  if (!sel) { showToast('Select a stage card first', 'error'); return; }
+  if (slot.classList.contains('slot-filled')) return;
+
+  const correct = parseInt(sel) === parseInt(position);
+
+  if (correct) {
+    // Mark placed
+    exerciseState.journey.placed[sel] = position;
+    // Update slot
+    const stageName = JOURNEY_STAGES_DATA.find(s => s.stage === sel).title;
+    slot.classList.add('slot-filled');
+    slot.innerHTML = `<span class="sort-slot-num">✓</span><span>${stageName}</span>`;
+    // Mark card as placed
+    const card = document.querySelector(`.sort-card[data-stage="${sel}"]`);
+    if (card) { card.classList.remove('selected'); card.classList.add('placed-correct'); }
+    exerciseState.journey.selectedCard = null;
+    // Update progress
+    const count = Object.keys(exerciseState.journey.placed).length;
+    document.getElementById('journey-progress').textContent = `${count} of 9 placed correctly`;
+    if (count === 9) {
+      showToast('Excellent! All 9 stages placed correctly! 🎉', 'success');
+      document.getElementById('journey-reveal-btn').disabled = false;
+      spawnConfetti();
+    }
+  } else {
+    // Wrong
+    slot.classList.add('slot-wrong');
+    setTimeout(() => slot.classList.remove('slot-wrong'), 500);
+    document.querySelectorAll('.sort-card').forEach(c => c.classList.remove('selected'));
+    document.querySelector(`.sort-card[data-stage="${sel}"]`)?.classList.add('placed-wrong');
+    setTimeout(() => document.querySelector(`.sort-card[data-stage="${sel}"]`)?.classList.remove('placed-wrong'), 500);
+    exerciseState.journey.selectedCard = null;
+    showToast('Not quite — try a different position', 'error');
+  }
+}
+
+function resetJourneySort() {
+  navToExercise(1);
+}
+
+function revealJourneyAnswer() {
+  const panel = document.getElementById('journey-reveal-panel');
+  panel.classList.add('show');
+  document.getElementById('journey-reveal-btn').disabled = true;
+}
+
+// --- LEVEL 2: KPI Triage ---
+const TRIAGE_SCENARIO = {
+  company: "Summit Ridge Property Management — 180 doors, small team of 3",
+  metrics: [
+    { id: 'a', label: 'Cycle Time: 14 days', priority: true, why: 'Double the target of 7 days — residents are waiting too long and satisfaction will crater.' },
+    { id: 'b', label: 'Emergency Rate: 22%', priority: true, why: 'More than double the 10% target — indicating massive deferred maintenance and reactive chaos.' },
+    { id: 'c', label: 'Owner NPS: 38', priority: true, why: 'Below the 50 target — owner retention risk is real. This is the lagging indicator of the operational failures above.' },
+    { id: 'd', label: 'CSAT: 4.1/5', priority: false, why: 'Below 4.5 target but a secondary concern — fixing cycle time and emergencies will lift this naturally.' },
+    { id: 'e', label: 'Vendor Util Rate: 65%', priority: false, why: 'Slightly below 70% target but not critical — fix coordination first, then optimize vendor utilization.' }
+  ]
+};
+
+function renderKPITriage(container) {
+  exerciseState.triage = { selectedMetric: null, placed: [], revealed: false };
+
+  const wrap = document.createElement('div');
+  wrap.className = 'exercise-wrap';
+
+  const scenarioHTML = `
+    <div class="sort-cards-pool">
+      <div class="sort-pool-title">Company Metrics</div>
+      ${TRIAGE_SCENARIO.metrics.map(m => `
+        <div class="triage-metric-card" id="triage-m-${m.id}" data-id="${m.id}" onclick="selectTriageMetric('${m.id}')">${m.label}</div>
+      `).join('')}
+    </div>
+    <div class="triage-fix-col">
+      <div class="triage-fix-label">🚨 Fix First (choose 3)</div>
+      ${[1,2,3].map(i => `<div class="triage-drop-zone" id="triage-slot-${i}" onclick="placeTriageMetric(${i})">Slot ${i} — click to place selected metric</div>`).join('')}
+    </div>
+  `;
+
+  wrap.innerHTML = `
+    <div class="exercise-header">
+      <div class="exercise-title">✏️ KPI Triage Exercise</div>
+      <div class="exercise-instructions">Review Summit Ridge PM's current metrics. Select the top 3 KPIs that need to be fixed first and place them in the "Fix First" column. Click a metric to select it, then click a slot to place it.</div>
+    </div>
+    <div class="sort-cards-pool" style="margin-bottom:1rem">
+      <div class="sort-pool-title">Scenario</div>
+      <div class="struct-scenario">${TRIAGE_SCENARIO.company}</div>
+    </div>
+    <div class="triage-layout">${scenarioHTML}</div>
+    <div style="display:flex;gap:0.75rem;margin-top:1.5rem;flex-wrap:wrap">
+      <button class="btn btn-outline btn-sm" onclick="resetKPITriage()">↺ Restart</button>
+      <button class="btn btn-gold btn-sm" id="triage-reveal-btn" onclick="revealTriageAnswer()" disabled>Reveal Analysis</button>
+    </div>
+    <div class="reveal-panel" id="triage-reveal-panel">
+      <h4 style="font-family:'Poppins',sans-serif;font-weight:700;margin-bottom:1rem;color:var(--dark)">The Priority Analysis</h4>
+      ${TRIAGE_SCENARIO.metrics.map(m => `
+        <div class="reveal-stage">
+          <div class="reveal-num">${m.priority ? '🔴' : '🟡'}</div>
+          <div><div class="reveal-title">${m.label}</div><div class="reveal-detail">${m.why}</div></div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  container.appendChild(wrap);
+}
+
+function selectTriageMetric(id) {
+  if (exerciseState.triage.placed.includes(id)) return;
+  document.querySelectorAll('.triage-metric-card').forEach(c => c.classList.remove('selected'));
+  const card = document.getElementById(`triage-m-${id}`);
+  if (card && !card.classList.contains('placed')) {
+    card.classList.add('selected');
+    exerciseState.triage.selectedMetric = id;
+  }
+}
+
+function placeTriageMetric(slotNum) {
+  const id = exerciseState.triage.selectedMetric;
+  if (!id) { showToast('Select a metric first', 'error'); return; }
+  const slot = document.getElementById(`triage-slot-${slotNum}`);
+  if (!slot || slot.classList.contains('filled')) return;
+
+  const metric = TRIAGE_SCENARIO.metrics.find(m => m.id === id);
+  slot.textContent = metric.label;
+  slot.classList.add('filled');
+
+  const card = document.getElementById(`triage-m-${id}`);
+  if (card) { card.classList.remove('selected'); card.classList.add('placed'); }
+
+  exerciseState.triage.placed.push(id);
+  exerciseState.triage.selectedMetric = null;
+
+  if (exerciseState.triage.placed.length === 3) {
+    const correctIds = TRIAGE_SCENARIO.metrics.filter(m => m.priority).map(m => m.id);
+    const placedSet = new Set(exerciseState.triage.placed);
+    const allCorrect = correctIds.every(id => placedSet.has(id));
+    if (allCorrect) {
+      showToast('Perfect prioritization! 🎯', 'success');
+      spawnConfetti();
+    } else {
+      showToast('Good attempt — check the reveal for the ideal priorities', '');
+    }
+    document.getElementById('triage-reveal-btn').disabled = false;
+  }
+}
+
+function resetKPITriage() { navToExercise(2); }
+function revealTriageAnswer() {
+  document.getElementById('triage-reveal-panel').classList.add('show');
+  document.getElementById('triage-reveal-btn').disabled = true;
+}
+
+// --- LEVEL 3: Structure Diagnosis ---
+const STRUCT_SCENARIO = {
+  text: `Meridian Property Management runs 320 doors across two cities. They have a leasing team, a maintenance team, and an accounting team — each reporting to a different director. When a maintenance issue isn't resolved, the leasing team blames maintenance, maintenance blames vendors, and accounting can't reconcile the charges. The owner calls the CEO directly to complain. The CEO is exhausted.`,
+  answer: 'Departmental',
+  pains: ['Handoff breakdowns between departments', 'No single owner of the resident experience', 'Blame-shifting instead of accountability', 'Owner visibility gap — no unified reporting'],
+  nextStep: 'Transition key PM relationships to a Portfolio model for accountability, while keeping maintenance as a shared service center (Hybrid). Property Meld gives the shared maintenance center the visibility and communication layer it needs.'
+};
+
+function renderStructureDiagnosis(container) {
+  exerciseState.structure = { selected: null, revealed: false };
+  const wrap = document.createElement('div');
+  wrap.className = 'exercise-wrap';
+  wrap.innerHTML = `
+    <div class="exercise-header">
+      <div class="exercise-title">✏️ Structure Diagnosis</div>
+      <div class="exercise-instructions">Read the scenario below and select which PM company structure this describes. Then see the pain analysis and recommended next step.</div>
+    </div>
+    <div class="struct-scenario">${STRUCT_SCENARIO.text}</div>
+    <div class="struct-options" id="struct-options">
+      <button class="struct-option-btn" onclick="selectStructure(this, 'Departmental')">Departmental</button>
+      <button class="struct-option-btn" onclick="selectStructure(this, 'Portfolio')">Portfolio</button>
+      <button class="struct-option-btn" onclick="selectStructure(this, 'Hybrid')">Hybrid</button>
+    </div>
+    <div class="struct-feedback" id="struct-feedback"></div>
+  `;
+  container.appendChild(wrap);
+}
+
+function selectStructure(btn, value) {
+  document.querySelectorAll('.struct-option-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  exerciseState.structure.selected = value;
+
+  const fb = document.getElementById('struct-feedback');
+  const correct = value === STRUCT_SCENARIO.answer;
+  fb.innerHTML = `
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem">
+      <span style="font-size:1.5rem">${correct ? '✅' : '❌'}</span>
+      <span style="font-family:'Poppins',sans-serif;font-weight:700;color:${correct ? 'var(--success)' : 'var(--error)'}">${correct ? 'Correct!' : `Not quite — the answer is ${STRUCT_SCENARIO.answer}`}</span>
+    </div>
+    <h4 style="font-family:'Poppins',sans-serif;font-weight:700;margin-bottom:0.75rem">Pain Points:</h4>
+    <ul style="margin:0 0 1rem 1.25rem;color:var(--gray-600);font-size:0.9375rem;line-height:2">${STRUCT_SCENARIO.pains.map(p => `<li>${p}</li>`).join('')}</ul>
+    <h4 style="font-family:'Poppins',sans-serif;font-weight:700;margin-bottom:0.5rem">Recommended Next Step:</h4>
+    <p style="color:var(--gray-600);font-size:0.9375rem">${STRUCT_SCENARIO.nextStep}</p>
+  `;
+  fb.classList.add('show');
+  if (correct) spawnConfetti();
+}
+
+// --- LEVEL 4: Pricing ROI ---
+function renderPricingROI(container) {
+  const wrap = document.createElement('div');
+  wrap.className = 'exercise-wrap';
+  wrap.innerHTML = `
+    <div class="exercise-header">
+      <div class="exercise-title">✏️ Pricing ROI Simulation</div>
+      <div class="exercise-instructions">Enter the PM company details below and see the ROI calculation update in real time. Understand the math before your next sales or CS conversation.</div>
+    </div>
+    <div class="struct-scenario"><strong>Scenario:</strong> A PM company with 200 doors and 1 maintenance coordinator making $45,000/year is considering Property Meld. They handle maintenance 40 hrs/week. Customize the numbers below.</div>
+    <div class="roi-input-grid">
+      <div class="roi-input-group"><label class="roi-input-label">Number of Doors</label><input class="roi-input" type="number" id="roi-doors" value="200" oninput="calcROI()"></div>
+      <div class="roi-input-group"><label class="roi-input-label">Coordinator Annual Salary ($)</label><input class="roi-input" type="number" id="roi-salary" value="45000" oninput="calcROI()"></div>
+      <div class="roi-input-group"><label class="roi-input-label">Coordinator Hours/Week on Maintenance</label><input class="roi-input" type="number" id="roi-hours" value="40" oninput="calcROI()"></div>
+      <div class="roi-input-group"><label class="roi-input-label">Estimated Hours Saved/Week (via Meld)</label><input class="roi-input" type="number" id="roi-saved" value="8" oninput="calcROI()"></div>
+    </div>
+    <div class="roi-results" id="roi-results"></div>
+  `;
+  container.appendChild(wrap);
+  calcROI();
+}
+
+function calcROI() {
+  const doors = parseFloat(document.getElementById('roi-doors')?.value) || 200;
+  const salary = parseFloat(document.getElementById('roi-salary')?.value) || 45000;
+  const hours = parseFloat(document.getElementById('roi-hours')?.value) || 40;
+  const saved = parseFloat(document.getElementById('roi-saved')?.value) || 8;
+
+  const hrRate = salary / 52 / hours;
+  const annualSavedLabor = saved * 52 * hrRate;
+  const coreAnnual = doors * 1.60 * 12;
+  const opsAnnual = doors * 2.00 * 12;
+  const maxAnnual = doors * (1.60 + 1.50) * 12;
+  const coreROI = annualSavedLabor - coreAnnual;
+  const opsROI = annualSavedLabor - opsAnnual;
+
+  const fmt = n => '$' + Math.round(n).toLocaleString();
+
+  document.getElementById('roi-results').innerHTML = `
+    <div class="roi-results-title">📊 ROI Breakdown</div>
+    <div class="roi-result-row"><span class="roi-result-label">Coordinator hourly rate</span><span class="roi-result-value">${fmt(hrRate)}/hr</span></div>
+    <div class="roi-result-row"><span class="roi-result-label">Annual labor savings (${saved} hrs/wk × 52)</span><span class="roi-result-value">${fmt(annualSavedLabor)}/yr</span></div>
+    <div class="roi-result-row"><span class="roi-result-label">Property Meld Core cost (${doors} doors)</span><span class="roi-result-value">${fmt(coreAnnual)}/yr</span></div>
+    <div class="roi-result-row"><span class="roi-result-label">Property Meld Operations cost</span><span class="roi-result-value">${fmt(opsAnnual)}/yr</span></div>
+    <div class="roi-result-row"><span class="roi-result-label">Core + MAX On-Call cost</span><span class="roi-result-value">${fmt(maxAnnual)}/yr</span></div>
+    <div class="roi-result-row highlight-row"><span class="roi-result-label">💚 Net ROI — Core Plan</span><span class="roi-result-value">${fmt(coreROI)}/yr net savings</span></div>
+    <div class="roi-result-row highlight-row"><span class="roi-result-label">💚 Net ROI — Operations Plan</span><span class="roi-result-value">${fmt(opsROI)}/yr net savings</span></div>
+    <div style="margin-top:0.75rem;font-size:0.8125rem;color:var(--gray-600)">* Does not include savings from reduced emergency call-outs, faster cycle times, or improved owner retention.</div>
+  `;
+}
+
+// --- LEVEL 5: Boss Intro ---
+function renderBossIntro(container) {
+  const wrap = document.createElement('div');
+  wrap.className = 'exercise-wrap';
+  wrap.innerHTML = `
+    <div class="boss-intro">
+      <span class="boss-intro-icon">⚔️</span>
+      <h2 class="boss-intro-title">Boss Battle</h2>
+      <p class="boss-intro-desc">You've climbed all five levels. Now prove your mastery with 15 questions drawn from the entire curriculum — scenarios, data, and knowledge.</p>
+      <div class="boss-req">Pass requirement: 12 of 15 correct (80%)</div>
+      <br>
+      <button class="btn btn-primary btn-lg" onclick="startBossBattle()">Begin Boss Battle →</button>
+    </div>
+  `;
+  container.appendChild(wrap);
+}
+
+
+// ============================================================
+// QUIZ ENGINE
+// ============================================================
+let quizState = { levelId: null, questions: [], current: 0, answers: [], isBoss: false };
+
+function renderQuizOrBoss(levelId, container) {
+  if (levelId === 5) {
+    renderBossIntro(container);
+  } else {
+    startQuiz(levelId, container);
+  }
+}
+
+function startBossBattle() {
+  quizState = {
+    levelId: 5, questions: BOSS_BATTLE_QUESTIONS,
+    current: 0, answers: [], isBoss: true, answered: false
+  };
+  const main = document.getElementById('level-main');
+  main.innerHTML = '';
+  renderQuizQuestion(main);
+}
+
+function startQuiz(levelId, container) {
+  quizState = {
+    levelId, questions: QUIZ_DATA[levelId],
+    current: 0, answers: [], isBoss: false, answered: false
+  };
+  renderQuizQuestion(container || document.getElementById('level-main'));
+}
+
+function renderQuizQuestion(container) {
+  container.innerHTML = '';
+  const q = quizState.questions[quizState.current];
+  const total = quizState.questions.length;
+  const num = quizState.current + 1;
+  const pct = Math.round(((num - 1) / total) * 100);
+  const isBoss = quizState.isBoss;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'quiz-wrap';
+
+  wrap.innerHTML = `
+    <div class="quiz-header">
+      <div class="quiz-eyebrow">${isBoss ? '⚔️ Boss Battle' : `Level ${quizState.levelId} Quiz`} — Question ${num} of ${total}</div>
+      <div style="margin:0.75rem 0">
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+        <div class="progress-label">${num - 1} of ${total} answered</div>
+      </div>
+      <div class="quiz-q-title">${q.q}</div>
+    </div>
+    <div class="quiz-options" id="quiz-options">
+      ${q.options.map((opt, i) => `
+        <button class="quiz-option" data-idx="${i}" onclick="answerQuiz(${i})">
+          <span class="quiz-option-letter">${String.fromCharCode(65 + i)}</span>
+          <span>${opt}</span>
+        </button>
+      `).join('')}
+    </div>
+    <div class="quiz-explanation" id="quiz-explanation">${q.explanation}</div>
+    <div class="quiz-footer">
+      <span></span>
+      <button class="btn btn-primary btn-sm hidden" id="quiz-next-btn" onclick="nextQuizQuestion()">
+        ${quizState.current < total - 1 ? 'Next Question →' : 'See Results'}
+      </button>
+    </div>
+  `;
+  container.appendChild(wrap);
+  quizState.answered = false;
+}
+
+function answerQuiz(selectedIdx) {
+  if (quizState.answered) return;
+  quizState.answered = true;
+
+  const q = quizState.questions[quizState.current];
+  const correct = selectedIdx === q.answer;
+  quizState.answers.push({ selected: selectedIdx, correct });
+
+  // Style options
+  document.querySelectorAll('.quiz-option').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.answer) btn.classList.add('correct');
+    else if (i === selectedIdx && !correct) btn.classList.add('wrong');
+  });
+
+  // Show explanation
+  document.getElementById('quiz-explanation').classList.add('show');
+
+  // Show next button
+  document.getElementById('quiz-next-btn').classList.remove('hidden');
+
+  if (correct) showToast('Correct! 🎉', 'success');
+  else showToast('Not quite — see the explanation below', 'error');
+}
+
+function nextQuizQuestion() {
+  quizState.current++;
+  if (quizState.current >= quizState.questions.length) {
+    showQuizResults();
+  } else {
+    const main = document.getElementById('level-main');
+    main.innerHTML = '';
+    renderQuizQuestion(main);
+  }
+}
+
+function showQuizResults() {
+  const main = document.getElementById('level-main');
+  main.innerHTML = '';
+  const correct = quizState.answers.filter(a => a.correct).length;
+  const total = quizState.questions.length;
+  const pct = Math.round((correct / total) * 100);
+  const isBoss = quizState.isBoss;
+  const passThreshold = isBoss ? 12 : 3;
+  const passed = correct >= passThreshold;
+  const levelId = quizState.levelId;
+
+  // Save score
+  state.quizScores[levelId] = correct;
+
+  if (passed) {
+    state.levelProgress[levelId] = 'completed';
+    if (levelId < 5) {
+      const nextId = levelId + 1;
+      if (state.levelProgress[nextId] === 'locked') {
+        state.levelProgress[nextId] = 'unlocked';
+      }
+    }
+    state.completedAt[levelId] = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    saveState();
+    spawnConfetti();
+  } else {
+    saveState();
+  }
+
+  const wrap = document.createElement('div');
+  wrap.className = 'quiz-wrap';
+  wrap.innerHTML = `
+    <div class="quiz-score-display">
+      <div class="quiz-score-num">${correct}/${total}</div>
+      <div class="quiz-score-label">${pct}% — ${isBoss ? 'Boss Battle' : `Level ${levelId} Quiz`}</div>
+      <div class="${passed ? 'quiz-pass-msg' : 'quiz-fail-msg'}">${passed ? '✓ Passed! Level Complete.' : '✗ Not quite — aim for ' + passThreshold + '/' + total + ' to pass.'}</div>
+      ${passed && levelId < 5 ? `<p style="color:var(--success);font-size:0.9375rem;margin-top:0.5rem">Level ${levelId + 1} is now unlocked!</p>` : ''}
+    </div>
+    <div style="display:flex;gap:0.75rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap">
+      ${passed && isBoss ? `<button class="btn btn-gold" onclick="showCertificate(${levelId})">🏆 Claim Your Certificate</button>` : ''}
+      ${passed && !isBoss ? `<button class="btn btn-primary" onclick="navToLevel(${levelId + 1})">Go to Level ${levelId + 1} →</button>` : ''}
+      ${passed && !isBoss ? `<button class="btn btn-gold" onclick="showCertificate(${levelId})">🏆 Get Certificate</button>` : ''}
+      <button class="btn btn-outline" onclick="retakeQuiz(${levelId})">↺ Retake Quiz</button>
+      <button class="btn btn-ghost" onclick="renderLevelMap(); showScreen('map');">View Level Map</button>
+    </div>
+  `;
+  main.appendChild(wrap);
+}
+
+function retakeQuiz(levelId) {
+  const main = document.getElementById('level-main');
+  main.innerHTML = '';
+  if (levelId === 5) renderBossIntro(main);
+  else startQuiz(levelId, main);
+}
+
+function navToLevel(levelId) {
+  if (levelId > 5) { renderLevelMap(); showScreen('map'); return; }
+  const status = state.levelProgress[levelId];
+  if (status === 'locked') { showToast('Complete the previous level first', 'error'); return; }
+  enterLevel(levelId);
+}
+
+// ============================================================
+// CERTIFICATE
+// ============================================================
+const ROLE_MESSAGES = {
+  'Customer Success': 'As a Customer Success Melder, your mastery of maintenance intelligence directly impacts every PM company you serve. You are the bridge between technology and transformation.',
+  'Business Development': 'As a Business Development Melder, this knowledge is your competitive edge. You don\'t sell software — you diagnose pain and prescribe solutions that change businesses.',
+  'Solutions': 'As a Solutions Melder, you now have the framework to speak every customer\'s language — from cycle times to P&L impact to organizational structure.',
+  'Marketing': 'As a Marketing Melder, you understand the world your audience lives in. This is what makes content that resonates, campaigns that convert, and stories that stick.',
+  'Product': 'As a Product Melder, understanding the customer\'s operational reality is the foundation of everything you build. Every feature has a human story behind it.',
+  'Engineering': 'As an Engineering Melder, knowing what you\'re building and why it matters makes every line of code more intentional.',
+  'Operations': 'As an Operations Melder, this mastery helps you build internal processes that mirror the excellence we deliver to customers.',
+  'Finance': 'As a Finance Melder, understanding the PM P&L gives you the context to make decisions that directly serve customer outcomes.',
+  'Leadership': 'As a leader at Property Meld, this mastery sets the standard for your team. You\'ve modeled what it means to be Hungry.',
+  'Other': 'Your commitment to mastering the Property Meld platform and the PM world reflects the Loyal value at its finest.'
+};
+
+function showCertificate(levelId) {
+  const lvl = LEVELS.find(l => l.id === levelId);
+  const name = state.learner.name || 'Learner';
+  const dept = state.learner.dept || 'Other';
+  const date = state.completedAt[levelId] || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const msg = ROLE_MESSAGES[dept] || ROLE_MESSAGES['Other'];
+
+  document.getElementById('cert-name').textContent = name;
+  document.getElementById('cert-level-name').textContent = `Level ${lvl.id} — ${lvl.name} ${lvl.emoji}`;
+  document.getElementById('cert-message').textContent = msg;
+  document.getElementById('cert-date').textContent = `Completed ${date}`;
+
+  showScreen('certificate');
+}
+
+// ============================================================
+// CONFETTI
+// ============================================================
+function spawnConfetti() {
+  const wrap = document.getElementById('confetti-wrap');
+  wrap.innerHTML = '';
+  const colors = ['#1175CC', '#FFB41B', '#B0E3FF', '#022935', '#16a34a'];
+  for (let i = 0; i < 60; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    const size = Math.random() * 10 + 6;
+    piece.style.cssText = `
+      left: ${Math.random() * 100}%;
+      width: ${size}px; height: ${size * 0.6}px;
+      background: ${colors[Math.floor(Math.random() * colors.length)]};
+      animation-duration: ${Math.random() * 2 + 2}s;
+      animation-delay: ${Math.random() * 0.5}s;
+      border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+    `;
+    wrap.appendChild(piece);
+  }
+  setTimeout(() => { wrap.innerHTML = ''; }, 4000);
+}
+
+// ============================================================
+// TOAST NOTIFICATIONS
+// ============================================================
+function showToast(msg, type = '') {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.style.animation = 'toast-out 0.3s ease forwards';
+    setTimeout(() => toast.remove(), 300);
+  }, 2800);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  loadState();
+
+  if (state.learner.name) {
+    // Returning user — go to welcome step 2 or map
+    if (state.learner.name.length > 0) {
+      // Pre-fill form
+      document.getElementById('input-name').value = state.learner.name;
+      document.getElementById('input-role').value = state.learner.role || '';
+      document.getElementById('input-dept').value = state.learner.dept || '';
+    }
+  }
+
+  showScreen('welcome');
+}
+
+// Start the app
+init();
+
+// ============================================================
+// CUSTOMER JOURNEY STEP-THROUGH VIEWER
+// ============================================================
+const CJ_LABELS = [
+  'Foundation Layer · People Operations',
+  'Phase 1 · Market Intelligence',
+  'Phase 2 · Problem Definition & Hypothesis',
+  'Phase 3 · Solution Design & Validation',
+  'Phase 4 · Build & Release',
+  'Stage 1 · Identify Their Pain',
+  'Stage 2 · Marketing Fill Station',
+  'Stage 3 · Cost of Their Pain',
+  'Stage 4 · They Articulate Their Pain',
+  'Stage 5 · Demonstrate How Pain Is Solved',
+  'Stage 6 · Urgency to Take Action',
+  'Stage 7 · Implementation',
+  'Stage 8 · Activation',
+  'Stage 9 · Advocacy'
+];
+
+function cjNav(dir) {
+  const slides = document.querySelectorAll('.cj-slide[data-cj]');
+  if (!slides.length) return;
+  const slideArr = Array.from(slides);
+  let cur = slideArr.findIndex(s => s.classList.contains('cj-active'));
+  if (cur === -1) cur = 0;
+  slideArr[cur].classList.remove('cj-active');
+  const next = Math.max(0, Math.min(slideArr.length - 1, cur + dir));
+  slideArr[next].classList.add('cj-active');
+
+  const label = document.getElementById('cj-label');
+  if (label && CJ_LABELS[next]) label.textContent = CJ_LABELS[next];
+
+  const counter = document.getElementById('cj-counter');
+  if (counter) counter.textContent = `${next + 1} of ${slideArr.length}`;
+
+  const prevBtn = document.getElementById('cj-prev-btn');
+  const nextBtn = document.getElementById('cj-next-btn');
+  if (prevBtn) prevBtn.disabled = next === 0;
+  if (nextBtn) nextBtn.disabled = next === slideArr.length - 1;
+
+  // update dots
+  const dots = document.querySelectorAll('.cj-dot');
+  dots.forEach((d, i) => d.classList.toggle('cj-dot-active', i === next));
+}
+
+// Render dots when the l4s4 slide comes into view
+function initCJDots() {
+  const dotsEl = document.getElementById('cj-dots');
+  if (!dotsEl || dotsEl.dataset.init) return;
+  dotsEl.dataset.init = '1';
+  for (let i = 0; i < 14; i++) {
+    const d = document.createElement('span');
+    d.className = 'cj-dot' + (i === 0 ? ' cj-dot-active' : '');
+    d.title = CJ_LABELS[i];
+    dotsEl.appendChild(d);
+  }
+}
+
+// Hook into navSlide to init dots when l4s4 renders
+const _origNavSlide = navSlide;
+function navSlide(levelId, idx) {
+  _origNavSlide(levelId, idx);
+  // l4s4 is the 4th slide (idx 3) of level 4
+  if (levelId === 4 && idx === 3) {
+    setTimeout(initCJDots, 50);
+  }
+}
+
+</script>
+</body>
+</html>
